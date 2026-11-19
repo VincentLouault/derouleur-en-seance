@@ -70,6 +70,9 @@ h2{font-size:22px;font-weight:500;margin:0 0 8px}
 .kpi .val.small{font-family:var(--sans);font-size:22px;font-weight:600;margin-top:10px;white-space:normal;overflow-wrap:anywhere}
 .kpi .val.texte{font-size:16px;line-height:1.35;letter-spacing:0}
 .kpi .val.texte.long{font-size:14px}
+.kpi{container-type:inline-size}
+.kpi .val.small.heure{font-family:var(--sans);font-weight:700;font-size:clamp(15px,13cqi,25px);line-height:1.2;overflow-wrap:normal;word-break:normal;max-width:100%}
+.kpi .val.heure .h1,.kpi .val.heure .h2{white-space:nowrap;display:inline-block}
 .kpi .sub{color:var(--muted);font-size:13.5px}
 .banner{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;border:1px solid var(--green-line);background:var(--green-panel);border-radius:12px;padding:12px 18px;margin-bottom:12px;font-size:15px}
 .banner.stale{border-color:var(--amber-line);background:var(--amber-bg)}
@@ -244,6 +247,13 @@ tbody tr:hover{background:#eef3fa}
 #orateurs .panel .ph{background:var(--navy-bg);color:var(--ink)}
 #orateurs .panel .ph .cnt{color:var(--muted)}
 #orateurs .panel.red .ph{background:var(--red-bg)}
+.art-cours{background:#fff;border-bottom:1px solid var(--line2)}
+.art-cours button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;width:100%;padding:12px 24px;box-shadow:inset 5px 0 0 var(--red-btn)}
+.art-cours button:hover{background:#f6f8fc}
+.art-cours .ac-lab{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--navy2)}
+.art-cours .ac-lab.live{color:#fff;background:var(--red-btn);border-radius:99px;padding:1px 9px}
+.art-cours .ac-titre{font-weight:600;font-size:16px;color:var(--navy)}
+.art-cours .ac-det{color:var(--muted);font-size:14px}
 .expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
 /* Téléphone : chaque ligne de tableau devient une fiche lisible, sans défilement horizontal. */
 @media (max-width:720px){
@@ -255,6 +265,7 @@ tbody tr:hover{background:#eef3fa}
   .hero .intro{font-size:12px}
   tr.cur{box-shadow:inset 4px 0 0 var(--red-btn)}
   .expl.in{padding:10px 14px}
+  .art-cours button{padding:10px 14px}
   .resume{font-size:15.5px}
   .kpis{grid-template-columns:1fr 1fr;gap:10px}
   .kpi{min-height:0;padding:12px 14px}
@@ -354,6 +365,7 @@ tbody tr:hover{background:#eef3fa}
     <p class="expl" id="expl-calc"></p>
     <div class="panel gold" id="p-articles" data-pli>
       <div class="ph"><h3>Articles à venir</h3><span class="cnt" id="art-cnt"></span></div>
+      <div class="art-cours hors-pli hidden" id="art-cours"></div>
       <div class="scroll">
         <table class="t-art">
           <thead><tr><th>Article</th><th class="num">Amendements</th><th class="num">Restants</th><th>Passage estimé</th><th>Fin estimée</th><th>Sort de l'article</th></tr></thead>
@@ -1364,7 +1376,7 @@ tbody tr:hover{background:#eef3fa}
       (M.etape && (!M.prochain || (M.divs[M.etape.idx] && M.divs[M.etape.idx].restants === 0)))
         ? kpi("Étape en cours", M.etape.libelle, "selon le dérouleur du Sénat", M.etape.libelle.length > 90 ? "texte long" : M.etape.libelle.length > 30 ? "texte" : true)
         : kpi(M.enDirect ? "Amendement en discussion" : "Prochain amendement", M.prochain ? "n° " + M.prochain.n : "—", M.prochain && M.divs[M.prochain.d] ? M.divs[M.prochain.d].libelle : "", true),
-      kpi("Fin estimée des débats", R ? (M.fin ? hm2(M.fin).replace(/^0/, "") + " – " + (M.fin2 ? hm2(M.fin2).replace(/^0/, "") : "…") : "—") : "—", plTxt ? "plages de séance : " + plTxt : "")
+      kpi("Fin estimée des débats", R ? (M.fin ? h("span", null, h("span", { class: "h1" }, hm2(M.fin).replace(/^0/, "")), " ", h("span", { class: "h2" }, "– " + (M.fin2 ? hm2(M.fin2).replace(/^0/, "") : "…"))) : "—") : "—", plTxt ? "plages de séance : " + plTxt : "", "heure")
     );
 
     // Bandeau
@@ -1392,6 +1404,17 @@ tbody tr:hover{background:#eef3fa}
     $("art-cnt").textContent = nb(av.length) + " article" + (av.length > 1 ? "s" : "") + " · " + nb(R) + " amendement" + (R > 1 ? "s" : "");
     var tb = vide($("art-body"));
     if (!av.length) tb.appendChild(ligneVide(6, M.statutTexte ? "Texte " + M.statutTexte.toLowerCase() + " : plus rien à examiner au dérouleur." : "Plus aucun article à examiner au dérouleur."));
+    // Seul l'article dont les amendements sont en discussion (ou le prochain) reste visible, même rubrique repliée.
+    var ac = $("art-cours"), dC = M.prochain ? M.divs.filter(function (d) { return d.i === M.prochain.d; })[0] : null;
+    vide(ac); ac.classList.toggle("hidden", !dC);
+    if (dC) {
+      var direct = M.enDirect && M.etape && M.etape.idx === dC.i;
+      ac.appendChild(h("button", { type: "button", title: "Afficher les amendements de cet article", onclick: function () { S.f.article = String(dC.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
+        h("span", { class: "ac-lab" + (direct ? " live" : "") }, direct ? "En discussion" : "Prochain article"),
+        h("span", { class: "ac-titre" }, dC.libelle),
+        h("span", { class: "ac-det" }, nb(dC.restants) + " amendement" + (dC.restants > 1 ? "s" : "") + " restant" + (dC.restants > 1 ? "s" : "") + " sur " + nb(dC.total) +
+          (dC.fin !== null && dC.fin !== undefined ? " · fin estimée " + fourchette(dC.fin, dC.fin2, M.depart) : ""))));
+    }
     av.forEach(function (d) {
       var estCours = M.etape ? M.etape.idx === d.i : (M.prochain && M.prochain.d === d.i);
       tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
@@ -1611,6 +1634,7 @@ tbody tr:hover{background:#eef3fa}
       ul.appendChild(h("li", null, h("span", { class: "d" }, it.date ? (memeJour(it.date, Date.now()) ? hm(it.date) : dateLongue(it.date) + " · " + hm(it.date)) : ""), h("a", { href: it.lien, target: "_blank", rel: "noopener" }, it.titre)));
     });
   }
+  function insec(t) { return String(t).replace(/ /g, "\u00a0"); }
   function kpi(lab, val, sub, small) {
     return h("div", { class: "kpi" }, h("div", { class: "lab" }, lab), h("div", { class: "val" + (small ? " small" : "") + (typeof small === "string" ? " " + small : "") }, val), h("div", { class: "sub" }, sub));
   }
@@ -1701,7 +1725,9 @@ tbody tr:hover{background:#eef3fa}
     document.querySelectorAll(".panel[data-pli]").forEach(function (p) {
       var ph = p.querySelector(".ph"), corps = document.createElement("div");
       corps.className = "pl-corps hidden";
-      while (ph.nextSibling) corps.appendChild(ph.nextSibling);
+      var garder = [];
+      while (ph.nextSibling) { var x = ph.nextSibling; if (x.nodeType === 1 && x.classList.contains("hors-pli")) { p.removeChild(x); garder.push(x); } else corps.appendChild(x); }
+      garder.forEach(function (x) { p.appendChild(x); });
       p.appendChild(corps);
       ph.classList.add("pliable"); ph.setAttribute("role", "button"); ph.setAttribute("tabindex", "0"); ph.setAttribute("aria-expanded", "false");
       ph.insertBefore(h("span", { class: "tri" }, "▶"), ph.firstChild);
