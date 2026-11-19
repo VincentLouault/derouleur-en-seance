@@ -256,6 +256,18 @@ tbody tr:hover{background:#eef3fa}
 .art-cours .ac-lab.live{color:#2b2200;background:#ffd60a;border-radius:99px;padding:1px 9px}
 .art-cours .ac-titre{font-weight:600;font-size:16px;color:var(--navy)}
 .art-cours .ac-det{color:var(--muted);font-size:14px}
+.rubriques{align-items:start;margin-bottom:14px}
+.rubriques .col-g{display:flex;flex-direction:column;gap:10px;min-width:0}
+.rubriques .kpis{margin:0;align-content:start;grid-template-columns:1fr 1fr}
+.rubriques .kpis .kpi:nth-child(5):last-child{grid-column:span 2}
+@media (min-width:1180px){.rubriques .kpis{grid-template-columns:repeat(3,1fr)}}
+.rub.a-venir{padding:10px 16px}
+.rub.a-venir h2{font-size:11px;margin:0 0 4px}
+.rub.a-venir li{padding:2px 0}
+.rub.a-venir .l-titre{font-size:14.5px}
+.rub.a-venir .l-sous{font-size:12.5px}
+.rub.a-venir .voir-plus{margin-top:4px;font-size:12.5px}
+.rub.a-venir .vide{font-size:13px}
 .expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
 /* Téléphone : chaque ligne de tableau devient une fiche lisible, sans défilement horizontal. */
 @media (max-width:720px){
@@ -340,12 +352,14 @@ tbody tr:hover{background:#eef3fa}
   </header>
 
   <div class="rubriques" id="rubriques">
-    <section class="rub en-cours"><h2>Texte en cours</h2><div id="rub-cours"><p class="vide">Lecture du site du Sénat…</p></div></section>
-    <section class="rub a-venir"><h2>Textes à venir</h2><div id="rub-venir"><p class="vide">Lecture du site du Sénat…</p></div></section>
+    <div class="col-g">
+      <section class="rub en-cours"><h2>Texte en cours</h2><div id="rub-cours"><p class="vide">Lecture du site du Sénat…</p></div></section>
+      <section class="rub a-venir"><h2>Textes à venir</h2><div id="rub-venir"><p class="vide">Lecture du site du Sénat…</p></div></section>
+    </div>
+    <div class="kpis" id="kpis"></div>
   </div>
   <div class="meta" id="meta"></div>
   <p class="resume" id="resume"></p>
-  <div class="kpis" id="kpis"></div>
 
   <div class="prog prog-haut"><div class="t" id="prog-t"></div><div class="bar"><div id="prog-bar" style="width:0"></div></div></div>
 
