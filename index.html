@@ -107,6 +107,10 @@ section{margin-top:36px}
 .red .ph{background:var(--red-bg)}
 .ph h3{margin:0;font-size:19px;font-weight:500}
 .ph .cnt{color:var(--muted);font-size:15px}
+.ph.pliable{cursor:pointer;user-select:none;align-items:center}
+.ph.pliable .tri{transition:transform .15s;font-size:13px}
+.ph.pliable.open .tri{transform:rotate(90deg)}
+.ph.pliable .hint{margin-left:auto;color:var(--muted);font-size:14px}
 .scroll{overflow:auto}
 .scroll.tall{max-height:640px}
 table{width:100%;border-collapse:collapse;font-size:15px}
@@ -143,10 +147,11 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 .badge{display:inline-block;background:var(--gold-badge);color:#fff8e6;border-radius:6px;padding:1px 9px;font-size:13.5px;font-weight:500;margin-left:10px;vertical-align:1px}
 .amhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px}
 .amhead>div{flex:1 1 420px}
-.filtres{display:grid;grid-template-columns:minmax(180px,1.4fr) minmax(160px,1.4fr) minmax(120px,.8fr) minmax(110px,.8fr) minmax(180px,1.3fr) auto;gap:14px;align-items:end;margin:6px 0 22px}
-.filtres label{display:block;color:var(--muted);font-size:14px;margin-bottom:6px}
-.filtres select,.filtres input{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
-@media (max-width:900px){.filtres{grid-template-columns:1fr 1fr}.filtres .reset{grid-column:span 2}}
+.filtres{display:grid;grid-template-columns:1.2fr 1.2fr .9fr .8fr 1.4fr auto;gap:8px;align-items:center;margin:4px 0 14px}
+.filtres label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.filtres select,.filtres input{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;height:34px;background:#fff;color:var(--ink)}
+.filtres #f-reset{padding:0 12px;height:34px;font-size:14px;white-space:nowrap}
+@media (max-width:900px){.filtres{grid-template-columns:1fr 1fr 1fr}.filtres .f-q{grid-column:span 2}}
 .prog{padding:4px 24px 18px;background:#fff;border-bottom:1px solid var(--line)}
 .prog .t{color:var(--muted);margin:10px 0 10px}
 .prog .t b{color:var(--ink)}
@@ -235,10 +240,15 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
   .t-bilan td:nth-child(1)::before{display:none}
   .arch-h{padding:14px}
   .arch-h .hint{display:none}
+  .ph.pliable .hint{display:none}
+  .ph.pliable{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;align-items:center}
+  .ph.pliable h3{margin:0}
+  .ph.pliable .cnt{grid-column:2;margin:0}
   .tabs{padding:10px 12px}
   .actu-liste li{padding:10px 14px}
-  .filtres{grid-template-columns:1fr 1fr;gap:10px}
-  .filtres .reset{grid-column:1/-1}
+  .filtres{grid-template-columns:1fr 1fr;gap:6px}
+  .filtres .f-q{grid-column:span 1}
+  .filtres select,.filtres input,.filtres #f-reset{height:32px;font-size:13.5px}
   .rub{padding:14px}
   .rub .t-titre{font-size:19px}
 }
@@ -275,7 +285,7 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
   <section id="s-articles">
     <h2>Heures de passage estimées par article</h2>
     <p class="expl" id="expl-calc"></p>
-    <div class="panel gold">
+    <div class="panel gold" id="p-articles" data-pli>
       <div class="ph"><h3>Articles à venir</h3><span class="cnt" id="art-cnt"></span></div>
       <div class="scroll">
         <table class="t-art">
@@ -298,15 +308,15 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
       <div><label for="f-article">Article</label><select id="f-article"><option value="">Tous les articles</option></select></div>
       <div><label for="f-groupe">Groupe</label><select id="f-groupe"><option value="">Tous les groupes</option></select></div>
       <div><label for="f-statut">Statut</label><select id="f-statut">
-        <option value="">Tous</option><option value="avenir">À examiner</option><option value="passe">Examinés</option>
+        <option value="">Tous les statuts</option><option value="avenir">À examiner</option><option value="passe">Examinés</option>
         <option value="Adopté">Adoptés</option><option value="Rejeté">Rejetés</option><option value="Retiré">Retirés</option>
         <option value="Non soutenu">Non soutenus</option><option value="Tombé">Tombés</option></select></div>
-      <div><label for="f-num">N° d'amendement</label><input id="f-num" inputmode="numeric" placeholder="ex. 1115"></div>
-      <div><label for="f-q">Sénateur, Gouvernement ou commission</label><input id="f-q" placeholder="ex. Louault, Gouvernement"></div>
-      <div class="reset"><button class="btn" id="f-reset" type="button" style="padding:10px 16px">Réinitialiser</button></div>
+      <div><label for="f-num">N° d'amendement</label><input id="f-num" inputmode="numeric" placeholder="N° d'amendement"></div>
+      <div class="f-q"><label for="f-q">Sénateur, Gouvernement ou commission</label><input id="f-q" placeholder="Sénateur, Gouvernement…"></div>
+      <div class="reset"><button class="btn" id="f-reset" type="button" title="Réinitialiser les filtres">Effacer</button></div>
     </div>
 
-    <div class="panel green">
+    <div class="panel green" id="p-derniers" data-pli>
       <div class="ph"><h3>Les 10 derniers amendements examinés</h3><span class="cnt">dans l'ordre du dérouleur, le plus récent en bas</span></div>
       <div class="prog"><div class="t" id="prog-t"></div><div class="bar"><div id="prog-bar" style="width:0"></div></div></div>
       <div class="scroll">
@@ -317,7 +327,7 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
       </div>
     </div>
 
-    <div class="panel red" id="p-cours">
+    <div class="panel red" id="p-cours" data-pli>
       <div class="ph"><h3>Amendements en cours</h3><span class="cnt" id="cours-cnt"></span></div>
       <div class="scroll">
         <table class="t-amdt">
@@ -327,7 +337,7 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
       </div>
     </div>
 
-    <div class="panel gold" id="p-avenir">
+    <div class="panel gold" id="p-avenir" data-pli>
       <div class="ph"><h3>Amendements à venir</h3><span class="cnt" id="avenir-cnt"></span></div>
       <div class="scroll tall">
         <table class="t-amdt">
@@ -1317,7 +1327,7 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
     if (!av.length) tb.appendChild(ligneVide(6, M.statutTexte ? "Texte " + M.statutTexte.toLowerCase() + " : plus rien à examiner au dérouleur." : "Plus aucun article à examiner au dérouleur."));
     av.forEach(function (d) {
       var estCours = M.etape ? M.etape.idx === d.i : (M.prochain && M.prochain.d === d.i);
-      tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
+      tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
         h("td", null, d.libelle, estCours ? h("span", { class: "badge" }, "En cours") : null),
         h("td", { class: "num" }, nb(d.total)), h("td", { class: "num" }, nb(d.restants)),
         d.sansAmdt ? h("td", null, (d.libelle.match(/à (\d{1,2} h \d{2})/) || [])[1] || (d.debut ? fourchette(d.debut, d.debut2, M.depart) : "—")) : h("td", null, fourchette(d.debut, d.debut2, M.depart)),
@@ -1610,6 +1620,25 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
   }
 
   /* ---------- interactions ---------- */
+  /* Rubriques dépliables, repliées par défaut (même fonctionnement que « Amendements déjà examinés ») */
+  function pliables() {
+    document.querySelectorAll(".panel[data-pli]").forEach(function (p) {
+      var ph = p.querySelector(".ph"), corps = document.createElement("div");
+      corps.className = "pl-corps hidden";
+      while (ph.nextSibling) corps.appendChild(ph.nextSibling);
+      p.appendChild(corps);
+      ph.classList.add("pliable"); ph.setAttribute("role", "button"); ph.setAttribute("tabindex", "0"); ph.setAttribute("aria-expanded", "false");
+      ph.insertBefore(h("span", { class: "tri" }, "▶"), ph.firstChild);
+      var hint = h("span", { class: "hint" }, "Cliquer pour déplier"); ph.appendChild(hint);
+      function poser(ouvert) {
+        ph.classList.toggle("open", ouvert); ph.setAttribute("aria-expanded", ouvert ? "true" : "false");
+        corps.classList.toggle("hidden", !ouvert); hint.textContent = ouvert ? "Cliquer pour replier" : "Cliquer pour déplier";
+      }
+      p._ouvrir = function () { poser(true); };
+      ph.addEventListener("click", function () { poser(corps.classList.contains("hidden")); });
+      ph.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); poser(corps.classList.contains("hidden")); } });
+    });
+  }
   function lierFiltres() {
     ["article", "groupe", "statut"].forEach(function (k) { $("f-" + k).addEventListener("change", function (e) { S.f[k] = e.target.value; rendre(); }); });
     var t;
@@ -1680,6 +1709,7 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
   }
   function demarrer() {
     var o = lsGet("derouleur.onglet"); if (o) S.onglet = o;
+    pliables();
     lierFiltres();
     chargerBase().then(function (d) { S.base = d; rendre(); }, function () { $("banner-txt").textContent = "Impossible de lire le site du Sénat depuis cet affichage. Ouvrez la page par son lien web (ship.place) ou dans un navigateur, puis rechargez-la."; ["rub-cours", "rub-venir"].forEach(function (id) { var e = document.getElementById(id); if (e) e.innerHTML = "<p class=\"vide\">Site du Sénat injoignable depuis cet affichage.</p>"; }); });
     // Rechargement léger du fichier publié et recalcul des heures (statut « probablement passé »).
