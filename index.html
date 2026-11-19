@@ -786,7 +786,7 @@ tbody tr:hover{background:#eef3fa}
       JOUR = { cle: cle, lu: Date.now(), libelle: libelleJour(r.y, r.m, r.d), aujourdHui: r.decal === 0, decal: r.decal, textes: r.textes.map(function (t) {
         var ancien = (JOUR.textes || []).filter(function (x) { return x.url === t.url; })[0];
         t.restants = ancien ? ancien.restants : null; t.verifie = ancien ? ancien.verifie : 0;
-        t.termine = ancien ? ancien.termine : null; t.etape = ancien ? ancien.etape : null; t.statut = ancien ? ancien.statut : null;
+        t.termine = ancien ? ancien.termine : null; t.etape = ancien ? ancien.etape : null; t.statut = ancien ? ancien.statut : null; t.demarre = ancien ? ancien.demarre : false;
         return t;
       }) };
     });
@@ -805,6 +805,8 @@ tbody tr:hover{background:#eef3fa}
   function analyser(page) {
     var doc = new DOMParser().parseFromString(page, "text/html");
     var res = { titre: null, lecture: null, deposes: null, a_examiner_senat: null, idtxt: null, divisions: [], amendements: [] };
+    // Horodatage de la dernière mise à jour du dérouleur par les services du Sénat.
+    var mTps = page.match(/data-tpsmaj="(\d{12,})"/); res.tpsmaj = mTps ? +mTps[1] : null;
     var corps = txt(doc.body).slice(0, 4000), m;
     if ((m = corps.match(/Amendements\s*:\s*([\d\s]+)\s*d[ée]pos[ée]s\s*-\s*([\d\s]+)\s*[àa] examiner/))) { res.deposes = +m[1].replace(/\D/g, ""); res.a_examiner_senat = +m[2].replace(/\D/g, ""); }
     if ((m = corps.match(/((?:Projet|Proposition) de loi(?: organique)?\s*:\s*.+?)\s+(\d+(?:ère|e|ème|re) lecture|Nouvelle lecture|Lecture d[ée]finitive)/))) { res.titre = m[1].trim(); res.lecture = m[2].trim(); }
@@ -937,13 +939,15 @@ tbody tr:hover{background:#eef3fa}
         });
         if (!vise) return;
         var titre = sansAccent(txt(it.querySelector(".timeline-title")));
-        var hm = titre.match(/a\s+(\d{1,2})\s*h(?:eures?)?\s*(\d{2})?/), debut = hm ? +hm[1] * 60 + (+hm[2] || 0) : null;
+        // Toutes les heures du titre (« À 10 h 30, à 14 h 30 et le soir ») : matin, après-midi et soir.
+        var heures = [], rx = /a\s+(\d{1,2})\s*h(?:eures?)?\s*(\d{2})?/g, hm;
+        while ((hm = rx.exec(titre))) heures.push(+hm[1] * 60 + (+hm[2] || 0));
         var apm = /apres-midi/.test(titre), soir = /soir/.test(titre), nuit = /nuit/.test(titre);
+        var matin = heures.filter(function (x) { return x < 13 * 60; })[0], aprem = heures.filter(function (x) { return x >= 13 * 60 && x < 20 * 60; })[0], tard = heures.filter(function (x) { return x >= 20 * 60; })[0];
         function ajoute(a, b) { plages.push({ debut: iso(y, mo, d, Math.floor(a / 60), a % 60), fin: iso(y, mo, d, Math.floor(b / 60), b % 60) }); }
-        if (debut !== null && debut < 13 * 60) ajoute(debut, 13 * 60);
-        if (debut !== null && debut >= 13 * 60 && debut < 20 * 60) ajoute(debut, 20 * 60);
-        else if (apm) ajoute(14 * 60 + 30, 20 * 60);
-        if (debut !== null && debut >= 20 * 60) ajoute(debut, nuit ? 26 * 60 : 24 * 60);
+        if (matin !== undefined) ajoute(matin, 13 * 60);
+        if (aprem !== undefined) ajoute(aprem, 20 * 60); else if (apm) ajoute(14 * 60 + 30, 20 * 60);
+        if (tard !== undefined) ajoute(tard, nuit ? 26 * 60 : 24 * 60);
         else if (soir) ajoute(21 * 60 + 30, nuit ? 26 * 60 : 24 * 60);
         else if (nuit) ajoute(21 * 60 + 30, 26 * 60);
       });
@@ -1027,6 +1031,10 @@ tbody tr:hover{background:#eef3fa}
   function noterEtat(t, res, courant) {
     var e = etape(res, courant);
     t.restants = e.restants; t.termine = e.termine; t.etape = e.libelle; t.statut = e.statut; t.verifie = Date.now();
+    if (res.tpsmaj) t.tpsmaj = res.tpsmaj;
+    // Examen commencé : au moins un amendement ou une division dont le sort est publié, ou un amendement marqué en cours.
+    var SORT = /adopt|rejet|retir|non soutenu|tomb|satisfait|vot/i;
+    t.demarre = !!courant || res.amendements.some(function (a) { return a.s && SORT.test(a.s); }) || res.divisions.some(function (d) { return d.sort && SORT.test(d.sort); });
     return e;
   }
 
@@ -1035,14 +1043,31 @@ tbody tr:hover{background:#eef3fa}
   function texteActif() {
     var ts = JOUR.textes; if (!ts.length) return null;
     if (CHOIX) { var c = ts.filter(function (t) { return t.url === CHOIX; })[0]; if (c) return c; }
-    // Le premier texte du jour (ordre de l'accueil) dont une étape reste à régler (amendements, vote,
-    // explications de vote…) ; sinon le dernier.
-    for (var i = 0; i < ts.length; i++) if (ts[i].termine !== true) return ts[i];
-    return ts[ts.length - 1];
+    // Le Sénat peut passer au texte suivant avant que tous les sorts du précédent soient publiés :
+    // on part donc du dernier texte du jour dont l'examen a commencé, les textes précédents étant considérés comme passés.
+    // Un texte est aussi considéré comme commencé quand le Sénat met à jour son dérouleur après le texte précédent
+    // (discussion générale, premiers amendements…), même si aucun sort n'est encore publié.
+    var debut = 0, i, maxAvant = 0, debJour = Date.now() - 18 * 3600000;
+    for (i = 0; i < ts.length; i++) {
+      var tp = ts[i].tpsmaj || 0;
+      if (ts[i].demarre || (i > 0 && tp > debJour && tp > maxAvant && maxAvant > debJour)) debut = i;
+      maxAvant = Math.max(maxAvant, tp);
+    }
+    var choisi = null;
+    for (i = debut; i < ts.length; i++) if (ts[i].termine !== true) { choisi = ts[i]; break; }
+    // Retour sur un texte non terminé : s'il est mis à jour nettement plus récemment que le texte retenu, c'est lui qui est en séance.
+    var recent = null;
+    ts.forEach(function (t) { if (t.termine !== true && t.tpsmaj && t.tpsmaj > debJour && (!recent || t.tpsmaj > recent.tpsmaj)) recent = t; });
+    if (recent && choisi && recent !== choisi && recent.tpsmaj > (choisi.tpsmaj || 0) + 120000) choisi = recent;
+    if (!choisi) choisi = ts[ts.length - 1];
+    var k = ts.indexOf(choisi);
+    ts.forEach(function (t, j) { t.depasse = j < k && t.termine !== true; });
+    return choisi;
   }
   function verifierAutres(actif) {
     // Les autres textes du jour sont relus toutes les 5 minutes pour connaître leur avancement.
-    return Promise.all(JOUR.textes.filter(function (t) { return t !== actif && Date.now() - (t.verifie || 0) > 300000; }).map(function (t) {
+    // Relus toutes les 2 minutes, pour basculer vite quand le Sénat passe au texte suivant.
+    return Promise.all(JOUR.textes.filter(function (t) { return t !== actif && Date.now() - (t.verifie || 0) > 60000; }).map(function (t) {
       return lire(t.url).then(function (pg) { noterEtat(t, analyser(pg), null); }, function () {});
     }));
   }
@@ -1089,7 +1114,7 @@ tbody tr:hover{background:#eef3fa}
       res.orateurs.forEach(function (b) { b.titre = preciser(b.titre); });
       actif.verifie = Date.now();
       var base = actif.url.replace(/\/[^\/]*$/, "");
-      var pc = res.idtxt ? lire(base + "/modifs/amd_courant_" + res.idtxt + ".txt").then(function (t) { return t.replace(/\s+/g, "") || null; }, function () { return null; }) : Promise.resolve(null);
+      var pc = res.idtxt ? lire(base + "/modifs/amd_courant_" + res.idtxt + ".txt").then(function (t) { t = t.replace(/\s+/g, ""); return /^[0-9A-Za-z .-]{1,30}$/.test(t) ? t : null; }, function () { return null; }) : Promise.resolve(null);
       return Promise.all([pc, completerAvis(actif, res.amendements), completerGroupes(res.amendements)]);
     }).then(function (r) {
       var pref = actif.session + "/" + actif.numero + "/";
@@ -1181,6 +1206,8 @@ tbody tr:hover{background:#eef3fa}
   var MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
   function hm(t) { var d = new Date(t); return d.getHours() + " h " + String(d.getMinutes()).padStart(2, "0"); }
   function hm2(t) { var d = new Date(t); return String(d.getHours()).padStart(2, "0") + " h " + String(d.getMinutes()).padStart(2, "0"); }
+  // Heure, précédée du jour quand ce n'est pas le jour de la séance en cours (débats qui se prolongent).
+  function heureJ(t) { var d = new Date(t), auj = new Date(Date.now() - 6 * 3600000); return (d.toDateString() === auj.toDateString() || (d.getHours() < 6 && new Date(t - 6 * 3600000).toDateString() === auj.toDateString()) ? "" : jourCourt(t) + " ") + hm2(t).replace(/^0/, ""); }
   function jourCourt(t) { var d = new Date(t); return JOURS[d.getDay()] + " " + d.getDate(); }
   function dateLongue(t) { var d = new Date(t); return d.getDate() + (d.getDate() === 1 ? "er" : "") + " " + MOIS[d.getMonth()]; }
   function memeJour(a, b) { var x = new Date(a), y = new Date(b); return x.toDateString() === y.toDateString(); }
@@ -1392,7 +1419,7 @@ tbody tr:hover{background:#eef3fa}
       (M.etape && (!M.prochain || (M.divs[M.etape.idx] && M.divs[M.etape.idx].restants === 0)))
         ? kpi("Étape en cours", M.etape.libelle, "selon le dérouleur du Sénat", M.etape.libelle.length > 90 ? "texte long" : M.etape.libelle.length > 30 ? "texte" : true)
         : kpi(M.enDirect ? "Amendement en discussion" : "Prochain amendement", M.prochain ? "n° " + M.prochain.n : "—", M.prochain && M.divs[M.prochain.d] ? M.divs[M.prochain.d].libelle : "", true),
-      kpi("Fin estimée des débats", R ? (M.fin ? h("span", null, h("span", { class: "h1" }, hm2(M.fin).replace(/^0/, "")), " ", h("span", { class: "h2" }, "– " + (M.fin2 ? hm2(M.fin2).replace(/^0/, "") : "…"))) : "—") : "—", plTxt ? "plages de séance : " + plTxt : "", "heure")
+      kpi("Fin estimée des débats", R ? (M.fin ? h("span", null, h("span", { class: "h1" }, heureJ(M.fin)), " ", h("span", { class: "h2" }, "– " + (M.fin2 ? heureJ(M.fin2) : "…"))) : "—") : "—", plTxt ? "plages de séance : " + plTxt : "", "heure")
     );
 
     // Bandeau
@@ -1541,13 +1568,13 @@ tbody tr:hover{background:#eef3fa}
         if (!dansPlage && prochainePlage) e.append(" · " + (memeJour(prochainePlage.a, now2) ? "séance à " : "séance le " + jourCourt(prochainePlage.a) + " à ") + hm(prochainePlage.a));
       } else {
         e.append(h("b", null, nb(R)), " amendement" + (R > 1 ? "s" : "") + " à examiner sur " + nb(T));
-        if (M.fin) e.append(" · fin estimée ", h("b", null, hm(M.fin) + " – " + (M.fin2 ? hm(M.fin2) : "…")));
+        if (M.fin) e.append(" · fin estimée ", h("b", null, heureJ(M.fin) + " – " + (M.fin2 ? heureJ(M.fin2) : "…")));
         if (!dansPlage && prochainePlage) e.append(" · " + (memeJour(prochainePlage.a, now2) ? "séance à " : "séance le " + jourCourt(prochainePlage.a) + " à ") + hm(prochainePlage.a));
         if (M.etape && M.divs[M.etape.idx] && M.divs[M.etape.idx].restants === 0) e.append(" · étape en cours : ", h("b", null, M.etape.libelle));
         else if (M.prochain) e.append(" · " + (M.enDirect ? "en discussion" : "prochain") + " : n° " + M.prochain.n);
       }
       c.appendChild(e);
-      var termines = J.textes.filter(function (t) { return t.url !== actif && t.termine === true; });
+      var termines = J.textes.filter(function (t) { return t.url !== actif && (t.termine === true || t.depasse); });
       if (termines.length) {
         var a = h("div", { class: "autres" }, "Terminé" + (termines.length > 1 ? "s" : "") + " ce jour : ");
         termines.forEach(function (t, i) { if (i) a.append(", "); a.append(h("button", { type: "button", onclick: basculer(t) }, t.court)); });
@@ -1557,7 +1584,7 @@ tbody tr:hover{background:#eef3fa}
     // Textes à venir : autres textes du jour encore à examiner, puis ceux du prochain jour de séance publié
     var v = vide($("rub-venir")), items = [];
     J.textes.forEach(function (t) {
-      if (t.url === actif || t.termine === true) return;
+      if (t.url === actif || t.termine === true || t.depasse) return;
       var hOdj = J.aujourdHui ? heureOdj(t.numero) : null;
       items.push({ t: t, sous: (J.aujourdHui ? "Aujourd'hui" : J.libelle) + (hOdj ? " · " + hOdj.charAt(0).toLowerCase() + hOdj.slice(1) : "") + (t.restants ? " · " + nb(t.restants) + " amendement" + (t.restants > 1 ? "s" : "") + " à examiner" : t.etape ? " · " + t.etape : "") });
     });
