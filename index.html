@@ -303,6 +303,12 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
 .alerte p{margin:0;font-size:13.5px;color:rgba(255,255,255,.85)}
 .alerte .x{all:unset;cursor:pointer;position:absolute;top:6px;right:10px;font-size:20px;color:rgba(255,255,255,.7)}
 @keyframes entree{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+details.objet{margin-top:4px}
+details.objet summary{cursor:pointer;display:inline-block;font-size:12px;font-weight:600;color:var(--navy2);list-style:none;user-select:none}
+details.objet summary::-webkit-details-marker{display:none}
+details.objet summary:before{content:"▸ ";font-size:10px}
+details.objet[open] summary:before{content:"▾ "}
+details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink);background:#f6f8fc;border-left:3px solid var(--navy2);padding:6px 9px;border-radius:0 6px 6px 0;max-width:520px}
 .expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
 /* Téléphone : chaque ligne de tableau devient une fiche lisible, sans défilement horizontal. */
 @media (max-width:720px){
@@ -925,6 +931,17 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
 
   /* ---------- 3. Avis (pages d'amendements), avec cache par texte ---------- */
   var AVIS = lsGet("derouleur.avis") || {};
+  // Découpage en phrases qui ignore les abréviations juridiques (« article L. 435-1 », « art. », « M. », « n° »…).
+  function phrases(t) {
+    var out = [], debut = 0, rx = /[.!?…]+\s+(?=[A-ZÀ-ÖØ-Ý«"“])/g, m;
+    while ((m = rx.exec(t))) {
+      var avant = t.slice(debut, m.index), mot = (avant.match(/(\S+)$/) || ["", ""])[1];
+      if (/^([A-Z]|art|arts|al|cf|ex|etc|M|MM|Mme|Mmes|Dr|p|pp|op|n°|L|R|D|O)$/i.test(mot.replace(/[()«»"]/g, "")) || /\d$/.test(mot) && /^[IVXLC]+$/.test(mot)) continue;
+      out.push(t.slice(debut, m.index + m[0].length).trim()); debut = m.index + m[0].length;
+    }
+    if (debut < t.length) out.push(t.slice(debut).trim());
+    return out.filter(Boolean);
+  }
   function lireAvis(page) {
     function bloc(nom) {
       var m = page.match(new RegExp("<!--\\s*debut_" + nom + "\\s*-->([\\s\\S]*?)<!--\\s*fin_" + nom + "\\s*-->"));
@@ -933,7 +950,14 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
       if (/^avis du gouvernement$/i.test(t)) t = "Avis du Gouvernement";
       return t || null;
     }
-    return { c: bloc("avis_commission"), v: bloc("avis_gouvernement"), s: bloc("sort") };
+    // Exposé des motifs (« Objet ») ramené à une phrase : la première, complétée de la suivante si elle est très courte.
+    var obj = bloc("objet"), o = "";
+    if (obj) {
+      var phr = phrases(obj.replace(/\s+/g, " "));
+      o = phr[0].trim(); if (o.length < 60 && phr[1]) o += " " + phr[1].trim();
+      if (o.length > 320) o = o.slice(0, 317).replace(/\s+\S*$/, "") + "…";
+    }
+    return { c: bloc("avis_commission"), v: bloc("avis_gouvernement"), s: bloc("sort"), o: o };
   }
   function completerAvis(texte, ams) {
     var base = texte.url.replace(/\/[^\/]*$/, ""), pref = texte.session + "/" + texte.numero + "/", now = Date.now();
@@ -943,7 +967,7 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
     // D'abord les amendements à venir, puis les déjà examinés.
     restants.concat(ams.filter(function (a) { return a.s; })).forEach(function (a) {
       var b = String(parseInt(a.n, 10)), e = AVIS[pref + b];
-      if (!e) aLire.push(b);
+      if (!e || e.o === undefined) aLire.push(b);
       else if (a.s && !e.f) aLire.push(b);
       else if (!a.s && proches[a.n] && now - (e.tl || 0) > 180000) aLire.push(b);
     });
@@ -1170,7 +1194,7 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
       res.amendements.forEach(function (a) {
         if (!a.g && a._slug && GROUPES_FICHES[a._slug]) a.g = GROUPES_FICHES[a._slug];
         var e = AVIS[pref + String(parseInt(a.n, 10))];
-        if (e) { if (e.c) a.c = e.c; if (e.v) a.v = e.v; }
+        if (e) { if (e.c) a.c = e.c; if (e.v) a.v = e.v; if (e.o) a.o = e.o; }
         delete a._slug;
       });
       var seances = ODJ.page ? plagesDepuisOdj(ODJ.page, actif.numero, actif.session) : [];
@@ -1286,7 +1310,7 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
     var cfg = config(), D = cur.donnees;
     var divs = D.divisions.map(function (d, i) { return { i: i, libelle: d.libelle, type: d.type, sort: d.sort, total: 0, restants: 0, examines: 0, cpt: {} }; });
     var am = D.amendements.map(function (a, k) {
-      var x = { k: k, n: a.n, base: parseInt(a.n, 10), d: a.d, al: a.al || "", a: a.a, g: a.g || null, gs: a.gs || null, s: a.s || null, sa: !!a.sa, c: a.c || null, v: a.v || null, dc: a.dc || null, id: a.id || null };
+      var x = { k: k, n: a.n, base: parseInt(a.n, 10), d: a.d, al: a.al || "", a: a.a, g: a.g || null, gs: a.gs || null, s: a.s || null, sa: !!a.sa, c: a.c || null, v: a.v || null, o: a.o || null, dc: a.dc || null, id: a.id || null };
       var dv = divs[a.d];
       if (dv) { dv.total++; if (x.s) { dv.examines++; dv.cpt[x.s] = (dv.cpt[x.s] || 0) + 1; } else dv.restants++; }
       return x;
@@ -1547,12 +1571,20 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
     var cls = [estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : ""), estSuivi(a) ? "suivi" : ""].join(" ").trim();
     return h("tr", { class: cls || null },
       numCell,
-      h("td", null, dv ? dv.libelle : "", alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null),
+      h("td", null, dv ? dv.libelle : "", alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null, objet(a)),
       h("td", null, estSuivi(a) ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, a.a),
       h("td", null, celluleGroupe(a)),
       h("td", null, pillAvis(a.c)),
       h("td", null, pillAvis(a.v)),
       dernier);
+  }
+  // Une phrase de l'exposé des motifs, repliée par défaut ; l'état ouvert est conservé d'une actualisation à l'autre.
+  function objet(a) {
+    if (!a.o) return null;
+    var cle = a.n, d = h("details", { class: "objet" }, h("summary", null, "Objet"), h("p", null, a.o));
+    if (S.objets && S.objets[cle]) d.open = true;
+    d.addEventListener("toggle", function () { S.objets = S.objets || {}; if (d.open) S.objets[cle] = 1; else delete S.objets[cle]; });
+    return d;
   }
   function ligneVide(cols, txt) { return h("tr", { class: "empty-row" }, h("td", { colspan: cols }, txt)); }
 
