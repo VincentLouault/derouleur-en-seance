@@ -741,12 +741,15 @@ tbody tr:hover{background:#eef3fa}
         var doc = new DOMParser().parseFromString(page, "text/html"), out = [];
         doc.querySelectorAll("article.list-article").forEach(function (art) {
           var a = art.querySelector("h2.title-article a[href]"); if (!a) return;
-          var href = a.getAttribute("href"), mm = href.match(/\/enseance\/(\d{4}-\d{4})\/(\d+)\/liste_discussion\.html/);
+          var href = a.getAttribute("href"), mm = href.match(/\/enseance\/(\d{4}-\d{4})\/(\d+)\/liste_discussion(?:_\d+)?\.html/);
           if (!mm) return;
           var titre = txt(a), court = titre.replace(/^(Projet|Proposition) de loi( organique)?\s*:\s*/i, "");
           var lr = txt(art.querySelector(".project-reading")).replace(/\+?\s*Voir le d[ée]tail/i, "").trim();
           var lm = lr.match(/\d+(?:ère|re|e|ème)\s+lecture|Nouvelle lecture|Lecture d[ée]finitive|Commission mixte paritaire|Texte de la commission mixte paritaire/i);
           var lect = lm ? lm[0] : lr;
+          // Textes examinés par parties (loi de finances…) : « Première partie », « Seconde partie »…
+          var pm = lr.match(/(premi[eè]re|seconde|deuxi[eè]me|troisi[eè]me)\s+partie/i);
+          if (pm) { court += " – " + pm[0].charAt(0).toUpperCase() + pm[0].slice(1); titre += " – " + pm[0]; if (!lm) lect = ""; }
           out.push({ url: SENAT + href, session: mm[1], numero: +mm[2], titre: titre, court: court, lecture: lect });
         });
         return out;
@@ -757,16 +760,20 @@ tbody tr:hover{background:#eef3fa}
   function majProchain() {
     var p = partiesParis(Date.now() - 6 * 3600000), cle = cleJour(p.y, p.m, p.d);
     if (PROCHAIN.cle === cle && Date.now() - PROCHAIN.lu < 1800000) return Promise.resolve();
-    var i = 1;
-    function chercher() {
-      var q = new Date(Date.UTC(p.y, p.m, p.d + i)), y = q.getUTCFullYear(), m = q.getUTCMonth(), d = q.getUTCDate();
-      return lireAccueil(y, m, d).then(function (textes) {
-        if (textes.length) return { textes: textes, libelle: libelleJour(y, m, d) };
-        if (++i > 7) return { textes: [], libelle: "" };
-        return chercher();
-      });
-    }
-    return chercher().then(function (r) { PROCHAIN = { lu: Date.now(), cle: cle, libelle: r.libelle, textes: r.textes }; }, function () {});
+    // Chaque jour à venir, l'un après l'autre (jusqu'à 10 jours), pour lister tous les textes publiés dans « En séance ».
+    var jours = [];
+    for (var i = 1; i <= 10; i++) { var q = new Date(Date.UTC(p.y, p.m, p.d + i)); jours.push({ y: q.getUTCFullYear(), m: q.getUTCMonth(), d: q.getUTCDate() }); }
+    return Promise.all(jours.map(function (j) {
+      return lireAccueil(j.y, j.m, j.d).then(function (textes) { return { cle: cleJour(j.y, j.m, j.d), libelle: libelleJour(j.y, j.m, j.d), textes: textes }; }, function () { return { cle: cleJour(j.y, j.m, j.d), libelle: libelleJour(j.y, j.m, j.d), textes: [] }; });
+    })).then(function (rs) {
+      var vus = {}, plats = [], parJour = rs.filter(function (r) { return r.textes.length; });
+      parJour.forEach(function (r) { r.textes.forEach(function (t) {
+        // Un même texte inscrit plusieurs jours (loi de finances…) : un seul élément, avec ses jours de séance.
+        if (vus[t.url]) { vus[t.url].jours.push(r.libelle); return; }
+        vus[t.url] = t; t.jours = [r.libelle]; t.jourLib = r.libelle; t.jourCle = r.cle; plats.push(t);
+      }); });
+      PROCHAIN = { lu: Date.now(), cle: cle, libelle: parJour.length ? parJour[0].libelle : "", jours: parJour, textes: plats };
+    }, function () {});
   }
   function majJour() {
     // Journée de séance : jusqu'à 6 h du matin, on reste sur la veille (séances de nuit).
@@ -1502,7 +1509,10 @@ tbody tr:hover{background:#eef3fa}
     $("avenir-cnt").textContent = nb(avF.length) + " affiché" + (avF.length > 1 ? "s" : "") + (filtreActif() ? " sur " + nb(R - nRestCours) : "");
     var vb = vide($("avenir-body"));
     if (!avF.length) vb.appendChild(ligneVide(7, R > nRestCours ? "Aucun amendement à venir ne correspond aux filtres." : "Plus aucun autre amendement à examiner."));
-    avF.forEach(function (a) { vb.appendChild(ligneAmdt(a, M, "venir", now)); });
+    // Textes très longs (loi de finances : plus de 2 000 amendements) : on n'affiche que les 150 prochains, les filtres permettent d'aller plus loin.
+    var MAXV = 150;
+    avF.slice(0, MAXV).forEach(function (a) { vb.appendChild(ligneAmdt(a, M, "venir", now)); });
+    if (avF.length > MAXV) vb.appendChild(ligneVide(7, "… et " + nb(avF.length - MAXV) + " autres amendements à venir : utilisez les filtres (article, groupe, n°) pour les afficher."));
 
     // Archive
     $("arch-count").textContent = nb(M.examines.length);
@@ -1590,13 +1600,17 @@ tbody tr:hover{background:#eef3fa}
     });
     if (J.decal <= 0) P.textes.forEach(function (t) {
       if (J.textes.some(function (x) { return x.url === t.url; })) return;
-      items.push({ t: t, sous: P.libelle.charAt(0).toUpperCase() + P.libelle.slice(1) + (t.lecture ? " · " + t.lecture : ""), lien: true });
+      items.push({ t: t, sous: (function (lib) { return lib.charAt(0).toUpperCase() + lib.slice(1); })(t.jourLib || P.libelle) + (t.jours && t.jours.length > 1 ? ", puis " + (t.jours.length - 1) + " autre" + (t.jours.length > 2 ? "s" : "") + " jour" + (t.jours.length > 2 ? "s" : "") + " de séance jusqu'au " + t.jours[t.jours.length - 1] : "") + (t.lecture ? " · " + t.lecture : ""), lien: true, cle: t.jourCle || "" });
     });
     // Questions d'actualité au Gouvernement à venir (ordre du jour) : aujourd'hui en tête, la prochaine séance de questions en fin de liste.
     qagAVenir.slice(0, 2).forEach(function (q, k) {
-      var it = { qag: true, titre: "Questions d'actualité au Gouvernement", sous: (q.g.aujourdHui ? "Aujourd'hui" : q.g.libelle.charAt(0).toUpperCase() + q.g.libelle.slice(1)) + " · à " + hm(q.it.debut) };
+      var it = { qag: true, cle: q.g.cle, titre: "Questions d'actualité au Gouvernement", sous: (q.g.aujourdHui ? "Aujourd'hui" : q.g.libelle.charAt(0).toUpperCase() + q.g.libelle.slice(1)) + " · à " + hm(q.it.debut) };
       if (q.g.aujourdHui) items.unshift(it); else if (k === 0 || !items.some(function (x) { return x.qag; })) items.push(it);
     });
+    // Jours à venir dans l'ordre chronologique (textes et questions d'actualité mêlés), après ceux du jour.
+    var duJour = items.filter(function (x) { return !x.cle; }), futurs = items.filter(function (x) { return x.cle; });
+    futurs = futurs.map(function (x, k) { return { x: x, k: k }; }).sort(function (a, b) { return a.x.cle < b.x.cle ? -1 : a.x.cle > b.x.cle ? 1 : a.k - b.k; }).map(function (o) { return o.x; });
+    items = duJour.concat(futurs);
     if (!items.length) { v.appendChild(h("p", { class: "vide" }, "Aucun autre texte publié pour l'instant dans « En séance ».")); return; }
     var ul = h("ul"), ulReste = h("ul", { class: "reste" + (S.venirOuvert ? "" : " hidden") });
     items.forEach(function (it, k) {
