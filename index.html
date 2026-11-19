@@ -300,6 +300,7 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
 .alertes{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;flex-direction:column;gap:8px;max-width:min(380px,calc(100vw - 32px))}
 .alerte{position:relative;background:var(--navy);color:#fff;border-radius:12px;padding:12px 34px 12px 14px;box-shadow:0 12px 30px -10px rgba(0,0,0,.45);border-left:6px solid #ffd60a;animation:entree .25s ease-out}
 .alerte b{display:block;font-size:15px;margin-bottom:3px}
+.alerte.ok{border-left-color:var(--green-bar)}
 .alerte p{margin:0;font-size:13.5px;color:rgba(255,255,255,.85)}
 .alerte .x{all:unset;cursor:pointer;position:absolute;top:6px;right:10px;font-size:20px;color:rgba(255,255,255,.7)}
 @keyframes entree{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
@@ -1405,6 +1406,20 @@ details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink
   SUIVI.noms = SUIVI.noms || {}; SUIVI.groupes = SUIVI.groupes || []; SUIVI.seuils = SUIVI.seuils || [10, 3];
   if (SUIVI.son === undefined) SUIVI.son = true;
   function sauverSuivi() { lsSet("derouleur.suivi", JSON.stringify(SUIVI)); }
+  // Transfert vers un autre appareil : les favoris voyagent dans le lien (après #), rien n'est envoyé à un serveur.
+  function b64e(t) { return btoa(unescape(encodeURIComponent(t))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function b64d(t) { t = t.replace(/-/g, "+").replace(/_/g, "/"); while (t.length % 4) t += "="; return decodeURIComponent(escape(atob(t))); }
+  function lienTransfert() { return location.href.split("#")[0] + "#suivi=" + b64e(JSON.stringify({ n: SUIVI.noms, g: SUIVI.groupes, s: SUIVI.seuils })); }
+  var IMPORT_SUIVI = null;
+  (function () {
+    var m = location.hash.match(/[#&]suivi=([A-Za-z0-9_-]+)/); if (!m) return;
+    try {
+      var d = JSON.parse(b64d(m[1]));
+      SUIVI.noms = d.n || {}; SUIVI.groupes = d.g || []; if (d.s) SUIVI.seuils = d.s; sauverSuivi();
+      IMPORT_SUIVI = Object.keys(SUIVI.noms).map(function (k) { return SUIVI.noms[k]; }).concat(SUIVI.groupes.map(function (g) { return "groupe " + g; }));
+    } catch (e) {}
+    try { history.replaceState(null, "", location.href.split("#")[0]); } catch (e) {}
+  })();
   function cleSen(nom) { return plain(nom).replace(/^(m|mme|mmes|mm)\.?\s+/, "").replace(/\s+/g, " ").trim(); }
   function estSuivi(a) { if (!a || !a.a) return false; return !!SUIVI.noms[cleSen(a.a)] || (!!a.g && SUIVI.groupes.indexOf(a.g) >= 0); }
   function nbSuivis() { return Object.keys(SUIVI.noms).length + SUIVI.groupes.length; }
@@ -1433,6 +1448,7 @@ details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink
   }
   var ALERTES = (function () { try { return JSON.parse(lsGet("derouleur.alertes") || "{}"); } catch (e) { return {}; } })();
   function verifierAlertes(M, now) {
+    if (IMPORT_SUIVI) { var li = IMPORT_SUIVI; IMPORT_SUIVI = null; var al = h("div", { class: "alerte ok" }, h("button", { type: "button", class: "x", onclick: function () { al.remove(); } }, "×"), h("b", null, "Favoris enregistrés sur cet appareil"), h("p", null, li.length ? li.join(", ") : "Aucun sénateur suivi.")); $("alertes").appendChild(al); setTimeout(function () { al.remove(); }, 8000); }
     if (!nbSuivis() || !M.prochain) return;
     // Seulement pendant une séance (ou dans le quart d'heure qui la précède).
     if (M.plages.length && !M.plages.some(function (p) { return now >= p.a - 15 * 60000 && now < p.b; })) return;
@@ -1516,11 +1532,22 @@ details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink
       h("p", { class: "sp-seuils" }, "Me prévenir quand un de leurs amendements est à ", s1, " puis à ", s2, " amendements du passage."),
       h("label", { class: "sp-g" }, son, " Son"),
       h("div", { class: "sp-notif" }, bNotif, etatNotif),
+      h("h4", null, "Sur mes autres appareils"),
+      h("p", { class: "sp-seuils", style: "line-height:1.45" }, "Envoyez-vous ce lien (SMS, mail, WhatsApp…) et ouvrez-le une fois sur votre téléphone : vos favoris et vos seuils d'alerte y seront enregistrés. À refaire après chaque changement."),
+      (function () {
+        var etat = h("span", { class: "sp-etat" });
+        var b = h("button", { type: "button", class: "btn primary", onclick: function () {
+          var url = lienTransfert();
+          if (navigator.share) { navigator.share({ title: "Mes sénateurs – Dérouleur En Séance", url: url }).catch(function () {}); return; }
+          (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { etat.textContent = "Lien copié : collez-le dans un message à vous-même."; }, function () { window.prompt("Copiez ce lien :", url); });
+        } }, "Envoyer mes favoris vers un autre appareil");
+        return h("div", { class: "sp-notif" }, b, etat);
+      })(),
       h("div", { class: "sp-bas" },
         h("button", { type: "button", class: "btn", onclick: function () { audio(); alerter("Essai d'alerte", "Voici à quoi ressemblera une alerte avant le passage d'un amendement suivi.", "essai"); } }, "Tester l'alerte"),
         h("button", { type: "button", class: "btn", onclick: function () { if (confirmer()) { SUIVI.noms = {}; SUIVI.groupes = []; SUIVI.seul = false; sauverSuivi(); construirePanneau(); rendre(); } } }, "Tout retirer"),
         h("button", { type: "button", class: "btn primary", onclick: function () { $("suivi-panel").classList.add("hidden"); } }, "Fermer")),
-      h("p", { class: "sp-note" }, "Choix enregistré dans ce navigateur uniquement. Les alertes fonctionnent tant que la page est ouverte ; seul le premier signataire de chaque amendement est pris en compte.")));
+      h("p", { class: "sp-note" }, "Choix enregistré dans ce navigateur ; utilisez le lien ci-dessus pour le copier sur un autre appareil. Les alertes fonctionnent tant que la page est ouverte ; seul le premier signataire de chaque amendement est pris en compte.")));
     function confirmer() { return true; }
   }
 
