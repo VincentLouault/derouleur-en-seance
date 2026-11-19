@@ -946,7 +946,7 @@ details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink
     function bloc(nom) {
       var m = page.match(new RegExp("<!--\\s*debut_" + nom + "\\s*-->([\\s\\S]*?)<!--\\s*fin_" + nom + "\\s*-->"));
       if (!m) return null;
-      var t = txt(new DOMParser().parseFromString(m[1], "text/html").body);
+      var t = txt(new DOMParser().parseFromString(m[1].replace(/<\/(p|div|li|br)>|<br\s*\/?>/gi, " $&"), "text/html").body);
       if (/^avis du gouvernement$/i.test(t)) t = "Avis du Gouvernement";
       return t || null;
     }
@@ -967,7 +967,7 @@ details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink
     // D'abord les amendements à venir, puis les déjà examinés.
     restants.concat(ams.filter(function (a) { return a.s; })).forEach(function (a) {
       var b = String(parseInt(a.n, 10)), e = AVIS[pref + b];
-      if (!e || e.o === undefined) aLire.push(b);
+      if (!e || e.o === undefined || e.ov !== 2) aLire.push(b);
       else if (a.s && !e.f) aLire.push(b);
       else if (!a.s && proches[a.n] && now - (e.tl || 0) > 180000) aLire.push(b);
     });
@@ -975,7 +975,7 @@ details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink
     function suivant() {
       if (i >= file.length) return Promise.resolve();
       var b = file[i++];
-      return lire(base + "/Amdt_" + b + ".html").then(function (pg) { var r = lireAvis(pg); r.tl = Date.now(); if (r.s) r.f = 1; AVIS[pref + b] = r; }, function () {}).then(suivant);
+      return lire(base + "/Amdt_" + b + ".html").then(function (pg) { var r = lireAvis(pg); r.ov = 2; r.tl = Date.now(); if (r.s) r.f = 1; AVIS[pref + b] = r; }, function () {}).then(suivant);
     }
     return Promise.all([suivant(), suivant(), suivant(), suivant()]).then(function () { lsSet("derouleur.avis", AVIS); });
   }
