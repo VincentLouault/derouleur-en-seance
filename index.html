@@ -9,10 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f7f6f3; --card:#fff; --ink:#1f1d1a; --muted:#6f6a62; --line:#e7e2d9; --line2:#efebe4;
-  --gold:#b08d57; --gold-bg:#f3ece2; --gold-row:#ebe3d6; --gold-ink:#7a5208; --gold-badge:#8a5a07;
-  --green:#1e6b2c; --green-bg:#e8f2e9; --green-line:#9fcda7; --green-bar:#13700f; --green-panel:#e6f0e7;
-  --red:#b3261e; --red-bg:#fcebea; --red-line:#e6a7a3; --red-btn:#a8262c;
+  --bg:#f2f4f8; --card:#fff; --ink:#14213d; --muted:#5b6578; --line:#d9dfe8; --line2:#e8ecf2;
+  --navy:#14213d; --navy2:#1f3a68; --navy-bg:#eaf0f8;
+  --gold:#1f3a68; --gold-bg:#eaf0f8; --gold-row:#dde7f5; --gold-ink:#1f3a68; --gold-badge:#1f3a68;
+  --green:#185c37; --green-bg:#e3f1e8; --green-line:#8fc3a2; --green-bar:#21a366; --green-panel:#e8f4ec; --green-d:#107c41;
+  --red:#b3261e; --red-bg:#fbeaea; --red-line:#e3a3a0; --red-btn:#c42b2b;
   --amber:#8a5a00; --amber-bg:#fdf3dc; --amber-line:#e7c77d;
   --blue:#2f5d8a; --blue-bg:#e9f0f7; --blue-line:#a9c2db;
   --grey:#6f6a62; --grey-bg:#f1efeb; --grey-line:#d8d3ca;
@@ -186,12 +187,74 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 .actu-liste a:hover{text-decoration:underline;text-underline-offset:3px}
 .actu-liste .d{display:block;color:var(--muted);font-size:13px;margin-bottom:2px}
 .actu-liste .vide{color:var(--muted)}
+/* ---------- Thème bleu marine / rouge / vert foncé ---------- */
+h1,.rub .t-titre,.kpi .val{font-family:var(--sans)}
+.hero{position:relative;background:linear-gradient(120deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;border-radius:18px;padding:22px 26px 20px;margin-bottom:6px;overflow:hidden;box-shadow:0 10px 30px -18px rgba(20,33,61,.7)}
+.hero:after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--red-btn) 0 50%,var(--green-d) 50%)}
+.hero h1{color:#fff;font-weight:700;font-size:clamp(22px,2.6vw,32px);letter-spacing:-.02em;margin:0 0 8px}
+.hero .intro{border:0;background:transparent;padding:0;max-width:900px;font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.72)}
+.hero .intro p+p{color:rgba(255,255,255,.6);font-size:12px}
+.rub{border-radius:16px;border:1px solid var(--line);box-shadow:0 4px 16px -12px rgba(20,33,61,.4)}
+.rub.en-cours{border:0;background:#fff;box-shadow:inset 5px 0 0 var(--navy2),0 4px 16px -12px rgba(20,33,61,.4)}
+.rub h2{color:var(--navy2);font-size:12.5px;letter-spacing:.08em}
+.rub.a-venir h2{color:var(--green-d)}
+.rub .t-titre{font-weight:700;letter-spacing:-.01em}
+.rub .badge-live{background:var(--red-btn);border-radius:99px;padding:1px 10px}
+.rub li.li-qag .l-titre{color:var(--red-btn)}
+.voir-plus{all:unset;cursor:pointer;display:inline-block;margin-top:8px;font-size:13.5px;font-weight:600;color:var(--navy2)}
+.voir-plus:hover{text-decoration:underline;text-underline-offset:3px}
+.rub ul.reste{margin-top:6px;border-top:1px solid var(--line2)}
+.rub ul.reste li:first-child{padding-top:10px}
+.textes-jour .txt.on{border-color:var(--navy2);background:var(--navy-bg);box-shadow:inset 0 0 0 1px var(--navy2)}
+.kpi{border:0;border-radius:16px;box-shadow:0 4px 16px -12px rgba(20,33,61,.45);border-top:4px solid var(--navy2)}
+.kpi:nth-child(3n+2){border-top-color:var(--green-d)}
+.kpi:nth-child(3n){border-top-color:var(--red-btn)}
+.kpi .lab{text-transform:uppercase;letter-spacing:.06em;font-size:12px;font-weight:600}
+.kpi .val{font-weight:700;color:var(--navy)}
+.banner{border:0;background:var(--green-panel);box-shadow:inset 4px 0 0 var(--green-d);border-radius:12px}
+.banner .ico{color:var(--green-d)}
+.banner.stale{box-shadow:inset 4px 0 0 var(--amber)}
+h2{font-weight:700;color:var(--navy);letter-spacing:-.01em}
+.panel{border:0!important;border-radius:16px;box-shadow:0 6px 20px -14px rgba(20,33,61,.55)}
+.ph h3{font-weight:600}
+.gold .ph,.navy .ph{background:var(--navy2);color:#fff}
+.green .ph{background:var(--green-d);color:#fff}
+.red .ph{background:var(--red-btn);color:#fff}
+.gold .ph .cnt,.navy .ph .cnt,.green .ph .cnt,.red .ph .cnt,.ph.pliable .hint{color:rgba(255,255,255,.8)}
+.grey .ph .cnt,.grey .ph .hint{color:var(--muted)}
+.grey .ph,.arch-h{background:#e9edf3}
+.arch-h .count{background:var(--navy)}
+.badge{background:var(--red-btn);color:#fff;border-radius:99px}
+.tag.next{background:var(--red-btn);color:#fff}
+tr.cur{background:var(--gold-row)!important;box-shadow:inset 5px 0 0 var(--red-btn)}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:var(--muted);background:#f7f9fc}
+tbody tr{background:#fff}
+tbody tr:nth-child(even){background:#f8fafc}
+tbody tr:hover{background:#eef3fa}
+.pill.encours{background:var(--red-bg);border-color:var(--red-line);color:var(--red)}
+.bar{background:#e3e8ef}
+.bar>div{background:linear-gradient(90deg,var(--green-d),var(--green-bar))}
+.tab.on{background:var(--navy2);border-color:var(--navy2)}
+.btn.primary{background:var(--navy2);border-color:var(--navy2)}
+.live{background:var(--red-btn);border-radius:99px}
+.live:hover{background:#a51f1f}
+.filtres select,.filtres input{border-color:var(--line)}
+.filtres select:focus,.filtres input:focus{outline:2px solid var(--navy2);outline-offset:-1px}
+#orateurs .panel{box-shadow:none;border-radius:0;margin:0;border-top:1px solid var(--line)!important}
+#orateurs .panel .ph{background:var(--navy-bg);color:var(--ink)}
+#orateurs .panel .ph .cnt{color:var(--muted)}
+#orateurs .panel.red .ph{background:var(--red-bg)}
+.expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
 /* Téléphone : chaque ligne de tableau devient une fiche lisible, sans défilement horizontal. */
 @media (max-width:720px){
   .wrap{padding:18px 12px 48px}
   h1{font-size:24px;margin-bottom:12px}
   h2{font-size:19px}
-  .intro{padding:12px 14px;font-size:14.5px}
+  .hero{padding:16px 16px 18px;border-radius:14px}
+  .hero h1{font-size:21px}
+  .hero .intro{font-size:12px}
+  tr.cur{box-shadow:inset 4px 0 0 var(--red-btn)}
+  .expl.in{padding:10px 14px}
   .resume{font-size:15.5px}
   .kpis{grid-template-columns:1fr 1fr;gap:10px}
   .kpi{min-height:0;padding:12px 14px}
@@ -211,7 +274,6 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
   tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 12px;padding:12px 14px;border-bottom:1px solid var(--line2)}
   td{display:block;padding:0;border:0;text-align:left!important;min-width:0}
   td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
-  tr.cur{box-shadow:inset 4px 0 0 var(--gold-badge)}
   .pill{white-space:normal}
   .n{min-width:0}
   .n .sub2{white-space:normal}
@@ -256,11 +318,13 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 </head>
 <body>
 <div class="wrap">
+  <header class="hero">
   <h1 id="titre-outil">Dérouleur « En Séance » optimisé par Vincent Louault</h1>
   <div class="intro">
     <p>Conçu par l'équipe de Vincent Louault à sa demande, cet outil enrichit le dérouleur du Sénat : avis de la commission et du Gouvernement, groupes politiques et heures de passage estimées. Le tout est lu en direct sur le site du Sénat, actualisé toutes les 30 secondes, et suit automatiquement le texte en discussion au fil des jours.</p>
     <p id="intro-avis"></p>
   </div>
+  </header>
 
   <div class="rubriques" id="rubriques">
     <section class="rub en-cours"><h2>Texte en cours</h2><div id="rub-cours"><p class="vide">Lecture du site du Sénat…</p></div></section>
@@ -278,8 +342,11 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 
   <section id="s-orateurs" class="hidden">
     <h2>Prises de parole</h2>
-    <p class="expl">Orateurs inscrits au dérouleur du Sénat pour l'étape en cours et les étapes à venir du texte affiché, dans l'ordre de passage, avec leur temps de parole.</p>
-    <div id="orateurs"></div>
+    <div class="panel navy" id="p-orateurs" data-pli>
+      <div class="ph"><h3>Orateurs inscrits</h3><span class="cnt" id="orat-cnt"></span></div>
+      <p class="expl in">Orateurs inscrits au dérouleur du Sénat pour l'étape en cours et les étapes à venir du texte affiché, dans l'ordre de passage, avec leur temps de parole.</p>
+      <div id="orateurs"></div>
+    </div>
   </section>
 
   <section id="s-articles">
@@ -327,7 +394,7 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
       </div>
     </div>
 
-    <div class="panel red" id="p-cours" data-pli>
+    <div class="panel red" id="p-cours">
       <div class="ph"><h3>Amendements en cours</h3><span class="cnt" id="cours-cnt"></span></div>
       <div class="scroll">
         <table class="t-amdt">
@@ -1465,14 +1532,21 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
       if (q.g.aujourdHui) items.unshift(it); else if (k === 0 || !items.some(function (x) { return x.qag; })) items.push(it);
     });
     if (!items.length) { v.appendChild(h("p", { class: "vide" }, "Aucun autre texte publié pour l'instant dans « En séance ».")); return; }
-    var ul = h("ul");
-    items.forEach(function (it) {
-      if (it.qag) { ul.appendChild(h("li", { class: "li-qag" }, h("span", { class: "l-titre" }, it.titre), h("span", { class: "l-sous" }, it.sous))); return; }
-      ul.appendChild(h("li", null, it.lien
+    var ul = h("ul"), ulReste = h("ul", { class: "reste" + (S.venirOuvert ? "" : " hidden") });
+    items.forEach(function (it, k) {
+      var cible = k === 0 ? ul : ulReste;
+      if (it.qag) { cible.appendChild(h("li", { class: "li-qag" }, h("span", { class: "l-titre" }, it.titre), h("span", { class: "l-sous" }, it.sous))); return; }
+      cible.appendChild(h("li", null, it.lien
         ? h("a", { href: it.t.url, target: "_blank", rel: "noopener", style: "text-decoration:none;color:inherit;display:block" }, h("span", { class: "l-titre" }, it.t.court + " ↗"), h("span", { class: "l-sous" }, it.sous))
         : h("button", { type: "button", onclick: basculer(it.t), title: "Afficher ce dérouleur" }, h("span", { class: "l-titre" }, it.t.court), h("span", { class: "l-sous" }, it.sous))));
     });
     v.appendChild(ul);
+    if (items.length > 1) {
+      var nR = items.length - 1;
+      v.appendChild(h("button", { type: "button", class: "voir-plus", onclick: function () { S.venirOuvert = !S.venirOuvert; ulReste.classList.toggle("hidden", !S.venirOuvert); this.textContent = S.venirOuvert ? "Masquer les autres ▴" : "Voir " + (nR > 1 ? "les " + nR + " suivants" : "le suivant") + " ▾"; } },
+        S.venirOuvert ? "Masquer les autres ▴" : "Voir " + (nR > 1 ? "les " + nR + " suivants" : "le suivant") + " ▾"));
+      v.appendChild(ulReste);
+    }
   }
   function rendreOrateurs(D) {
     var blocs = ((D && D.orateurs) || []).slice(), sec = $("s-orateurs"), box = vide($("orateurs"));
@@ -1487,6 +1561,8 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
     blocs.forEach(function (b) { b.enCours = !!lib && b.titre === lib; });
     blocs.sort(function (x, y) { return (y.enCours ? 1 : 0) - (x.enCours ? 1 : 0); });
     sec.classList.toggle("hidden", !blocs.length);
+    var nOrat = 0; blocs.forEach(function (b) { nOrat += b.lignes.length; });
+    $("orat-cnt").textContent = blocs.length ? (blocs[0].enCours ? "en cours : " + blocs[0].titre + " · " : "") + nb(nOrat) + " orateur" + (nOrat > 1 ? "s" : "") + (blocs.length > 1 ? " sur " + nb(blocs.length) + " étapes" : "") : "";
     blocs.forEach(function (b, i) {
       var minutes = 0;
       b.lignes.forEach(function (l) { var m = String(l.temps || "").match(/(\d+)\s*'/); if (m) minutes += +m[1]; });
