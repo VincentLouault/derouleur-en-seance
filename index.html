@@ -157,6 +157,8 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 .filtres #f-reset{padding:0 12px;height:34px;font-size:14px;white-space:nowrap}
 @media (max-width:900px){.filtres{grid-template-columns:1fr 1fr 1fr}.filtres .f-q{grid-column:span 2}}
 .prog{padding:4px 24px 18px;background:#fff;border-bottom:1px solid var(--line)}
+.prog.prog-haut{border:0;border-radius:16px;padding:6px 22px 18px;margin-bottom:12px;box-shadow:0 4px 16px -12px rgba(20,33,61,.45)}
+#banner{margin-top:30px}
 .prog .t{color:var(--muted);margin:10px 0 10px}
 .prog .t b{color:var(--ink)}
 .bar{height:12px;background:#ebe8e2;border-radius:99px;overflow:hidden}
@@ -345,10 +347,7 @@ tbody tr:hover{background:#eef3fa}
   <p class="resume" id="resume"></p>
   <div class="kpis" id="kpis"></div>
 
-  <div class="banner" id="banner">
-    <span class="ico">↻</span>
-    <span class="txt" id="banner-txt">Chargement des données…</span>
-  </div>
+  <div class="prog prog-haut"><div class="t" id="prog-t"></div><div class="bar"><div id="prog-bar" style="width:0"></div></div></div>
 
 
   <section id="s-orateurs" class="hidden">
@@ -397,7 +396,6 @@ tbody tr:hover{background:#eef3fa}
 
     <div class="panel green" id="p-derniers" data-pli>
       <div class="ph"><h3>Les 10 derniers amendements examinés</h3><span class="cnt">dans l'ordre du dérouleur, le plus récent en bas</span></div>
-      <div class="prog"><div class="t" id="prog-t"></div><div class="bar"><div id="prog-bar" style="width:0"></div></div></div>
       <div class="scroll">
         <table class="t-amdt">
           <thead><tr><th>N°</th><th>Article</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Sort</th></tr></thead>
@@ -450,6 +448,10 @@ tbody tr:hover{background:#eef3fa}
     </div>
   </section>
 
+  <div class="banner" id="banner">
+    <span class="ico">↻</span>
+    <span class="txt" id="banner-txt">Chargement des données…</span>
+  </div>
   <div class="foot" id="foot"></div>
 </div>
 
