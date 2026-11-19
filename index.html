@@ -268,6 +268,41 @@ tbody tr:hover{background:#eef3fa}
 .rub.a-venir .l-sous{font-size:12.5px}
 .rub.a-venir .voir-plus{margin-top:4px;font-size:12.5px}
 .rub.a-venir .vide{font-size:13px}
+.suivi-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:#fff;border-radius:12px;padding:8px 12px;margin:4px 0 8px;box-shadow:0 4px 14px -12px rgba(20,33,61,.5)}
+.suivi-bar .sb-titre{font-weight:700;color:var(--green-d);white-space:nowrap}
+.suivi-bar .sb-vide{color:var(--muted);font-size:13.5px;flex:1 1 260px}
+.suivi-bar .chips{display:flex;flex-wrap:wrap;gap:4px}
+.suivi-bar .chip{background:var(--green-panel);color:var(--green);border-radius:99px;padding:2px 9px;font-size:13px;font-weight:600}
+.suivi-bar .chip.g{background:var(--navy-bg);color:var(--navy2)}
+.suivi-bar .sb-info{color:var(--ink);font-size:13.5px;flex:1 1 220px}
+.suivi-bar .sb-actions{display:flex;gap:6px;margin-left:auto}
+.suivi-bar .btn{padding:5px 11px;font-size:13.5px}
+.suivi-bar .btn.on{background:var(--green-d);border-color:var(--green-d);color:#fff}
+.suivi-panel{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;background:#fff;border-radius:14px;padding:14px 16px;margin:0 0 10px;box-shadow:0 8px 24px -16px rgba(20,33,61,.6);border:1px solid var(--line)}
+.suivi-panel h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--navy2)}
+.suivi-panel h4+*{margin-bottom:12px}
+.sp-rech{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;margin-bottom:6px;box-sizing:border-box}
+.sp-liste{max-height:300px;overflow:auto;border:1px solid var(--line2);border-radius:8px}
+.sp-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid var(--line2);font-size:14px;cursor:pointer}
+.sp-item:hover{background:#f6f8fc}
+.sp-item .sp-n{margin-left:auto;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.sp-groupes{display:flex;flex-wrap:wrap;gap:6px 12px}
+.sp-g{font-size:14px;cursor:pointer;white-space:nowrap}
+.sp-seuils{font-size:14px;margin:0 0 8px;line-height:2}
+.sp-seuils input{width:56px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+.sp-notif{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+.sp-etat{color:var(--muted);font-size:12.5px}
+.sp-bas{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sp-note{color:var(--muted);font-size:12px;margin:10px 0 0}
+tr.suivi{background:#e3f4e9!important;box-shadow:inset 5px 0 0 var(--green-d)}
+tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
+.etoile{color:var(--green-d);font-weight:700}
+.alertes{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;flex-direction:column;gap:8px;max-width:min(380px,calc(100vw - 32px))}
+.alerte{position:relative;background:var(--navy);color:#fff;border-radius:12px;padding:12px 34px 12px 14px;box-shadow:0 12px 30px -10px rgba(0,0,0,.45);border-left:6px solid #ffd60a;animation:entree .25s ease-out}
+.alerte b{display:block;font-size:15px;margin-bottom:3px}
+.alerte p{margin:0;font-size:13.5px;color:rgba(255,255,255,.85)}
+.alerte .x{all:unset;cursor:pointer;position:absolute;top:6px;right:10px;font-size:20px;color:rgba(255,255,255,.7)}
+@keyframes entree{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
 .expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
 /* Téléphone : chaque ligne de tableau devient une fiche lisible, sans défilement horizontal. */
 @media (max-width:720px){
@@ -279,6 +314,9 @@ tbody tr:hover{background:#eef3fa}
   .hero .intro{font-size:12px}
   tr.cur{box-shadow:inset 4px 0 0 var(--red-btn)}
   .expl.in{padding:10px 14px}
+  .suivi-panel{grid-template-columns:1fr;padding:12px}
+  .suivi-bar .sb-actions{margin-left:0}
+  .alertes{left:12px;right:12px;bottom:12px;max-width:none}
   .art-cours button{padding:10px 14px}
   .resume{font-size:15.5px}
   .kpis{grid-template-columns:1fr 1fr;gap:10px}
@@ -396,6 +434,8 @@ tbody tr:hover{background:#eef3fa}
       </div>
     </div>
 
+    <div class="suivi-bar" id="suivi-bar"></div>
+    <div class="suivi-panel hidden" id="suivi-panel"></div>
     <div class="filtres">
       <div><label for="f-article">Article</label><select id="f-article"><option value="">Tous les articles</option></select></div>
       <div><label for="f-groupe">Groupe</label><select id="f-groupe"><option value="">Tous les groupes</option></select></div>
@@ -467,6 +507,7 @@ tbody tr:hover{background:#eef3fa}
     <span class="txt" id="banner-txt">Chargement des données…</span>
   </div>
   <div class="foot" id="foot"></div>
+  <div class="alertes" id="alertes" aria-live="assertive"></div>
 </div>
 
 <script>
@@ -1323,6 +1364,7 @@ tbody tr:hover{background:#eef3fa}
   /* ---------- filtres ---------- */
   function passeFiltre(a) {
     var f = S.f;
+    if (SUIVI.seul && !estSuivi(a)) return false;
     if (f.article !== "" && String(a.d) !== f.article) return false;
     if (f.groupe) { if (f.groupe === "__none" ? a.g : a.g !== f.groupe) return false; }
     if (f.statut === "avenir" && a.s) return false;
@@ -1332,7 +1374,131 @@ tbody tr:hover{background:#eef3fa}
     if (f.q) { var q = plain(f.q); if (plain(a.a).indexOf(q) < 0 && plain(a.g).indexOf(q) < 0) return false; }
     return true;
   }
-  function filtreActif() { var f = S.f; return !!(f.article || f.groupe || f.statut || f.num || f.q); }
+  function filtreActif() { var f = S.f; return !!(f.article || f.groupe || f.statut || f.num || f.q || SUIVI.seul); }
+
+  /* ---------- Mes sénateurs / mon groupe : suivi, surlignage et alertes ---------- */
+  var SUIVI = (function () { try { return JSON.parse(lsGet("derouleur.suivi") || "null"); } catch (e) { return null; } })() || {};
+  SUIVI.noms = SUIVI.noms || {}; SUIVI.groupes = SUIVI.groupes || []; SUIVI.seuils = SUIVI.seuils || [10, 3];
+  if (SUIVI.son === undefined) SUIVI.son = true;
+  function sauverSuivi() { lsSet("derouleur.suivi", JSON.stringify(SUIVI)); }
+  function cleSen(nom) { return plain(nom).replace(/^(m|mme|mmes|mm)\.?\s+/, "").replace(/\s+/g, " ").trim(); }
+  function estSuivi(a) { if (!a || !a.a) return false; return !!SUIVI.noms[cleSen(a.a)] || (!!a.g && SUIVI.groupes.indexOf(a.g) >= 0); }
+  function nbSuivis() { return Object.keys(SUIVI.noms).length + SUIVI.groupes.length; }
+
+  // Son d'alerte (deux bips), débloqué par le premier clic sur la page.
+  var AUDIO = null;
+  function audio() { try { if (!AUDIO) AUDIO = new (window.AudioContext || window.webkitAudioContext)(); if (AUDIO.state === "suspended") AUDIO.resume(); } catch (e) { AUDIO = null; } return AUDIO; }
+  document.addEventListener("click", function () { audio(); }, { once: true });
+  function bip() {
+    var ac = audio(); if (!ac) return;
+    [0, 0.28].forEach(function (d) {
+      var o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + d;
+      o.type = "sine"; o.frequency.value = 880; o.connect(g); g.connect(ac.destination);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      o.start(t); o.stop(t + 0.25);
+    });
+  }
+  function alerter(titre, corps, cle) {
+    var box = $("alertes"), el = h("div", { class: "alerte" },
+      h("button", { type: "button", class: "x", title: "Fermer", onclick: function () { el.remove(); } }, "×"),
+      h("b", null, titre), h("p", null, corps));
+    box.appendChild(el);
+    if (SUIVI.son) bip();
+    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+    try { if (SUIVI.notif && "Notification" in window && Notification.permission === "granted") new Notification(titre, { body: corps, tag: cle }); } catch (e) {}
+  }
+  var ALERTES = (function () { try { return JSON.parse(lsGet("derouleur.alertes") || "{}"); } catch (e) { return {}; } })();
+  function verifierAlertes(M, now) {
+    if (!nbSuivis() || !M.prochain) return;
+    // Seulement pendant une séance (ou dans le quart d'heure qui la précède).
+    if (M.plages.length && !M.plages.some(function (p) { return now >= p.a - 15 * 60000 && now < p.b; })) return;
+    var seuils = SUIVI.seuils.filter(function (x) { return x >= 0; }).sort(function (x, y) { return y - x; }), maj = false;
+    M.restants.forEach(function (a) {
+      if (a.s || !estSuivi(a) || a.rang === undefined || a.rang === null) return;
+      var franchis = seuils.filter(function (n) { return a.rang <= n; }); if (!franchis.length) return;
+      var neufs = franchis.filter(function (n) { return !ALERTES[M.cfg.url_derouleur + "|" + a.n + "|" + n]; });
+      if (!neufs.length) return;
+      franchis.forEach(function (n) { ALERTES[M.cfg.url_derouleur + "|" + a.n + "|" + n] = now; }); maj = true;
+      var quand = a.rang === 0 ? "en discussion maintenant" : a.rang === 1 ? "c'est le prochain amendement" : "dans " + a.rang + " amendements";
+      var vers = a.rang > 0 && a.eta ? " (vers " + heureJ(a.eta) + (a.eta2 && a.eta2 !== a.eta ? " – " + heureJ(a.eta2) : "") + ")" : "";
+      var dv = M.divs[a.d];
+      alerter("Amendement n° " + a.n + " : " + quand, a.a + (a.g ? " (" + a.g + ")" : "") + " · " + (dv ? dv.libelle : "") + vers + ". C'est le moment de prévenir le sénateur.", M.cfg.url_derouleur + "|" + a.n);
+    });
+    if (maj) {
+      Object.keys(ALERTES).forEach(function (k) { if (now - ALERTES[k] > 3 * 86400000) delete ALERTES[k]; });
+      lsSet("derouleur.alertes", JSON.stringify(ALERTES));
+    }
+  }
+  function rendreSuivi(M, now) {
+    var bar = vide($("suivi-bar")), n = nbSuivis();
+    var siens = M.restants.filter(estSuivi), prochainS = siens[0];
+    var chips = h("span", { class: "chips" });
+    Object.keys(SUIVI.noms).forEach(function (k) { chips.appendChild(h("span", { class: "chip" }, SUIVI.noms[k])); });
+    SUIVI.groupes.forEach(function (g) { chips.appendChild(h("span", { class: "chip g" }, "groupe " + g)); });
+    bar.appendChild(h("span", { class: "sb-titre" }, "★ Mes sénateurs"));
+    bar.appendChild(n ? chips : h("span", { class: "sb-vide" }, "Choisissez des sénateurs ou un groupe : leurs amendements seront surlignés et vous serez prévenu avant leur passage."));
+    if (n) bar.appendChild(h("span", { class: "sb-info" }, siens.length ? nb(siens.length) + " amendement" + (siens.length > 1 ? "s" : "") + " à venir · prochain : n° " + prochainS.n +
+      (prochainS.rang === 0 ? ", en discussion" : prochainS.rang ? " dans " + prochainS.rang + " amendement" + (prochainS.rang > 1 ? "s" : "") + (prochainS.eta ? ", vers " + heureJ(prochainS.eta) : "") : "") : "aucun amendement à venir sur ce texte"));
+    var actions = h("span", { class: "sb-actions" });
+    if (n) actions.appendChild(h("button", { type: "button", class: "btn" + (SUIVI.seul ? " on" : ""), onclick: function () { SUIVI.seul = !SUIVI.seul; sauverSuivi(); rendre(); } }, SUIVI.seul ? "Tout afficher" : "Seulement leurs amendements"));
+    actions.appendChild(h("button", { type: "button", class: "btn primary", onclick: function () { var p = $("suivi-panel"); if (p.classList.contains("hidden")) { construirePanneau(); p.classList.remove("hidden"); } else p.classList.add("hidden"); } }, n ? "Modifier" : "Choisir"));
+    bar.appendChild(actions);
+  }
+  function construirePanneau() {
+    var M = S.M, p = vide($("suivi-panel")); if (!M) return;
+    var auteurs = {};
+    M.am.forEach(function (a) { if (!a.a) return; var k = cleSen(a.a); auteurs[k] = auteurs[k] || { nom: a.a, g: a.g, n: 0 }; auteurs[k].n++; });
+    Object.keys(SUIVI.noms).forEach(function (k) { if (!auteurs[k]) auteurs[k] = { nom: SUIVI.noms[k], g: null, n: 0 }; });
+    var cles = Object.keys(auteurs).sort(function (x, y) { var sx = !!SUIVI.noms[x], sy = !!SUIVI.noms[y]; if (sx !== sy) return sx ? -1 : 1; return x < y ? -1 : 1; });
+    var liste = h("div", { class: "sp-liste" });
+    function remplir(q) {
+      vide(liste); q = plain(q || "");
+      cles.filter(function (k) { return !q || k.indexOf(q) >= 0 || plain(auteurs[k].g).indexOf(q) >= 0; }).forEach(function (k) {
+        var A = auteurs[k], cb = h("input", { type: "checkbox" }); cb.checked = !!SUIVI.noms[k];
+        cb.onchange = function () { if (cb.checked) SUIVI.noms[k] = A.nom; else delete SUIVI.noms[k]; sauverSuivi(); rendre(); };
+        liste.appendChild(h("label", { class: "sp-item" }, cb, h("span", null, A.nom), A.g ? h("span", { class: "grp" }, A.g) : null, h("span", { class: "sp-n" }, A.n ? nb(A.n) + " amdt" + (A.n > 1 ? "s" : "") : "pas sur ce texte")));
+      });
+    }
+    var rech = h("input", { type: "search", placeholder: "Rechercher un sénateur ou un groupe…", class: "sp-rech" });
+    rech.oninput = function () { remplir(rech.value); };
+    remplir("");
+    var gr = h("div", { class: "sp-groupes" });
+    Object.keys(M.groupes).filter(function (g) { return g !== "__none" && !/^(Gouvernement|Commission)$/.test(g); }).sort().forEach(function (g) {
+      var cb = h("input", { type: "checkbox" }); cb.checked = SUIVI.groupes.indexOf(g) >= 0;
+      cb.onchange = function () { SUIVI.groupes = SUIVI.groupes.filter(function (x) { return x !== g; }); if (cb.checked) SUIVI.groupes.push(g); sauverSuivi(); rendre(); };
+      gr.appendChild(h("label", { class: "sp-g" }, cb, " " + g));
+    });
+    var s1 = h("input", { type: "number", min: "0", max: "200", value: String(SUIVI.seuils[0] !== undefined ? SUIVI.seuils[0] : 10) });
+    var s2 = h("input", { type: "number", min: "0", max: "200", value: String(SUIVI.seuils[1] !== undefined ? SUIVI.seuils[1] : 3) });
+    function majSeuils() { SUIVI.seuils = [parseInt(s1.value, 10), parseInt(s2.value, 10)].filter(function (x) { return !isNaN(x) && x >= 0; }); sauverSuivi(); }
+    s1.onchange = majSeuils; s2.onchange = majSeuils;
+    var son = h("input", { type: "checkbox" }); son.checked = !!SUIVI.son; son.onchange = function () { SUIVI.son = son.checked; sauverSuivi(); if (son.checked) bip(); };
+    var etatNotif = h("span", { class: "sp-etat" });
+    function majEtat() {
+      if (!("Notification" in window)) etatNotif.textContent = "notifications non disponibles sur cet appareil (sur iPhone : ajouter la page à l'écran d'accueil)";
+      else etatNotif.textContent = Notification.permission === "granted" ? (SUIVI.notif ? "notifications activées" : "notifications autorisées mais désactivées") : Notification.permission === "denied" ? "notifications refusées dans le navigateur" : "notifications non activées";
+    }
+    majEtat();
+    var bNotif = h("button", { type: "button", class: "btn", onclick: function () {
+      audio();
+      if (!("Notification" in window)) return;
+      if (SUIVI.notif && Notification.permission === "granted") { SUIVI.notif = false; sauverSuivi(); majEtat(); bNotif.textContent = "Activer les notifications"; return; }
+      Notification.requestPermission().then(function (r) { SUIVI.notif = r === "granted"; sauverSuivi(); majEtat(); bNotif.textContent = SUIVI.notif ? "Désactiver les notifications" : "Activer les notifications"; });
+    } }, SUIVI.notif ? "Désactiver les notifications" : "Activer les notifications");
+    p.appendChild(h("div", { class: "sp-col" }, h("h4", null, "Sénateurs"), rech, liste));
+    p.appendChild(h("div", { class: "sp-col" },
+      h("h4", null, "Groupes"), gr,
+      h("h4", null, "Alertes"),
+      h("p", { class: "sp-seuils" }, "Me prévenir quand un de leurs amendements est à ", s1, " puis à ", s2, " amendements du passage."),
+      h("label", { class: "sp-g" }, son, " Son"),
+      h("div", { class: "sp-notif" }, bNotif, etatNotif),
+      h("div", { class: "sp-bas" },
+        h("button", { type: "button", class: "btn", onclick: function () { audio(); alerter("Essai d'alerte", "Voici à quoi ressemblera une alerte avant le passage d'un amendement suivi.", "essai"); } }, "Tester l'alerte"),
+        h("button", { type: "button", class: "btn", onclick: function () { if (confirmer()) { SUIVI.noms = {}; SUIVI.groupes = []; SUIVI.seul = false; sauverSuivi(); construirePanneau(); rendre(); } } }, "Tout retirer"),
+        h("button", { type: "button", class: "btn primary", onclick: function () { $("suivi-panel").classList.add("hidden"); } }, "Fermer")),
+      h("p", { class: "sp-note" }, "Choix enregistré dans ce navigateur uniquement. Les alertes fonctionnent tant que la page est ouverte ; seul le premier signataire de chaque amendement est pris en compte.")));
+    function confirmer() { return true; }
+  }
 
   /* ---------- briques d'affichage ---------- */
   function urlAmdt(a, cfg) {
@@ -1378,10 +1544,11 @@ tbody tr:hover{background:#eef3fa}
     } else if (mode === "cours") {
       dernier = h("td", null, a.s ? pillSort(a.s) : estProchain ? h("span", { class: "pill encours" }, M.enDirect ? "En discussion" : "Prochain") : h("span", { class: "pill aexam" }, "En attente du vote"));
     } else dernier = h("td", null, pillSort(a.s));
-    return h("tr", { class: estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : null) },
+    var cls = [estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : ""), estSuivi(a) ? "suivi" : ""].join(" ").trim();
+    return h("tr", { class: cls || null },
       numCell,
       h("td", null, dv ? dv.libelle : "", alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null),
-      h("td", null, a.a),
+      h("td", null, estSuivi(a) ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, a.a),
       h("td", null, celluleGroupe(a)),
       h("td", null, pillAvis(a.c)),
       h("td", null, pillAvis(a.v)),
@@ -1393,6 +1560,8 @@ tbody tr:hover{background:#eef3fa}
   function rendre() {
     var M = modele(); if (!M) return;
     var cfg = M.cfg, D = M.D, now = Date.now(), cur = M.cur;
+    S.M = M;
+    try { rendreSuivi(M, now); verifierAlertes(M, now); } catch (e) { if (window.console) console.warn(e); }
     if (S.texteAffiche !== cfg.url_derouleur) {
       if (S.texteAffiche) { S.f = { article: "", groupe: "", statut: "", num: "", q: "" }; $("f-num").value = ""; $("f-q").value = ""; $("f-article").removeAttribute("data-sig"); }
       S.texteAffiche = cfg.url_derouleur;
