@@ -304,12 +304,13 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
 .alerte p{margin:0;font-size:13.5px;color:rgba(255,255,255,.85)}
 .alerte .x{all:unset;cursor:pointer;position:absolute;top:6px;right:10px;font-size:20px;color:rgba(255,255,255,.7)}
 @keyframes entree{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
-details.objet{margin-top:4px}
-details.objet summary{cursor:pointer;display:inline-block;font-size:12px;font-weight:600;color:var(--navy2);list-style:none;user-select:none}
-details.objet summary::-webkit-details-marker{display:none}
-details.objet summary:before{content:"▸ ";font-size:10px}
-details.objet[open] summary:before{content:"▾ "}
-details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink);background:#f6f8fc;border-left:3px solid var(--navy2);padding:6px 9px;border-radius:0 6px 6px 0;max-width:520px}
+.objet-btn{all:unset;cursor:pointer;display:inline-block;margin-left:8px;white-space:nowrap;font-size:12px;font-weight:600;color:var(--navy2);user-select:none}
+.objet-btn:before{content:"▸ ";font-size:10px}
+.objet-btn.on:before{content:"▾ "}
+.objet-btn:hover{text-decoration:underline;text-underline-offset:3px}
+tbody tr.objet-row,tbody tr.objet-row:hover{background:#f6f8fc!important;box-shadow:none}
+tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45;color:var(--ink);border-top:0!important;box-shadow:inset 3px 0 0 var(--navy2)}
+.objet-lab{font-weight:600;color:var(--navy2)}
 .expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
 /* Téléphone : chaque ligne de tableau devient une fiche lisible, sans défilement horizontal. */
 @media (max-width:720px){
@@ -358,6 +359,9 @@ details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink
   .t-amdt td:nth-child(6){grid-column:2;grid-row:4}
   .t-amdt td:nth-child(1)::before,.t-amdt td:nth-child(2)::before,.t-amdt td:nth-child(7)::before{display:none}
   .t-amdt td:nth-child(2){color:var(--muted);font-size:14px}
+  .t-amdt tr.objet-row{margin-top:-8px;border-top-left-radius:0;border-top-right-radius:0}
+  .t-amdt tr.objet-row td{grid-column:1/-1!important;grid-row:auto!important;justify-self:stretch!important;text-align:left!important}
+  .t-amdt tr.objet-row td::before{display:none}
   .t-art td:nth-child(1){grid-column:1/-1;font-weight:500}
   .t-art td:nth-child(1)::before{display:none}
   .t-art td:last-child:empty{display:none}
@@ -1596,22 +1600,31 @@ details.objet p{margin:4px 0 2px;font-size:13px;line-height:1.45;color:var(--ink
       dernier = h("td", null, a.s ? pillSort(a.s) : estProchain ? h("span", { class: "pill encours" }, M.enDirect ? "En discussion" : "Prochain") : h("span", { class: "pill aexam" }, "En attente du vote"));
     } else dernier = h("td", null, pillSort(a.s));
     var cls = [estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : ""), estSuivi(a) ? "suivi" : ""].join(" ").trim();
-    return h("tr", { class: cls || null },
+    var ligneObjet = a.o ? h("tr", { class: "objet-row" + (S.objets && S.objets[a.n] ? "" : " hidden") }, h("td", { colspan: 7 }, h("span", { class: "objet-lab" }, "Objet du n° " + a.n + " : "), a.o)) : null;
+    var tr = h("tr", { class: cls || null },
       numCell,
-      h("td", null, dv ? dv.libelle : "", alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null, objet(a)),
+      h("td", null, dv ? dv.libelle : "", objet(a, ligneObjet), alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null),
       h("td", null, estSuivi(a) ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, a.a),
       h("td", null, celluleGroupe(a)),
       h("td", null, pillAvis(a.c)),
       h("td", null, pillAvis(a.v)),
       dernier);
+    if (!ligneObjet) return tr;
+    var frag = document.createDocumentFragment(); frag.appendChild(tr); frag.appendChild(ligneObjet); return frag;
   }
   // Une phrase de l'exposé des motifs, repliée par défaut ; l'état ouvert est conservé d'une actualisation à l'autre.
-  function objet(a) {
+  // Bouton « Objet » dans la cellule Article ; la phrase s'affiche sur une ligne pleine largeur sous l'amendement.
+  function objet(a, ligne) {
     if (!a.o) return null;
-    var cle = a.n, d = h("details", { class: "objet" }, h("summary", null, "Objet"), h("p", null, a.o));
-    if (S.objets && S.objets[cle]) d.open = true;
-    d.addEventListener("toggle", function () { S.objets = S.objets || {}; if (d.open) S.objets[cle] = 1; else delete S.objets[cle]; });
-    return d;
+    var cle = a.n, ouvert = !!(S.objets && S.objets[cle]);
+    var b = h("button", { type: "button", class: "objet-btn" + (ouvert ? " on" : ""), "aria-expanded": ouvert ? "true" : "false" }, "Objet");
+    b.onclick = function () {
+      S.objets = S.objets || {}; ouvert = !ouvert;
+      if (ouvert) S.objets[cle] = 1; else delete S.objets[cle];
+      b.classList.toggle("on", ouvert); b.setAttribute("aria-expanded", ouvert ? "true" : "false");
+      ligne.classList.toggle("hidden", !ouvert);
+    };
+    return b;
   }
   function ligneVide(cols, txt) { return h("tr", { class: "empty-row" }, h("td", { colspan: cols }, txt)); }
 
