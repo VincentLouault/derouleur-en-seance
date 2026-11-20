@@ -411,6 +411,9 @@ tr.flash td{animation:flash 2s ease-out}
 .tampon.rejete{color:#c62f2f;transform:rotate(-5deg)}
 .tampon.retire{color:#2b5aa6;transform:rotate(-6deg)}
 .tampon.tombe{color:#6d6a63;transform:rotate(-4deg)}
+.pill.scrutin{display:inline-flex;align-items:center;gap:6px;background:var(--red-btn);border-color:var(--red-btn);color:#fff;font-weight:700;white-space:nowrap;animation:clignoteScrutin 1.1s ease-in-out infinite}
+.pill.scrutin i{display:block;width:8px;height:8px;border-radius:50%;background:#fff}
+@keyframes clignoteScrutin{50%{opacity:.4}}
 .tampon.nonsout{color:#b8650f;transform:rotate(-5deg)}
 tr:hover .tampon{filter:saturate(1.15)}
 tr.plus-row td{padding:10px 16px!important;background:#f6f8fc;text-align:center}
@@ -851,7 +854,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120155356";</script>
+<script>window.DEROULEUR_BUILD = "20261120163554";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1442,6 +1445,11 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
         // Séance suspendue : le dernier chapitre du sommaire du direct est « La séance est suspendue… ».
         var sd = direct && VIDS.seqs[direct.id], der = sd && sd.length ? sd[sd.length - 1] : null;
         VIDEO.data.suspendue = der && /s[ée]ance est suspendue/i.test(der.label) ? { label: der.label.replace(/\s+/g, " ").trim(), debut: (VIDS.sync[direct.id] || {})[der.id] || null } : null;
+        // Scrutin public en cours : le dernier chapitre du sommaire du direct est « Scrutin public… ».
+        if (der && /^scrutin public/i.test(der.label)) {
+          VIDS.vuScrutin = VIDS.vuScrutin || {}; if (!VIDS.vuScrutin[der.id]) VIDS.vuScrutin[der.id] = Date.now();
+          VIDEO.data.scrutin = { id: der.id, label: der.label.replace(/\s+/g, " ").trim(), debut: (VIDS.sync[direct.id] || {})[der.id] || VIDS.vuScrutin[der.id] };
+        } else VIDEO.data.scrutin = null;
       });
     }).catch(function () {});
   }
@@ -2003,6 +2011,18 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     if (a.gs === "manuel") return h("span", { class: "grp manuel", title: "Groupe ajouté manuellement" }, a.g);
     return h("span", { class: "grp" }, a.g);
   }
+  // Scrutin public signalé par le sommaire du direct vidéo (dernier chapitre, depuis moins de 10 minutes).
+  function scrutinEnCours() {
+    var L = window.DEROULEUR_LIVE, V = L && L.video ? L.video() : null, sc = V && V.scrutin;
+    return sc && (!sc.debut || Date.now() - sc.debut < 480000) ? sc : null;
+  }
+  // Le scrutin reste attaché à l'amendement en discussion quand il a été annoncé (pas au suivant si le marqueur avance).
+  function scrutinSur(a) {
+    var sc = scrutinEnCours(); if (!sc) return false;
+    if (!S.scrA || S.scrA.id !== sc.id) S.scrA = { id: sc.id, k: a.k };
+    return S.scrA.k === a.k;
+  }
+  function pillScrutin() { return h("span", { class: "pill scrutin", title: "D'après le sommaire du direct vidéo du Sénat" }, h("i", { "aria-hidden": "true" }), "Scrutin public"); }
   function ligneAmdt(a, M, mode, now) {
     var url = urlAmdt(a, M.cfg), dv = M.divs[a.d], estProchain = M.prochain && a.k === M.prochain.k;
     var numCell = h("td", { class: "n" },
@@ -2017,10 +2037,10 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       var enDiscussion = estProchain || (M.prochain && a.dc && a.dc === M.prochain.dc && a.k < M.prochain.k);
       var prob = a.eta !== null && a.eta <= now && now > M.depart;
       dernier = h("td", null,
-        enDiscussion ? h("span", { class: "pill encours" }, "En discussion") : h("span", { class: "pill aexam" }, "À examiner"),
+        estProchain && scrutinSur(a) ? pillScrutin() : enDiscussion ? h("span", { class: "pill encours" }, "En discussion") : h("span", { class: "pill aexam" }, "À examiner"),
         null);
     } else if (mode === "cours") {
-      dernier = h("td", null, a.s ? pillSort(a.s) : estProchain ? h("span", { class: "pill encours" }, M.enDirect ? "En discussion" : "Prochain") : h("span", { class: "pill aexam" }, "En attente du vote"));
+      dernier = h("td", null, a.s ? pillSort(a.s) : estProchain && scrutinSur(a) ? pillScrutin() : estProchain ? h("span", { class: "pill encours" }, M.enDirect ? "En discussion" : "Prochain") : h("span", { class: "pill aexam" }, "En attente du vote"));
     } else dernier = h("td", null, pillSort(a.s));
     var cls = [estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : ""), estSuivi(a) ? "suivi" : ""].join(" ").trim();
     var ligneObjet = a.o ? h("tr", { class: "objet-row" + (S.objets && S.objets[a.n] ? "" : " hidden") }, h("td", { colspan: 7 }, h("span", { class: "objet-box" }, h("span", { class: "objet-lab" }, "Objet du n° " + a.n + " : "), a.o))) : null;
