@@ -409,6 +409,7 @@ tr.flash td{animation:flash 2s ease-out}
 .tampon.rejete{color:#c62f2f;transform:rotate(-5deg)}
 .tampon.retire{color:#2b5aa6;transform:rotate(-6deg)}
 .tampon.tombe{color:#6d6a63;transform:rotate(-4deg)}
+.tampon.nonsout{color:#b8650f;transform:rotate(-5deg)}
 tr:hover .tampon{filter:saturate(1.15)}
 tr.plus-row td{padding:10px 16px!important;background:#f6f8fc;text-align:center}
 tr.plus-row .voir-plus{margin:0}
@@ -848,7 +849,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120150344";</script>
+<script>window.DEROULEUR_BUILD = "20261120151029";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1986,9 +1987,9 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     return h("span", { class: "pill " + cls }, v);
   }
   function pillSort(s) {
-    var p = plain(s), cls = /^adopt/.test(p) ? "adopte" : /^rejet/.test(p) ? "rejete" : /^retir/.test(p) ? "retire" : /^tomb/.test(p) ? "tombe" : "";
+    var p = plain(s), cls = /^adopt/.test(p) ? "adopte" : /^rejet/.test(p) ? "rejete" : /^retir/.test(p) ? "retire" : /^tomb/.test(p) ? "tombe" : /^non sout/.test(p) ? "nonsout" : "";
     // Adopté / rejeté : tampon encreur ; « Adopté », « Adopté modifié »… gardent leur libellé exact.
-    if (cls === "adopte" || cls === "rejete" || cls === "retire" || cls === "tombe") return h("span", { class: "tampon " + cls, title: s }, h("span", null, s));
+    if (cls === "adopte" || cls === "rejete" || cls === "retire" || cls === "tombe" || cls === "nonsout") return h("span", { class: "tampon " + cls, title: s }, h("span", null, s));
     return h("span", { class: "pill big " + cls }, s);
   }
   function celluleGroupe(a) {
