@@ -807,7 +807,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120134845";</script>
+<script>window.DEROULEUR_BUILD = "20261120140346";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1361,11 +1361,13 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     if (VIDS.jour !== jour) VIDS = { jour: jour, ids: {}, seqs: {}, luIndex: 0, luSeq: {} };
     var slug = "seance-publique-du-" + p.d + "-" + MOIS_L[p.m] + "-" + p.y;
     var direct = null;
-    var pIndex = Date.now() - VIDS.luIndex < 300000 ? Promise.resolve() : fetch(VIDEOS + "index?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) {
-      VIDS.luIndex = Date.now();
-      var rx = new RegExp("video\\.(\\d+_[0-9a-f]+)\\." + slug + "(?:-[a-z-]+)?", "g"), m;
-      while ((m = rx.exec(t))) VIDS.ids[m[1]] = VIDS.ids[m[1]] || "";
-    }, function () {});
+    // Vidéos de séance publique du jour : chaîne « Séance publique » (toutes les séances) et page d'accueil (la plus récente).
+    var pIndex = Date.now() - VIDS.luIndex < 300000 ? Promise.resolve() : Promise.all(["chaine.seance-publique", "index"].map(function (pg) {
+      return fetch(VIDEOS + pg + "?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) {
+        var rx = new RegExp("video\\.(\\d+_[0-9a-f]+)\\." + slug + "(?:-[a-z-]+)?", "g"), m;
+        while ((m = rx.exec(t))) VIDS.ids[m[1]] = VIDS.ids[m[1]] || "";
+      }, function () {});
+    })).then(function () { VIDS.luIndex = Date.now(); });
     var pLive = fetch(VIDEOS + "senat_lives.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (lives) {
       Object.keys(lives || {}).forEach(function (k) { var x = lives[k]; if (!direct && x && x.url && (x.stream === "Hémicycle" || /s[ée]ance publique/i.test(x.title || ""))) direct = { id: String(x.url).replace(/^\//, ""), titre: x.title }; });
       if (direct) VIDS.ids[direct.id] = direct.titre || "";
@@ -1388,21 +1390,36 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     if (!V || !V.seq.length) return;
     var seq = V.seq, dernierIN = -1;
     for (var z = seq.length - 1; z >= 0; z--) if (seq[z].type === "IN") { dernierIN = z; break; }
+    // Rubriques du sommaire (entre deux titres) avec les intervenants de chacune.
+    var sections = [], cour = null;
+    seq.forEach(function (x, k) {
+      if (x.type !== "IN") { cour = { debut: k, fin: seq.length, label: x.label, noms: {} }; if (sections.length) sections[sections.length - 1].fin = k; sections.push(cour); }
+      else if (cour && x.nom) cour.noms[x.nom] = 1;
+    });
     blocs.forEach(function (b) {
-      var cle = normTitre(b.titre), iT = -1;
-      for (var k = seq.length - 1; k >= 0; k--) if (seq[k].type !== "IN" && normTitre(seq[k].label) === cle) { iT = k; break; }
-      if (iT < 0) return;
-      var fin = seq.length; for (var j = iT + 1; j < seq.length; j++) if (seq[j].type !== "IN") { fin = j; break; }
-      var passes = {}, tribune = null;
-      for (j = iT + 1; j < fin; j++) if (seq[j].nom) passes[seq[j].nom] = 1;
-      if (V.direct && dernierIN > iT && dernierIN < fin && fin === seq.length) tribune = seq[dernierIN].nom;
+      // 1. Rubrique du même titre ; 2. sinon, celle où l'on retrouve le plus d'orateurs de la liste
+      //    (le Sénat range parfois une liste sous un autre intitulé, ex. orateurs de l'article 55 sous « Explications de vote »).
+      var cle = normTitre(b.titre), sec = null, k;
+      for (k = sections.length - 1; k >= 0 && !sec; k--) if (normTitre(sections[k].label) === cle) sec = sections[k];
+      if (!sec) {
+        var fams = b.lignes.map(function (l) { return majFam(l.nom); }).filter(Boolean), meilleur = 0;
+        sections.forEach(function (sx) {
+          var n = fams.filter(function (f) { return sx.noms[f]; }).length;
+          if (n && n >= meilleur && (n >= 2 || sx.noms[fams[0]])) { meilleur = n; sec = sx; }
+        });
+      }
+      if (!sec) return;
+      var passes = sec.noms, tribune = null;
+      if (V.direct && dernierIN > sec.debut && dernierIN < sec.fin && sec.fin === seq.length) tribune = seq[dernierIN].nom;
       var avant = b.lignes.length;
       b.lignes = b.lignes.filter(function (l) { var f = majFam(l.nom); if (f && f === tribune) { l.tribune = true; return true; } return !(f && passes[f]); });
       b.passes = avant - b.lignes.length;
       if (b.passes) b.total = null; // temps restant = somme des orateurs encore à venir
       b.direct = true;
+      if (normTitre(sec.label.split("\n")[0]) !== cle) b.sous = sec.label.replace(/\s+/g, " ").trim();
     });
   }
+
 
   /* ---------- 7. Chargement complet ---------- */
   var enCours = false, dernier = null;
