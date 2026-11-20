@@ -304,10 +304,11 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
 .alerte p{margin:0;font-size:13.5px;color:rgba(255,255,255,.85)}
 .alerte .x{all:unset;cursor:pointer;position:absolute;top:6px;right:10px;font-size:20px;color:rgba(255,255,255,.7)}
 @keyframes entree{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
-.objet-btn{all:unset;cursor:pointer;display:inline-block;margin-left:8px;white-space:nowrap;font-size:12px;font-weight:600;color:var(--navy2);user-select:none}
-.objet-btn:before{content:"▸ ";font-size:10px}
+.objet-btn{all:unset;cursor:pointer;display:inline-block;margin-left:8px;white-space:nowrap;font-size:11.5px;font-weight:600;color:#fff;background:var(--navy2);border-radius:99px;padding:1px 9px 2px;vertical-align:1px;user-select:none}
+.objet-btn:before{content:"▸ ";font-size:9px}
+.objet-btn.on{background:var(--navy)}
 .objet-btn.on:before{content:"▾ "}
-.objet-btn:hover{text-decoration:underline;text-underline-offset:3px}
+.objet-btn:hover{background:var(--navy)}
 tbody tr.objet-row,tbody tr.objet-row:hover{background:transparent!important;box-shadow:none}
 tr.objet-row td{padding:2px 12px 10px!important;border-top:0!important}
 tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-radius:10px;padding:9px 13px;font-size:13.5px;line-height:1.45}
