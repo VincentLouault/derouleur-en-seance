@@ -1,5 +1,5 @@
 {
-"maj": 1795173647168,
+"maj": 1795177654317,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Main tendue par Marine Tondelier à Jean-Luc Mélenchon: une \"trahison\" selon Yannick Jadot, qui quitte les Écologistes",
+"lien": "https://lcp.fr/actualites/main-tendue-par-marine-tondelier-a-jean-luc-melenchon-une-trahison-selon-yannick-jadot",
+"date": 1795175220000,
+"source": "LCP"
+},
+{
 "titre": "Présidentielle 2027: Dominique de Villepin officiellement candidat à l'Élysée",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-dominique-de-villepin-officiellement-candidat-a-l-elysee-445372",
 "date": 1795170720000,
@@ -140,12 +146,6 @@
 "titre": "Des policiers manifestent devant Beauvau: Jean-Luc Mélenchon appelle à \"sévèrement\" les \"punir\"",
 "lien": "https://lcp.fr/actualites/des-policiers-manifestent-devant-beauvau-jean-luc-melenchon-appelle-a-severement-les",
 "date": 1795074120000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle 2027: Marine Tondelier \"prête\" à une \"coalition\" autour de Jean-Luc Mélenchon",
-"lien": "https://lcp.fr/actualites/presidentielle-2027-marine-tondelier-prete-a-une-coalition-autour-de-jean-luc-melenchon",
-"date": 1795035540000,
 "source": "LCP"
 }
 ]
