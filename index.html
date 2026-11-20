@@ -308,9 +308,10 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
 .objet-btn:before{content:"▸ ";font-size:10px}
 .objet-btn.on:before{content:"▾ "}
 .objet-btn:hover{text-decoration:underline;text-underline-offset:3px}
-tbody tr.objet-row,tbody tr.objet-row:hover{background:#f6f8fc!important;box-shadow:none}
-tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45;color:var(--ink);border-top:0!important;box-shadow:inset 3px 0 0 var(--navy2)}
-.objet-lab{font-weight:600;color:var(--navy2)}
+tbody tr.objet-row,tbody tr.objet-row:hover{background:transparent!important;box-shadow:none}
+tr.objet-row td{padding:2px 12px 10px!important;border-top:0!important}
+tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-radius:10px;padding:9px 13px;font-size:13.5px;line-height:1.45}
+.objet-lab{font-weight:700;color:#ffd60a}
 .expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
 /* Téléphone : chaque ligne de tableau devient une fiche lisible, sans défilement horizontal. */
 @media (max-width:720px){
@@ -964,6 +965,8 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
     }
     return { c: bloc("avis_commission"), v: bloc("avis_gouvernement"), s: bloc("sort"), o: o };
   }
+  // Numéro d'amendement sans rectification : « 28 rect. bis » → « 28 », « I-2738 rect. » → « I-2738 » (loi de finances).
+  function cleAmdt(n) { var m = String(n || "").replace(/\s+/g, "").match(/^([A-Z]+-)?\d+/i); return m ? m[0].toUpperCase() : String(n || ""); }
   function completerAvis(texte, ams) {
     var base = texte.url.replace(/\/[^\/]*$/, ""), pref = texte.session + "/" + texte.numero + "/", now = Date.now();
     var restants = ams.filter(function (a) { return !a.s; }), proches = {};
@@ -971,7 +974,7 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
     var aLire = [];
     // D'abord les amendements à venir, puis les déjà examinés.
     restants.concat(ams.filter(function (a) { return a.s; })).forEach(function (a) {
-      var b = String(parseInt(a.n, 10)), e = AVIS[pref + b];
+      var b = cleAmdt(a.n), e = AVIS[pref + b];
       if (!e || e.o === undefined || e.ov !== 2) aLire.push(b);
       else if (a.s && !e.f) aLire.push(b);
       else if (!a.s && proches[a.n] && now - (e.tl || 0) > 180000) aLire.push(b);
@@ -1098,8 +1101,8 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
     if (!restantsTot && solennel !== undefined) aVenir = aVenir.filter(function (k) { return k >= solennel; });
     var idx = aVenir.length ? aVenir[0] : -1;
     if (courant) {
-      var cb = parseInt(courant, 10);
-      res.amendements.forEach(function (a) { if (!a.s && parseInt(a.n, 10) === cb && a.d >= 0) idx = a.d; });
+      var cb = cleAmdt(courant);
+      res.amendements.forEach(function (a) { if (!a.s && cleAmdt(a.n) === cb && a.d >= 0) idx = a.d; });
     }
     var statut = res.statutTexte && res.statutTexte.trim() ? res.statutTexte.trim() : null;
     return { idx: statut ? -1 : idx, libelle: !statut && idx >= 0 ? D[idx].libelle : null, type: !statut && idx >= 0 ? D[idx].type : null,
@@ -1198,7 +1201,7 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
       var et = noterEtat(actif, res, r[0]);
       res.amendements.forEach(function (a) {
         if (!a.g && a._slug && GROUPES_FICHES[a._slug]) a.g = GROUPES_FICHES[a._slug];
-        var e = AVIS[pref + String(parseInt(a.n, 10))];
+        var e = AVIS[pref + cleAmdt(a.n)];
         if (e) { if (e.c) a.c = e.c; if (e.v) a.v = e.v; if (e.o) a.o = e.o; }
         delete a._slug;
       });
@@ -1315,7 +1318,7 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
     var cfg = config(), D = cur.donnees;
     var divs = D.divisions.map(function (d, i) { return { i: i, libelle: d.libelle, type: d.type, sort: d.sort, total: 0, restants: 0, examines: 0, cpt: {} }; });
     var am = D.amendements.map(function (a, k) {
-      var x = { k: k, n: a.n, base: parseInt(a.n, 10), d: a.d, al: a.al || "", a: a.a, g: a.g || null, gs: a.gs || null, s: a.s || null, sa: !!a.sa, c: a.c || null, v: a.v || null, o: a.o || null, dc: a.dc || null, id: a.id || null };
+      var x = { k: k, n: a.n, base: cleAmdt(a.n), d: a.d, al: a.al || "", a: a.a, g: a.g || null, gs: a.gs || null, s: a.s || null, sa: !!a.sa, c: a.c || null, v: a.v || null, o: a.o || null, dc: a.dc || null, id: a.id || null };
       var dv = divs[a.d];
       if (dv) { dv.total++; if (x.s) { dv.examines++; dv.cpt[x.s] = (dv.cpt[x.s] || 0) + 1; } else dv.restants++; }
       return x;
@@ -1328,7 +1331,7 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
     // Amendement en discussion : marqueur publié par le Sénat s'il existe, sinon premier amendement sans sort.
     var prochain = restants[0] || null, enDirect = false;
     if (D.courant) {
-      var cb = parseInt(D.courant, 10), ic = -1;
+      var cb = cleAmdt(D.courant), ic = -1;
       for (var q = 0; q < am.length; q++) if (am[q].base === cb) { ic = q; break; }
       if (ic >= 0) {
         var p2 = null;
@@ -1391,6 +1394,8 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
   }
 
   /* ---------- filtres ---------- */
+  // Numéro d'amendement sans rectification : « 28 rect. bis » → « 28 », « I-2738 rect. » → « I-2738 » (loi de finances).
+  function cleAmdt(n) { var m = String(n || "").replace(/\s+/g, "").match(/^([A-Z]+-)?\d+/i); return m ? m[0].toUpperCase() : String(n || ""); }
   function passeFiltre(a) {
     var f = S.f;
     if (SUIVI.seul && !estSuivi(a)) return false;
@@ -1399,7 +1404,7 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
     if (f.statut === "avenir" && a.s) return false;
     if (f.statut === "passe" && !a.s) return false;
     if (f.statut && f.statut !== "avenir" && f.statut !== "passe" && a.s !== f.statut) return false;
-    if (f.num && String(a.base).indexOf(f.num.replace(/\D/g, "")) !== 0) return false;
+    if (f.num) { var fq = f.num.toUpperCase().replace(/\s+/g, ""), fd = fq.replace(/\D/g, ""); if (a.base.indexOf(fq) !== 0 && !(fd && a.base.replace(/^[A-Z]+-/, "").indexOf(fd) === 0)) return false; }
     if (f.q) { var q = plain(f.q); if (plain(a.a).indexOf(q) < 0 && plain(a.g).indexOf(q) < 0) return false; }
     return true;
   }
@@ -1600,7 +1605,7 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
       dernier = h("td", null, a.s ? pillSort(a.s) : estProchain ? h("span", { class: "pill encours" }, M.enDirect ? "En discussion" : "Prochain") : h("span", { class: "pill aexam" }, "En attente du vote"));
     } else dernier = h("td", null, pillSort(a.s));
     var cls = [estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : ""), estSuivi(a) ? "suivi" : ""].join(" ").trim();
-    var ligneObjet = a.o ? h("tr", { class: "objet-row" + (S.objets && S.objets[a.n] ? "" : " hidden") }, h("td", { colspan: 7 }, h("span", { class: "objet-lab" }, "Objet du n° " + a.n + " : "), a.o)) : null;
+    var ligneObjet = a.o ? h("tr", { class: "objet-row" + (S.objets && S.objets[a.n] ? "" : " hidden") }, h("td", { colspan: 7 }, h("span", { class: "objet-box" }, h("span", { class: "objet-lab" }, "Objet du n° " + a.n + " : "), a.o))) : null;
     var tr = h("tr", { class: cls || null },
       numCell,
       h("td", null, dv ? dv.libelle : "", objet(a, ligneObjet), alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null),
@@ -1667,7 +1672,7 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
       (M.etape && (!M.prochain || (M.divs[M.etape.idx] && M.divs[M.etape.idx].restants === 0)))
         ? kpi("Étape en cours", M.etape.libelle, "selon le dérouleur du Sénat", M.etape.libelle.length > 90 ? "texte long" : M.etape.libelle.length > 30 ? "texte" : true)
         : kpi(M.enDirect ? "Amendement en discussion" : "Prochain amendement", M.prochain ? "n° " + M.prochain.n : "—", M.prochain && M.divs[M.prochain.d] ? M.divs[M.prochain.d].libelle : "", true),
-      kpi("Fin estimée des débats", R ? (M.fin ? h("span", null, h("span", { class: "h1" }, heureJ(M.fin)), " ", h("span", { class: "h2" }, "– " + (M.fin2 ? heureJ(M.fin2) : "…"))) : "—") : "—", plTxt ? "plages de séance : " + plTxt : "", "heure")
+      kpi("Fin estimée des débats", R ? (M.fin ? h("span", null, h("span", { class: "h1" }, heureJ(M.fin)), " ", h("span", { class: "h2" }, "– " + (M.fin2 ? heureJ(M.fin2) : "…"))) : "—") : "—", "", "heure")
     );
 
     // Bandeau
@@ -1686,9 +1691,8 @@ tr.objet-row td{padding:6px 14px 9px!important;font-size:13.5px;line-height:1.45
     // Explication du calcul
     var e = vide($("expl-calc"));
     var obs = rythmeObserve(cur);
-    e.append("Calcul : fourchette de " + M.rMin + " à " + M.rMax + " amendements par heure (la première heure indiquée correspond à " + M.rMax + " amendements par heure, la seconde à " + M.rMin + ")" + (M.delai ? ", après " + duree(M.delai) + " de temps de parole inscrit (" + M.delaiBlocs.join(", ").toLowerCase() + ")" : "") + ", à partir de l'amendement suivant le dernier examiné et de l'heure du relevé, dans les plages de séance consacrées au texte selon l'ordre du jour du Sénat (" + (plTxt || "aucune plage renseignée") + "). ",
-      obs ? "Rythme observé entre les deux derniers relevés : " + obs + " amendements par heure. " : "",
-      "Cliquez sur un article pour afficher ses amendements.");
+    e.append("Calcul : fourchette de " + M.rMin + " à " + M.rMax + " amendements par heure.",
+      obs ? " Rythme observé entre les deux derniers relevés : " + obs + " amendements par heure." : "");
 
     // Articles à venir
     var av = M.divs.filter(function (d) { return d.restants > 0 || d.sansAmdt; });
