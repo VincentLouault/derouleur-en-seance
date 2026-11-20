@@ -375,6 +375,12 @@ h2.avec-audio{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .audio-msg{font-size:12.5px;font-weight:400;color:var(--muted);flex-basis:100%}
 .btn-tuto{all:unset;cursor:pointer;display:inline-block;margin:0 0 10px 8px;font-size:13px;font-weight:700;color:var(--navy2);background:#fff;border:1.5px solid var(--navy2);border-radius:99px;padding:6px 13px;vertical-align:top;box-shadow:0 4px 12px -8px rgba(20,33,61,.6)}
 .btn-tuto:hover{background:var(--navy-bg)}
+.alerte-susp{display:flex;align-items:center;gap:10px;margin:0;padding:9px 18px;background:#fff4d6;border-bottom:1px solid #f0d58a;color:#7a4b00;font-size:14px;font-weight:600}
+.alerte-susp .ico-susp{display:inline-flex;gap:3px}
+.alerte-susp .ico-susp i{display:block;width:4px;height:13px;border-radius:1px;background:currentColor;animation:clignoteSusp 1.6s ease-in-out infinite}
+.alerte-susp small{font-weight:500;opacity:.8}
+@media (max-width:720px){.alerte-susp{flex-wrap:wrap;gap:4px 10px;padding:9px 14px}.alerte-susp>span:not(.ico-susp){flex:1 1 0;min-width:0}.alerte-susp small{flex-basis:100%;padding-left:21px}}
+@keyframes clignoteSusp{50%{opacity:.35}}
 .tuto-voile{position:fixed;inset:0;z-index:9000;pointer-events:auto}
 .tuto-spot{position:fixed;z-index:9001;border-radius:14px;box-shadow:0 0 0 4px #ffd60a,0 0 0 9999px rgba(10,18,35,.7);transition:all .35s ease;pointer-events:none}
 .tuto-carte{position:fixed;z-index:9002;width:min(380px,calc(100vw - 24px));background:#fff;color:var(--ink);border-radius:16px;padding:16px 18px 14px;box-shadow:0 20px 50px -12px rgba(0,0,0,.6);transition:top .35s ease,left .35s ease}
@@ -597,6 +603,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 
     <div class="panel red" id="p-cours">
       <div class="ph"><h3>Amendements en cours</h3><span class="cnt" id="cours-cnt"></span></div>
+      <div class="alerte-susp hidden" id="alerte-susp" role="status"></div>
       <div class="scroll">
         <table class="t-amdt">
           <thead><tr><th>Article</th><th>N°</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Statut</th></tr></thead>
@@ -851,7 +858,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120151326";</script>
+<script>window.DEROULEUR_BUILD = "20261120155055";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1439,6 +1446,9 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
         var dernierId = ids[ids.length - 1];
         VIDEO.data = { page: VIDEOS + "video." + (direct ? direct.id : dernierId), seq: seq, direct: !!direct && direct.id === dernierId, lu: Date.now(),
           flux: direct && VIDS.flux ? VIDS.flux[direct.id] || null : null, titreDirect: direct ? direct.titre : null };
+        // Séance suspendue : le dernier chapitre du sommaire du direct est « La séance est suspendue… ».
+        var sd = direct && VIDS.seqs[direct.id], der = sd && sd.length ? sd[sd.length - 1] : null;
+        VIDEO.data.suspendue = der && /s[ée]ance est suspendue/i.test(der.label) ? { label: der.label.replace(/\s+/g, " ").trim(), debut: (VIDS.sync[direct.id] || {})[der.id] || null } : null;
       });
     }).catch(function () {});
   }
@@ -2264,6 +2274,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     var nRestCours = enCours.filter(function (a) { return !a.s; }).length;
     $("cours-cnt").textContent = !P0 ? "" : (M.enDirect ? "en discussion en séance" : "prochain à l'examen") +
       (enCours.length > 1 ? " · " + (P0.dc ? "discussion commune de " : "") + nb(enCours.length) + " amendements" + (nRestCours < enCours.length ? ", dont " + nb(nRestCours) + " restant" + (nRestCours > 1 ? "s" : "") + " à voter" : "") : "");
+    majSuspension();
     var cb2 = vide($("cours-body"));
     if (!enCours.length) cb2.appendChild(ligneVide(7, "Aucun amendement en cours d'examen."));
     var iC = Math.max(0, enCours.indexOf(P0)), ouvC = !!S.coursOuvert;
@@ -2784,6 +2795,16 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     [TU.voile, TU.spot, TU.carte].forEach(function (x) { if (x) x.remove(); });
     TU.voile = TU.spot = TU.carte = null;
     window.removeEventListener("scroll", tutoPlacer); window.removeEventListener("resize", tutoPlacer); document.removeEventListener("keydown", tutoTouches);
+  }
+  // Petite alerte sous « Amendements en cours » quand le sommaire du direct indique que la séance est suspendue.
+  function majSuspension() {
+    var el = $("alerte-susp"); if (!el) return;
+    var L = window.DEROULEUR_LIVE, V = L && L.video ? L.video() : null, su = V && V.suspendue;
+    if (!su) { el.classList.add("hidden"); vide(el); return; }
+    vide(el).appendChild(h("span", { class: "ico-susp", "aria-hidden": "true" }, h("i"), h("i")));
+    el.appendChild(h("span", null, (/quelques instants/i.test(su.label) ? "Séance suspendue quelques instants" : "Séance suspendue") + (su.debut ? " depuis " + hm(su.debut).replace(/ /g, "\u00a0") : "")));
+    el.appendChild(h("small", null, "d'après le sommaire du direct vidéo"));
+    el.classList.remove("hidden");
   }
   function lierBulleTitre() {
     var t = $("titre-outil"), b = $("bulle-titre"), minuterie = null; if (!t || !b) return;
