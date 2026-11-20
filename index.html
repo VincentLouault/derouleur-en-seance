@@ -796,7 +796,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120125259";</script>
+<script>window.DEROULEUR_BUILD = "20261120125927";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1704,24 +1704,34 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   /* ---------- Mes sénateurs / mon groupe : suivi, surlignage et alertes ---------- */
   var SUIVI = (function () { try { return JSON.parse(lsGet("derouleur.suivi") || "null"); } catch (e) { return null; } })() || {};
   SUIVI.noms = SUIVI.noms || {}; SUIVI.groupes = SUIVI.groupes || []; SUIVI.seuils = SUIVI.seuils || [10, 3];
+  if (SUIVI.premier === undefined) SUIVI.premier = true; // amendements dont ils sont premier signataire
+  if (SUIVI.cosig === undefined) SUIVI.cosig = false;    // amendements qu'ils ont cosignés
   if (SUIVI.son === undefined) SUIVI.son = true;
   function sauverSuivi() { lsSet("derouleur.suivi", JSON.stringify(SUIVI)); }
   // Transfert vers un autre appareil : les favoris voyagent dans le lien (après #), rien n'est envoyé à un serveur.
   function b64e(t) { return btoa(unescape(encodeURIComponent(t))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
   function b64d(t) { t = t.replace(/-/g, "+").replace(/_/g, "/"); while (t.length % 4) t += "="; return decodeURIComponent(escape(atob(t))); }
-  function lienTransfert() { return location.href.split("#")[0] + "#suivi=" + b64e(JSON.stringify({ n: SUIVI.noms, g: SUIVI.groupes, s: SUIVI.seuils })); }
+  function lienTransfert() { return location.href.split("#")[0] + "#suivi=" + b64e(JSON.stringify({ n: SUIVI.noms, g: SUIVI.groupes, s: SUIVI.seuils, p: SUIVI.premier, c: SUIVI.cosig })); }
   var IMPORT_SUIVI = null;
   (function () {
     var m = location.hash.match(/[#&]suivi=([A-Za-z0-9_-]+)/); if (!m) return;
     try {
       var d = JSON.parse(b64d(m[1]));
-      SUIVI.noms = d.n || {}; SUIVI.groupes = d.g || []; if (d.s) SUIVI.seuils = d.s; sauverSuivi();
+      SUIVI.noms = d.n || {}; SUIVI.groupes = d.g || []; if (d.s) SUIVI.seuils = d.s; if (d.p !== undefined) SUIVI.premier = d.p; if (d.c !== undefined) SUIVI.cosig = d.c; sauverSuivi();
       IMPORT_SUIVI = Object.keys(SUIVI.noms).map(function (k) { return SUIVI.noms[k]; }).concat(SUIVI.groupes.map(function (g) { return "groupe " + g; }));
     } catch (e) {}
     try { history.replaceState(null, "", location.href.split("#")[0]); } catch (e) {}
   })();
   function cleSen(nom) { return plain(nom).replace(/^(m|mme|mmes|mm)\.?\s+/, "").replace(/\s+/g, " ").trim(); }
-  function estSuivi(a) { if (!a || !a.a) return false; return !!SUIVI.noms[cleSen(a.a)] || (!!a.g && SUIVI.groupes.indexOf(a.g) >= 0); }
+  var FAMS = { cle: null, set: {} };
+  function famsSuivies() {
+    var c = JSON.stringify(SUIVI.noms); if (FAMS.cle === c) return FAMS.set;
+    var st = {}; Object.keys(SUIVI.noms).forEach(function (k) { var f = famSen(SUIVI.noms[k]); if (f) st[f] = 1; });
+    FAMS = { cle: c, set: st }; return st;
+  }
+  function estSuiviAuteur(a) { return !!a && !!a.a && (!!SUIVI.noms[cleSen(a.a)] || !!famsSuivies()[famSen(a.a)] || (!!a.g && SUIVI.groupes.indexOf(a.g) >= 0)); }
+  function estSuiviCosig(a) { if (!a || !a.cs || !a.cs.length) return false; var st = famsSuivies(); return a.cs.some(function (n) { return !!st[famSen(n)]; }); }
+  function estSuivi(a) { return (SUIVI.premier !== false && estSuiviAuteur(a)) || (!!SUIVI.cosig && estSuiviCosig(a)); }
   function nbSuivis() { return Object.keys(SUIVI.noms).length + SUIVI.groupes.length; }
 
   // Son d'alerte (deux bips), débloqué par le premier clic sur la page.
@@ -1787,7 +1797,10 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   function construirePanneau() {
     var M = S.M, p = vide($("suivi-panel")); if (!M) return;
     var auteurs = {};
-    M.am.forEach(function (a) { if (!a.a) return; var k = cleSen(a.a); auteurs[k] = auteurs[k] || { nom: a.a, g: a.g, n: 0 }; auteurs[k].n++; });
+    var parFam = {};
+    M.am.forEach(function (a) { if (!a.a) return; var k = cleSen(a.a); auteurs[k] = auteurs[k] || { nom: a.a, g: a.g, n: 0, c: 0 }; auteurs[k].n++; var f = famSen(a.a); if (f && !parFam[f]) parFam[f] = k; });
+    // Cosignataires : comptés avec l'auteur du même nom, ou ajoutés à la liste s'ils ne déposent rien en premier.
+    M.am.forEach(function (a) { (a.cs || []).forEach(function (n) { var f = famSen(n), k = (f && parFam[f]) || cleSen(n); if (!auteurs[k]) { auteurs[k] = { nom: n, g: null, n: 0, c: 0 }; if (f) parFam[f] = k; } auteurs[k].c++; }); });
     Object.keys(SUIVI.noms).forEach(function (k) { if (!auteurs[k]) auteurs[k] = { nom: SUIVI.noms[k], g: null, n: 0 }; });
     var cles = Object.keys(auteurs).sort(function (x, y) { var sx = !!SUIVI.noms[x], sy = !!SUIVI.noms[y]; if (sx !== sy) return sx ? -1 : 1; return x < y ? -1 : 1; });
     var liste = h("div", { class: "sp-liste" });
@@ -1796,7 +1809,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       cles.filter(function (k) { return !q || k.indexOf(q) >= 0 || plain(auteurs[k].g).indexOf(q) >= 0; }).forEach(function (k) {
         var A = auteurs[k], cb = h("input", { type: "checkbox" }); cb.checked = !!SUIVI.noms[k];
         cb.onchange = function () { if (cb.checked) SUIVI.noms[k] = A.nom; else delete SUIVI.noms[k]; sauverSuivi(); rendre(); };
-        liste.appendChild(h("label", { class: "sp-item" }, cb, h("span", null, A.nom), A.g ? h("span", { class: "grp" }, A.g) : null, h("span", { class: "sp-n" }, A.n ? nb(A.n) + " amdt" + (A.n > 1 ? "s" : "") : "pas sur ce texte")));
+        liste.appendChild(h("label", { class: "sp-item" }, cb, h("span", null, A.nom), A.g ? h("span", { class: "grp" }, A.g) : null, h("span", { class: "sp-n" }, [A.n ? nb(A.n) + " en 1er signataire" : "", A.c ? nb(A.c) + " cosigné" + (A.c > 1 ? "s" : "") : ""].filter(Boolean).join(" · ") || "pas sur ce texte")));
       });
     }
     var rech = h("input", { type: "search", placeholder: "Rechercher un sénateur ou un groupe…", class: "sp-rech" });
@@ -1827,6 +1840,14 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     } }, SUIVI.notif ? "Désactiver les notifications" : "Activer les notifications");
     p.appendChild(h("div", { class: "sp-col" }, h("h4", null, "Sénateurs"), rech, liste));
     p.appendChild(h("div", { class: "sp-col" },
+      h("h4", null, "Amendements à repérer"),
+      (function () {
+        var c1 = h("input", { type: "checkbox" }), c2 = h("input", { type: "checkbox" });
+        c1.checked = SUIVI.premier !== false; c2.checked = !!SUIVI.cosig;
+        c1.onchange = function () { SUIVI.premier = c1.checked; sauverSuivi(); rendre(); };
+        c2.onchange = function () { SUIVI.cosig = c2.checked; sauverSuivi(); rendre(); };
+        return h("div", { class: "sp-groupes" }, h("label", { class: "sp-g" }, c1, " Premier signataire"), h("label", { class: "sp-g" }, c2, " Cosignataires"));
+      })(),
       h("h4", null, "Groupes"), gr,
       h("h4", null, "Alertes"),
       h("p", { class: "sp-seuils" }, "Me prévenir quand un de leurs amendements est à ", s1, " puis à ", s2, " amendements du passage."),
