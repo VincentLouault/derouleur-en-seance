@@ -327,6 +327,7 @@ tbody tr.objet-row,tbody tr.objet-row:hover{background:transparent!important;box
 tr.objet-row td{padding:2px 12px 10px!important;border-top:0!important}
 tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-radius:10px;padding:9px 13px;font-size:13.5px;line-height:1.45}
 .objet-lab{font-weight:700;color:#ffd60a}
+.tag-odj{display:block;margin-top:5px;font-size:12px;font-weight:600;color:var(--green-d)}
 .art-bulle{display:inline-block;background:var(--navy2);color:#fff;font-weight:700;border-radius:8px;padding:3px 10px;line-height:1.35;max-width:100%}
 .expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
 /* Téléphone : chaque ligne de tableau devient une fiche lisible, sans défilement horizontal. */
@@ -741,7 +742,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120103310";</script>
+<script>window.DEROULEUR_BUILD = "20261120103858";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1085,6 +1086,41 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     });
     return out;
   }
+  /* Articles appelés en priorité par l'ordre du jour (« => Examen de l'article 55 », « => Examen de l'article liminaire »…),
+     avec leur jour, leur créneau et le temps de parole attribué (rapporteurs, présidents, orateurs des groupes). */
+  function prioritesOdj(page, numero, session, divisions) {
+    if (!page || !numero) return [];
+    var doc = new DOMParser().parseFromString(page, "text/html"), out = [];
+    var auj = partiesParis(Date.now() - 6 * 3600000), cleAuj = cleJour(auj.y, auj.m, auj.d);
+    var libs = divisions.map(function (d) { return sansAccent(d.libelle).replace(/[’']/g, "'").replace(/\s+/g, " ").trim(); });
+    doc.querySelectorAll(".accordion-item").forEach(function (jour) {
+      var h = jour.querySelector("h2[id]"); if (!h) return;
+      var m = sansAccent(h.id).match(/_(\d{1,2})_([a-z]+)_(\d{4})$/); if (!m || !(m[2] in MOIS)) return;
+      var y = +m[3], mo = MOIS[m[2]], d = +m[1], cle = cleJour(y, mo, d);
+      if (cle < cleAuj) return;
+      jour.querySelectorAll("li.timeline-item").forEach(function (it) {
+        var creneau = txt(it.querySelector(".timeline-title")), texteCourant = null, dernier = null;
+        it.querySelectorAll("[class^='activiteParagraphe']").forEach(function (p) {
+          var t = txt(p), nn = t.match(/n°\s*(\d+)\s*,\s*(\d{4})\s*-\s*(\d{4})/);
+          if (/activiteParagraphe1/.test(p.className)) {
+            if (nn) texteCourant = +nn[1] + "|" + nn[2] + "-" + nn[3]; else if (!/^\s*=\s*>/.test(t)) texteCourant = null;
+            dernier = null;
+            if (texteCourant !== numero + "|" + session) return;
+            var ex = t.match(/=\s*>\s*Examen d(?:e l['’]|es )(articles?\s+[^:•]+?)(?:\s*:\s*([^•]*))?$/i);
+            if (!ex) return;
+            var cible = sansAccent("Article " + ex[1].replace(/^articles?\s+/i, "")).replace(/[’']/g, "'").replace(/\s+/g, " ").trim();
+            var k = libs.indexOf(cible);
+            dernier = { jour: cle, aujourdHui: cle === cleAuj, creneau: creneau, article: ex[1].trim(), objet: (ex[2] || "").trim(), k: k, minutes: 0 };
+            out.push(dernier);
+          } else if (dernier) {
+            var tm, rx = /Temps attribu[ée][^:]*:\s*(\d+)\s*(heures?|minutes?)(?:\s*(\d+))?/gi;
+            while ((tm = rx.exec(t))) dernier.minutes += /heure/i.test(tm[2]) ? +tm[1] * 60 + (+tm[3] || 0) : +tm[1];
+          }
+        });
+      });
+    });
+    return out;
+  }
   function majOdj() {
     if (Date.now() - ODJ.lu < 600000 && ODJ.page) return Promise.resolve();
     return lire(SENAT + "/ordre-du-jour/ordre-du-jour.html").then(function (pg) { ODJ = { lu: Date.now(), page: pg }; }, function () {});
@@ -1132,6 +1168,13 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     // Examen commencé : au moins un amendement ou une division dont le sort est publié, ou un amendement marqué en cours.
     var SORT = /adopt|rejet|retir|non soutenu|tomb|satisfait|vot/i;
     t.demarre = !!courant || res.amendements.some(function (a) { return a.s && SORT.test(a.s); }) || res.divisions.some(function (d) { return d.sort && SORT.test(d.sort); });
+    // Texte appelé aujourd'hui pour quelques articles seulement (ordre du jour) : une fois ceux-ci examinés,
+    // la séance passe au texte suivant de l'ordre du jour, même si le texte n'est pas terminé.
+    t.pauseJour = false;
+    try {
+      var pr = prioritesOdj(ODJ.page, t.numero, t.session, res.divisions).filter(function (p) { return p.aujourdHui && p.k >= 0; });
+      if (pr.length) t.pauseJour = pr.every(function (p) { return !res.amendements.some(function (a) { return a.d === p.k && !a.s; }) && (res.divisions[p.k].sort || res.amendements.some(function (a) { return a.d === p.k; }) || e.idx > p.k); });
+    } catch (x) {}
     return e;
   }
 
@@ -1151,10 +1194,11 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       maxAvant = Math.max(maxAvant, tp);
     }
     var choisi = null;
-    for (i = debut; i < ts.length; i++) if (ts[i].termine !== true) { choisi = ts[i]; break; }
+    for (i = debut; i < ts.length; i++) if (ts[i].termine !== true && !ts[i].pauseJour) { choisi = ts[i]; break; }
+    if (!choisi) for (i = 0; i < ts.length; i++) if (ts[i].termine !== true && !ts[i].pauseJour) { choisi = ts[i]; break; }
     // Retour sur un texte non terminé : s'il est mis à jour nettement plus récemment que le texte retenu, c'est lui qui est en séance.
     var recent = null;
-    ts.forEach(function (t) { if (t.termine !== true && t.tpsmaj && t.tpsmaj > debJour && (!recent || t.tpsmaj > recent.tpsmaj)) recent = t; });
+    ts.forEach(function (t) { if (t.termine !== true && !t.pauseJour && t.tpsmaj && t.tpsmaj > debJour && (!recent || t.tpsmaj > recent.tpsmaj)) recent = t; });
     if (recent && choisi && recent !== choisi && recent.tpsmaj > (choisi.tpsmaj || 0) + 120000) choisi = recent;
     if (!choisi) choisi = ts[ts.length - 1];
     var k = ts.indexOf(choisi);
@@ -1231,7 +1275,8 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
         config: config, releve: new Date().toISOString(), source: "lecture directe de senat.fr",
         donnees: { schema: 1, titre: res.titre || actif.titre, lecture: res.lecture || actif.lecture, deposes: res.deposes, a_examiner_senat: res.a_examiner_senat, courant: r[0],
           divisions: res.divisions.map(function (d) { return { libelle: d.libelle, type: d.type, sort: d.sort }; }), amendements: res.amendements, stats_groupes: { fiche: 1 }, orateurs: res.orateurs,
-          etape: et.idx >= 0 ? { idx: et.idx, libelle: et.libelle, type: et.type } : null, divs_a_venir: et.aVenir, statut_texte: et.statut }
+          etape: et.idx >= 0 ? { idx: et.idx, libelle: et.libelle, type: et.type } : null, divs_a_venir: et.aVenir, statut_texte: et.statut,
+          priorites: (function () { try { return prioritesOdj(ODJ.page, actif.numero, actif.session, res.divisions); } catch (e) { return []; } })() }
       };
       enCours = false;
       return dernier;
@@ -1352,6 +1397,13 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
         if (p2) { prochain = p2; enDirect = p2.k === ic; }
       }
     }
+    // Ordre du jour : articles appelés en priorité aujourd'hui (ex. article liminaire puis article 55 de la loi de finances).
+    var prio = (D.priorites || []).filter(function (p) { return p.k >= 0 && p.aujourdHui; }), posPrio = {}, minutesPrio = {};
+    prio.forEach(function (p, i) { if (!(p.k in posPrio)) posPrio[p.k] = i - 100000; minutesPrio[p.k] = (minutesPrio[p.k] || 0) + (p.minutes || 0); });
+    if (prio.length) {
+      var cleDiv = function (d) { return d in posPrio ? posPrio[d] : d; };
+      restants = restants.map(function (a, i) { return { a: a, i: i }; }).sort(function (x, y) { return cleDiv(x.a.d) - cleDiv(y.a.d) || x.i - y.i; }).map(function (o) { return o.a; });
+    }
     var iProchain = prochain ? restants.indexOf(prochain) : 0;
     // Estimation : rythme constant, dans les plages de séance, à partir du relevé.
     // Fourchette fixe : 25 amendements par heure (estimation haute) à 20 par heure (estimation basse).
@@ -1376,19 +1428,43 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       }
       return null;
     }
-    restants.forEach(function (a, i) { a.rang = Math.max(0, i - iProchain); a.eta = avance(a.rang * mpa); a.eta2 = avance(a.rang * mpa2); });
+    // Temps de parole attribué par l'ordre du jour à un article prioritaire : il s'écoule avant ses amendements.
+    var pausePrio = {}, cumul = 0, vus = {};
+    restants.forEach(function (a, i) { if (i < iProchain) return; if (!vus[a.d]) { vus[a.d] = 1; pausePrio[a.d] = cumul; cumul += minutesPrio[a.d] || 0; } });
+    function pauseAvant(a) { return (pausePrio[a.d] || 0) + (minutesPrio[a.d] || 0); }
+    // Quand l'ordre du jour n'appelle aujourd'hui que certains articles, la suite du texte reprend au prochain jour de séance.
+    var jourDepart = new Date(depart - 6 * 3600000).toDateString();
+    var plageSuite = prio.length ? plages.filter(function (p) { return new Date(p.a - 6 * 3600000).toDateString() !== jourDepart && p.a > depart; })[0] : null;
+    var nPrioRest = restants.filter(function (a, i) { return i >= iProchain && a.d in posPrio; }).length;
+    function horsPrio(a) { return prio.length && !(a.d in posPrio); }
+    function avanceSuite(rangSuite, mp) { if (!plageSuite) return null; var d0 = depart; depart = plageSuite.a; var r = avance(rangSuite * mp, true); depart = d0; return r; }
+    restants.forEach(function (a, i) {
+      a.rang = Math.max(0, i - iProchain);
+      if (horsPrio(a)) { var rs = Math.max(0, a.rang - nPrioRest); a.eta = avanceSuite(rs, mpa); a.eta2 = avanceSuite(rs, mpa2); return; }
+      var x = pauseAvant(a); a.eta = avance(a.rang * mpa + x); a.eta2 = avance(a.rang * mpa2 + x);
+    });
     divs.forEach(function (dv) {
       var rs = restants.filter(function (a) { return a.d === dv.i; });
       if (rs.length) {
         var mi = Math.min.apply(null, rs.map(function (a) { return a.rang; })), ma = Math.max.apply(null, rs.map(function (a) { return a.rang; }));
-        dv.debut = avance(mi * mpa); dv.fin = avance((ma + 1) * mpa);
-        dv.debut2 = avance(mi * mpa2); dv.fin2 = avance((ma + 1) * mpa2);
+        var p0 = pausePrio[dv.i] || 0, p1 = p0 + (minutesPrio[dv.i] || 0);
+        if (horsPrio({ d: dv.i })) {
+          var a0 = Math.max(0, mi - nPrioRest), a1 = Math.max(0, ma + 1 - nPrioRest);
+          dv.debut = avanceSuite(a0, mpa); dv.fin = avanceSuite(a1, mpa); dv.debut2 = avanceSuite(a0, mpa2); dv.fin2 = avanceSuite(a1, mpa2);
+        } else {
+          dv.debut = avance(mi * mpa + p0); dv.fin = avance((ma + 1) * mpa + p1);
+          dv.debut2 = avance(mi * mpa2 + p0); dv.fin2 = avance((ma + 1) * mpa2 + p1);
+        }
+        dv.prio = prio.filter(function (p) { return p.k === dv.i; })[0] || null;
       }
     });
     divs.forEach(function (dv) {
       if (dv.restants || aVenirDiv.indexOf(dv.i) < 0) return;
       var r0 = Math.max(0, restants.filter(function (a) { return a.d < dv.i; }).length - iProchain), avant = dv.i < premiereDivAmdt;
-      dv.debut = avance(r0 * mpa, avant); dv.debut2 = avance(r0 * mpa2, avant); dv.fin = dv.debut; dv.fin2 = dv.debut2; dv.sansAmdt = true;
+      var premPrio = prio.length ? Math.min.apply(null, prio.map(function (p) { return p.k; })) : Infinity;
+      if (prio.length && dv.i > premPrio) { var rs0 = Math.max(0, restants.filter(function (a) { return a.d < dv.i && !(a.d in posPrio); }).length - Math.max(0, iProchain - nPrioRest)); dv.debut = avanceSuite(rs0, mpa); dv.debut2 = avanceSuite(rs0, mpa2); }
+      else { dv.debut = avance(r0 * mpa, avant); dv.debut2 = avance(r0 * mpa2, avant); }
+      dv.fin = dv.debut; dv.fin2 = dv.debut2; dv.sansAmdt = true;
     });
     var groupes = {};
     am.forEach(function (a) { var k = a.g || "__none"; groupes[k] = groupes[k] || { g: a.g, total: 0, examines: 0, restants: 0, cpt: {} }; var G = groupes[k]; G.total++; if (a.s) { G.examines++; G.cpt[a.s] = (G.cpt[a.s] || 0) + 1; } else G.restants++; });
@@ -1396,8 +1472,8 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     return {
       cur: cur, cfg: cfg, D: D, divs: divs, am: am, examines: examines, restants: restants, groupes: groupes, cpt: cpt,
       rMin: rMin, rMax: rMax, plages: plages, depart: depart,
-      fin: restants.length ? avance((restants.length - iProchain) * mpa) : null,
-      fin2: restants.length ? avance((restants.length - iProchain) * mpa2) : null,
+      fin: restants.length ? (prio.length && restants.length - iProchain > nPrioRest ? avanceSuite(restants.length - iProchain - nPrioRest, mpa) : avance((restants.length - iProchain) * mpa + cumul)) : null,
+      fin2: restants.length ? (prio.length && restants.length - iProchain > nPrioRest ? avanceSuite(restants.length - iProchain - nPrioRest, mpa2) : avance((restants.length - iProchain) * mpa2 + cumul)) : null, prio: prio, priosFutures: (D.priorites || []).filter(function (p) { return !p.aujourdHui; }),
       dureeRestante: (restants.length - iProchain) * mpa + delai,
       dureeRestante2: (restants.length - iProchain) * mpa2 + delai,
       delai: delai, delaiBlocs: delaiBlocs,
@@ -1709,6 +1785,20 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 
     // Articles à venir
     var av = M.divs.filter(function (d) { return d.restants > 0 || d.sansAmdt; });
+    // Articles appelés en priorité aujourd'hui par l'ordre du jour : en tête, dans l'ordre fixé.
+    var rangPrio = {}; (M.prio || []).forEach(function (p, i) { if (!(p.k in rangPrio)) rangPrio[p.k] = i; });
+    var premP = Object.keys(rangPrio).length ? Math.min.apply(null, Object.keys(rangPrio).map(Number)) : Infinity;
+    function groupe(d) { return d.i in rangPrio ? 1 : d.i < premP ? 0 : 2; }
+    av = av.map(function (d, i) { return { d: d, i: i }; }).sort(function (x, y) {
+      var gx = groupe(x.d), gy = groupe(y.d); if (gx !== gy) return gx - gy;
+      if (gx === 1) return rangPrio[x.d.i] - rangPrio[y.d.i]; return x.i - y.i;
+    }).map(function (o) { return o.d; });
+    function tagOdj(d) {
+      var p = (M.prio || []).filter(function (x) { return x.k === d.i; })[0] || (M.priosFutures || []).filter(function (x) { return x.k === d.i; })[0];
+      if (!p) return null;
+      var j = p.aujourdHui ? "aujourd'hui" : (function () { var y = +p.jour.slice(0, 4), m = +p.jour.slice(4, 6) - 1, dd = +p.jour.slice(6, 8); return jourCourt(new Date(y, m, dd, 12).getTime()); })();
+      return h("span", { class: "tag-odj", title: p.objet || "" }, "Ordre du jour : " + j + (p.creneau ? " - " + p.creneau.charAt(0).toLowerCase() + p.creneau.slice(1) : "") + (p.minutes ? " · " + duree(p.minutes) + " de temps de parole" : ""));
+    }
     $("art-cnt").textContent = nb(av.length) + " article" + (av.length > 1 ? "s" : "") + " · " + nb(R) + " amendement" + (R > 1 ? "s" : "");
     var tb = vide($("art-body"));
     if (!av.length) tb.appendChild(ligneVide(6, M.statutTexte ? "Texte " + M.statutTexte.toLowerCase() + " : plus rien à examiner au dérouleur." : "Plus aucun article à examiner au dérouleur."));
@@ -1726,7 +1816,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     av.forEach(function (d) {
       var estCours = M.etape ? M.etape.idx === d.i : (M.prochain && M.prochain.d === d.i);
       tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
-        h("td", null, h("span", { class: "art-bulle" }, d.libelle), estCours ? h("span", { class: "badge" }, "En cours") : null),
+        h("td", null, h("span", { class: "art-bulle" }, d.libelle), estCours ? h("span", { class: "badge" }, "En cours") : null, tagOdj(d)),
         h("td", { class: "num" }, nb(d.total)), h("td", { class: "num" }, nb(d.restants)),
         d.sansAmdt ? h("td", null, (d.libelle.match(/à (\d{1,2} h \d{2})/) || [])[1] || (d.debut ? fourchette(d.debut, d.debut2, M.depart) : "—")) : h("td", null, fourchette(d.debut, d.debut2, M.depart)),
         d.sansAmdt ? h("td", null, "—") : h("td", null, d.fin === null ? "—" : fourchette(d.fin, d.fin2, M.depart)),
