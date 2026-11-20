@@ -1,0 +1,28 @@
+name: Fil d'actualité (Public Sénat, LCP)
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: actus
+  cancel-in-progress: true
+jobs:
+  actus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lire les fils
+        run: python3 scripts/actus.py
+      - name: Publier sur la branche actus
+        run: |
+          mkdir -p /tmp/a && cp actus.json /tmp/a/
+          git config user.name "dérouleur-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git fetch origin actus --depth=1 || true
+          if git rev-parse --verify origin/actus >/dev/null 2>&1; then git checkout -B actus origin/actus; else git checkout --orphan actus && git rm -rf . -q; fi
+          cp /tmp/a/actus.json actus.json
+          git add actus.json
+          git commit -m "Fil d'actualité" -q || exit 0
+          git push origin actus
