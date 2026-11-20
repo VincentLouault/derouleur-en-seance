@@ -429,7 +429,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     </div>
     <div class="kpis" id="kpis"></div>
   </div>
-  <div class="meta" id="meta"></div>
+  <div class="meta hidden" id="meta"></div>
   <p class="resume" id="resume"></p>
 
   <div class="recherche" id="recherche">
@@ -747,7 +747,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120111014";</script>
+<script>window.DEROULEUR_BUILD = "20261120111213";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2080,7 +2080,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
         if (M.etape && M.divs[M.etape.idx] && M.divs[M.etape.idx].restants === 0) e.append(" · étape en cours : ", h("b", null, M.etape.libelle));
         else if (M.prochain) e.append(" · " + (M.enDirect ? "en discussion" : "prochain") + " : n° " + M.prochain.n);
       }
-      c.appendChild(e);
+      if (fini) c.appendChild(e); // pendant l'examen, ces chiffres figurent déjà dans les indicateurs
       var termines = J.textes.filter(function (t) { return t.url !== actif && (t.termine === true || t.depasse); });
       if (termines.length) {
         var a = h("div", { class: "autres" }, "Terminé" + (termines.length > 1 ? "s" : "") + " ce jour : ");
