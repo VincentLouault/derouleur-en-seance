@@ -327,6 +327,7 @@ tbody tr.objet-row,tbody tr.objet-row:hover{background:transparent!important;box
 tr.objet-row td{padding:2px 12px 10px!important;border-top:0!important}
 tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-radius:10px;padding:9px 13px;font-size:13.5px;line-height:1.45}
 .objet-lab{font-weight:700;color:#ffd60a}
+.plus-tard{color:var(--muted);font-style:italic}
 .tag-odj{display:block;margin-top:5px;font-size:12px;font-weight:600;color:var(--green-d)}
 .art-bulle{display:inline-block;background:var(--navy2);color:#fff;font-weight:700;border-radius:8px;padding:3px 10px;line-height:1.35;max-width:100%}
 .expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
@@ -435,7 +436,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     <h2>Prises de parole</h2>
     <div class="panel navy" id="p-orateurs" data-pli>
       <div class="ph"><h3>Orateurs inscrits</h3><span class="cnt" id="orat-cnt"></span></div>
-      <p class="expl in">Orateurs inscrits au dérouleur du Sénat pour l'étape en cours et les étapes à venir du texte affiché, dans l'ordre de passage, avec leur temps de parole.</p>
+      <p class="expl in">Orateurs inscrits au dérouleur du Sénat pour l'étape en cours et les étapes à venir du texte affiché, dans l'ordre de passage, avec leur temps de parole. Pendant la séance, le sommaire du direct vidéo du Sénat retire ceux qui sont déjà intervenus et signale l'orateur à la tribune.</p>
       <div id="orateurs"></div>
     </div>
   </section>
@@ -742,7 +743,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120103858";</script>
+<script>window.DEROULEUR_BUILD = "20261120105943";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -926,7 +927,8 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
         res.divisions.push({ libelle: lib, type: typeDivision(lib), sort: null, n: 0, _cont: cont }); cur = res.divisions.length - 1;
       } else if (e.tagName === "LI") {
         var lien = e.querySelector("a");
-        if (lien && /motion/i.test(txt(lien))) return;
+        // Motion (question préalable, exception d'irrecevabilité…) : son sort règle la division « Motions ».
+        if (lien && /motion/i.test(txt(lien))) { var sm = txt(e.querySelector("span.status")); if (sm && cur >= 0) res.divisions[cur].sort = sm; return; }
         var num = e.getAttribute("data-amdnum").replace(/\s+/g, " ").trim();
         var al = txt(e.querySelector("p.w15")).replace(/^Alin[ée]a\s*:\s*/, "").trim();
         var sig = e.querySelector(".premierSignataire"), brut = txt(sig).replace(/\^/g, "").trim(), slug = null;
@@ -1226,6 +1228,63 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     }, function () { ACTUS = { lu: Date.now() - 240000, items: ACTUS.items, erreur: true }; });
   }
 
+  /* ---------- 6 ter. Direct vidéo du Sénat : sommaire de la séance (videos.senat.fr), relu toutes les 30 secondes ----------
+     Le sommaire liste, dans l'ordre, les rubriques (TI) et les intervenants (IN) déjà passés ; le dernier intervenant est à la tribune. */
+  var VIDEOS = "https://videos.senat.fr/";
+  var VIDEO = { lu: 0, data: null };
+  function majFam(s) {
+    var t = String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, ""), m = t.match(/[A-Z][A-Z'’-]+(?:\s+[A-Z][A-Z'’-]+)*/g) || [];
+    m = m.filter(function (x) { return !/^(MM?E?S?|M)$/.test(x); });
+    return m.length ? m[0].replace(/[’']/g, "'") : "";
+  }
+  function normTitre(s) { return sansAccent(s).replace(/[^a-z0-9]+/g, " ").trim(); }
+  function analyserVideo(xml, page, titre) {
+    var doc = new DOMParser().parseFromString(xml, "text/xml"), seq = [];
+    function meta(ch, n) { for (var k = 0; k < ch.children.length; k++) { var e = ch.children[k]; if (e.tagName === "metadata" && e.getAttribute("name") === n) return e.getAttribute("value"); } return null; }
+    (function parcourir(el) {
+      Array.prototype.forEach.call(el.children, function (ch) {
+        if (ch.tagName !== "chapter") return;
+        var lab = (ch.getAttribute("label") || "").trim(), ty = meta(ch, "type");
+        seq.push({ type: ty, label: lab, nom: ty === "IN" ? majFam(lab.replace(/^Orateur (pour|contre)\s*:\s*/i, "")) : "" });
+        parcourir(ch);
+      });
+    })(doc.querySelector("chapters") || doc);
+    return { page: page, titre: titre, seq: seq, jour: new Date(Date.now() - 6 * 3600000).toDateString(), lu: Date.now() };
+  }
+  function majVideo() {
+    if (Date.now() - VIDEO.lu < 25000) return Promise.resolve();
+    VIDEO.lu = Date.now();
+    if (VIDEO.data && VIDEO.data.jour !== new Date(Date.now() - 6 * 3600000).toDateString()) VIDEO.data = null;
+    return fetch(VIDEOS + "senat_lives.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (lives) {
+      var v = null; Object.keys(lives || {}).forEach(function (k) { var x = lives[k]; if (!v && x && (x.stream === "Hémicycle" || /s[ée]ance publique/i.test(x.title || ""))) v = x; });
+      if (!v || !v.url) { if (VIDEO.data) VIDEO.data.direct = false; return; }
+      var id = String(v.url).replace(/^\//, "");
+      return fetch(VIDEOS + "Datas/senat/" + id + "/content/data.nvs?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (xml) {
+        var d = analyserVideo(xml, VIDEOS + "video." + id, v.title); d.direct = true; VIDEO.data = d;
+      });
+    }).catch(function () {});
+  }
+  // Retire des orateurs inscrits ceux qui sont déjà intervenus dans la rubrique correspondante du direct, marque celui qui est à la tribune.
+  function appliquerVideo(blocs, V) {
+    if (!V || !V.seq.length) return;
+    var seq = V.seq, dernierIN = -1;
+    for (var z = seq.length - 1; z >= 0; z--) if (seq[z].type === "IN") { dernierIN = z; break; }
+    blocs.forEach(function (b) {
+      var cle = normTitre(b.titre), iT = -1;
+      for (var k = seq.length - 1; k >= 0; k--) if (seq[k].type !== "IN" && normTitre(seq[k].label) === cle) { iT = k; break; }
+      if (iT < 0) return;
+      var fin = seq.length; for (var j = iT + 1; j < seq.length; j++) if (seq[j].type !== "IN") { fin = j; break; }
+      var passes = {}, tribune = null;
+      for (j = iT + 1; j < fin; j++) if (seq[j].nom) passes[seq[j].nom] = 1;
+      if (V.direct && dernierIN > iT && dernierIN < fin && fin === seq.length) tribune = seq[dernierIN].nom;
+      var avant = b.lignes.length;
+      b.lignes = b.lignes.filter(function (l) { var f = majFam(l.nom); if (f && f === tribune) { l.tribune = true; return true; } return !(f && passes[f]); });
+      b.passes = avant - b.lignes.length;
+      if (b.passes) b.total = null; // temps restant = somme des orateurs encore à venir
+      b.direct = true;
+    });
+  }
+
   /* ---------- 7. Chargement complet ---------- */
   var enCours = false, dernier = null;
   function charger() {
@@ -1242,9 +1301,10 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       if (!actif) throw new Error("aucun texte");
       var pageP = actif._page ? Promise.resolve(actif._page) : lire(actif.url);
       delete actif._page;
-      return Promise.all([pageP, majOdj(), verifierAutres(actif), majProchain(), majActus()]);
+      return Promise.all([pageP, majOdj(), verifierAutres(actif), majProchain(), majActus(), majVideo()]);
     }).then(function (r) {
       res = analyser(r[0]);
+      try { appliquerVideo(res.orateurs, VIDEO.data); } catch (e) {}
       // Discussions générales : préciser le texte étudié.
       var preciser = function (lib) { return /^Discussion g[ée]n[ée]rale/i.test(lib || "") && lib.indexOf(actif.court) < 0 ? lib + " – " + actif.court : lib; };
       res.divisions.forEach(function (d) { d.libelle = preciser(d.libelle); });
@@ -1288,6 +1348,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     jour: function () { return JOUR; },
     prochain: function () { return PROCHAIN; },
     programme: function () { return programme(ODJ.page); },
+    video: function () { return VIDEO.data; },
     actif: function () { var a = texteActif(); return a ? a.url : null; },
     choisir: function (url) { CHOIX = url; dernier = null; },
     actus: function () { return ACTUS.items; },
@@ -1438,8 +1499,26 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     var nPrioRest = restants.filter(function (a, i) { return i >= iProchain && a.d in posPrio; }).length;
     function horsPrio(a) { return prio.length && !(a.d in posPrio); }
     function avanceSuite(rangSuite, mp) { if (!plageSuite) return null; var d0 = depart; depart = plageSuite.a; var r = avance(rangSuite * mp, true); depart = d0; return r; }
+    // Créneau fixé par l'ordre du jour pour les articles prioritaires (« L'après-midi et le soir », « À 14 h 30 »…) : pas avant son début.
+    var debutCreneau = null;
+    if (prio.length && prio[0].creneau) {
+      var cr = plain(prio[0].creneau), hm0 = cr.match(/a\s+(\d{1,2})\s*h(?:eures?)?\s*(\d{2})?/);
+      var duJour = plages.filter(function (p) { return new Date(p.a - 6 * 3600000).toDateString() === jourDepart; });
+      if (hm0) { var dd = new Date(depart); dd.setHours(+hm0[1], +hm0[2] || 0, 0, 0); debutCreneau = dd.getTime(); }
+      else if (/apres-midi/.test(cr)) { var pa = duJour.filter(function (p) { var hh = new Date(p.a).getHours(); return hh >= 13 && hh < 20; })[0]; debutCreneau = pa ? pa.a : null; }
+      else if (/soir|nuit/.test(cr)) { var ps = duJour.filter(function (p) { return new Date(p.a).getHours() >= 20; })[0]; debutCreneau = ps ? ps.a : null; }
+    }
+    var rangPrio0 = null; restants.forEach(function (a, i) { if (rangPrio0 === null && i >= iProchain && a.d in posPrio) rangPrio0 = i - iProchain; });
+    function avancePrio(minutes, rang, mp) {
+      var t = avance(minutes);
+      if (!debutCreneau || rangPrio0 === null) return t;
+      var t0 = avance(rangPrio0 * mp);
+      if (t0 === null || t0 >= debutCreneau) return t;
+      var d0 = depart; depart = debutCreneau; var r = avance(minutes - rangPrio0 * mp, true); depart = d0; return r;
+    }
     restants.forEach(function (a, i) {
       a.rang = Math.max(0, i - iProchain);
+      if (prio.length && !horsPrio(a)) { var xx = pauseAvant(a); a.eta = avancePrio(a.rang * mpa + xx, a.rang, mpa); a.eta2 = avancePrio(a.rang * mpa2 + xx, a.rang, mpa2); return; }
       if (horsPrio(a)) { var rs = Math.max(0, a.rang - nPrioRest); a.eta = avanceSuite(rs, mpa); a.eta2 = avanceSuite(rs, mpa2); return; }
       var x = pauseAvant(a); a.eta = avance(a.rang * mpa + x); a.eta2 = avance(a.rang * mpa2 + x);
     });
@@ -1452,8 +1531,8 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
           var a0 = Math.max(0, mi - nPrioRest), a1 = Math.max(0, ma + 1 - nPrioRest);
           dv.debut = avanceSuite(a0, mpa); dv.fin = avanceSuite(a1, mpa); dv.debut2 = avanceSuite(a0, mpa2); dv.fin2 = avanceSuite(a1, mpa2);
         } else {
-          dv.debut = avance(mi * mpa + p0); dv.fin = avance((ma + 1) * mpa + p1);
-          dv.debut2 = avance(mi * mpa2 + p0); dv.fin2 = avance((ma + 1) * mpa2 + p1);
+          dv.debut = avancePrio(mi * mpa + p0, mi, mpa); dv.fin = avancePrio((ma + 1) * mpa + p1, ma, mpa);
+          dv.debut2 = avancePrio(mi * mpa2 + p0, mi, mpa2); dv.fin2 = avancePrio((ma + 1) * mpa2 + p1, ma, mpa2);
         }
         dv.prio = prio.filter(function (p) { return p.k === dv.i; })[0] || null;
       }
@@ -1793,6 +1872,17 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       var gx = groupe(x.d), gy = groupe(y.d); if (gx !== gy) return gx - gy;
       if (gx === 1) return rangPrio[x.d.i] - rangPrio[y.d.i]; return x.i - y.i;
     }).map(function (o) { return o.d; });
+    // Estimations limitées aux deux prochains jours de séance (les jours sans séance ne comptent pas).
+    var joursSeance = [], limite = null;
+    M.plages.forEach(function (p) { if (p.b <= M.depart) return; var j = new Date(p.a - 6 * 3600000).toDateString(); if (joursSeance.indexOf(j) < 0) joursSeance.push(j); });
+    if (joursSeance.length > 2) M.plages.forEach(function (p) { if (new Date(p.a - 6 * 3600000).toDateString() === joursSeance[1]) limite = Math.max(limite || 0, p.b); });
+    var auDela = limite ? "après " + jourCourt(limite - 6 * 3600000) : "";
+    function fourch2(t1, t2) {
+      if (!limite || t1 === null || t1 === undefined) return fourchette(t1, t2, M.depart);
+      if (t1 > limite) return h("span", { class: "plus-tard" }, auDela);
+      if (t2 === null || t2 === undefined || t2 > limite) return heure(t1, M.depart) + " – " + auDela;
+      return fourchette(t1, t2, M.depart);
+    }
     function tagOdj(d) {
       var p = (M.prio || []).filter(function (x) { return x.k === d.i; })[0] || (M.priosFutures || []).filter(function (x) { return x.k === d.i; })[0];
       if (!p) return null;
@@ -1818,8 +1908,8 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
         h("td", null, h("span", { class: "art-bulle" }, d.libelle), estCours ? h("span", { class: "badge" }, "En cours") : null, tagOdj(d)),
         h("td", { class: "num" }, nb(d.total)), h("td", { class: "num" }, nb(d.restants)),
-        d.sansAmdt ? h("td", null, (d.libelle.match(/à (\d{1,2} h \d{2})/) || [])[1] || (d.debut ? fourchette(d.debut, d.debut2, M.depart) : "—")) : h("td", null, fourchette(d.debut, d.debut2, M.depart)),
-        d.sansAmdt ? h("td", null, "—") : h("td", null, d.fin === null ? "—" : fourchette(d.fin, d.fin2, M.depart)),
+        d.sansAmdt ? h("td", null, (d.libelle.match(/à (\d{1,2} h \d{2})/) || [])[1] || (d.debut ? fourch2(d.debut, d.debut2) : "—")) : h("td", null, fourch2(d.debut, d.debut2)),
+        d.sansAmdt ? h("td", null, "—") : h("td", null, d.fin === null ? "—" : fourch2(d.fin, d.fin2)),
         h("td", null, d.sort ? pillSort(d.sort) : "")));
     });
 
@@ -1996,14 +2086,14 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       b.lignes.forEach(function (l) { var m = String(l.temps || "").match(/(\d+)\s*'/); if (m) minutes += +m[1]; });
       var tbody = h("tbody");
       b.lignes.forEach(function (l) {
-        tbody.appendChild(h("tr", null,
+        tbody.appendChild(h("tr", { class: l.tribune ? "cur" : null },
           h("td", { class: "num", style: "width:48px" }, l.ordre ? String(l.ordre) : ""),
-          h("td", null, l.nom),
+          h("td", null, l.nom, l.tribune ? h("span", { class: "tag next" }, "À la tribune") : null),
           h("td", null, l.groupe ? h("span", { class: "grp" }, l.groupe) : (l.role || "")),
           h("td", { class: "num" }, (l.temps || "").replace(/'\s*$/, " min").replace(/'/g, " min "))));
       });
       box.appendChild(h("div", { class: "panel grey", id: "orateurs-" + i },
-        h("div", { class: "ph" }, h("h3", null, b.titre, b.sous ? " · " + b.sous : "", b.enCours ? h("span", { class: "badge" }, "En cours") : null), h("span", { class: "cnt" }, nb(b.lignes.length) + " orateur" + (b.lignes.length > 1 ? "s" : "") + (b.total ? " · " + String(b.total).replace(/(\d+)\s*h\s*(\d+)/, function (x, hh, mm) { return hh + " h " + String(mm).padStart(2, "0"); }) + " de temps de parole au total" : minutes ? " · " + duree(minutes) + " de temps de parole" : ""))),
+        h("div", { class: "ph" }, h("h3", null, b.titre, b.sous ? " · " + b.sous : "", b.enCours ? h("span", { class: "badge" }, "En cours") : null), h("span", { class: "cnt" }, (b.passes ? nb(b.passes) + " déjà intervenu" + (b.passes > 1 ? "s" : "") + " · " : "") + nb(b.lignes.length) + " orateur" + (b.lignes.length > 1 ? "s" : "") + (b.direct ? " restant" + (b.lignes.length > 1 ? "s" : "") : "") + (b.total ? " · " + String(b.total).replace(/(\d+)\s*h\s*(\d+)/, function (x, hh, mm) { return hh + " h " + String(mm).padStart(2, "0"); }) + " de temps de parole au total" : minutes ? " · " + duree(minutes) + " de temps de parole" : ""))),
         h("div", { class: "scroll" }, h("table", { class: "t-orat" },
           h("thead", null, h("tr", null, h("th", { class: "num" }, "N°"), h("th", null, "Orateur"), h("th", null, "Groupe ou fonction"), h("th", { class: "num" }, "Temps"))),
           tbody))));
