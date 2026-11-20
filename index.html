@@ -325,7 +325,8 @@ tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
 .alerte p{margin:0;font-size:13.5px;color:rgba(255,255,255,.85)}
 .alerte .x{all:unset;cursor:pointer;position:absolute;top:6px;right:10px;font-size:20px;color:rgba(255,255,255,.7)}
 @keyframes entree{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
-.objet-btn{all:unset;cursor:pointer;display:inline-block;margin-left:8px;white-space:nowrap;font-size:11.5px;font-weight:600;color:#fff;background:var(--navy2);border-radius:99px;padding:1px 9px 2px;vertical-align:1px;user-select:none}
+.obj-sous{display:block;margin-top:4px}
+.objet-btn{all:unset;cursor:pointer;display:inline-block;margin-left:0;white-space:nowrap;font-size:11.5px;font-weight:600;color:#fff;background:var(--navy2);border-radius:99px;padding:1px 9px 2px;vertical-align:1px;user-select:none}
 .objet-btn:before{content:"▸ ";font-size:9px}
 .objet-btn.on{background:var(--navy)}
 .objet-btn.on:before{content:"▾ "}
@@ -396,15 +397,15 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   .n .sub2{white-space:normal}
   .empty-row td{grid-column:1/-1;text-align:center!important}
   .empty-row td::before{display:none}
-  .t-amdt td:nth-child(1){grid-column:1;grid-row:1}
+  .t-amdt td:nth-child(2){grid-column:1;grid-row:1}
   .t-amdt td:nth-child(7){grid-column:2;grid-row:1;justify-self:end;text-align:right!important}
-  .t-amdt td:nth-child(2){grid-column:1/-1;grid-row:2}
+  .t-amdt td:nth-child(1){grid-column:1/-1;grid-row:2}
   .t-amdt td:nth-child(3){grid-column:1;grid-row:3}
   .t-amdt td:nth-child(4){grid-column:2;grid-row:3}
   .t-amdt td:nth-child(5){grid-column:1;grid-row:4}
   .t-amdt td:nth-child(6){grid-column:2;grid-row:4}
   .t-amdt td:nth-child(1)::before,.t-amdt td:nth-child(2)::before,.t-amdt td:nth-child(7)::before{display:none}
-  .t-amdt td:nth-child(2){color:var(--muted);font-size:14px}
+  .t-amdt td:nth-child(1){color:var(--muted);font-size:14px}
   .t-amdt tr.objet-row{margin-top:-8px;border-top-left-radius:0;border-top-right-radius:0}
   .t-amdt tr.objet-row td{grid-column:1/-1!important;grid-row:auto!important;justify-self:stretch!important;text-align:left!important}
   .t-amdt tr.objet-row td::before{display:none}
@@ -511,7 +512,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       <div class="ph"><h3>Les 10 derniers amendements examinés</h3><span class="cnt">dans l'ordre du dérouleur, le plus récent en bas</span></div>
       <div class="scroll">
         <table class="t-amdt">
-          <thead><tr><th>N°</th><th>Article</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Sort</th></tr></thead>
+          <thead><tr><th>Article</th><th>N°</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Sort</th></tr></thead>
           <tbody id="derniers-body"></tbody>
         </table>
       </div>
@@ -521,7 +522,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       <div class="ph"><h3>Amendements en cours</h3><span class="cnt" id="cours-cnt"></span></div>
       <div class="scroll">
         <table class="t-amdt">
-          <thead><tr><th>N°</th><th>Article</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Statut</th></tr></thead>
+          <thead><tr><th>Article</th><th>N°</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Statut</th></tr></thead>
           <tbody id="cours-body"></tbody>
         </table>
       </div>
@@ -531,7 +532,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       <div class="ph"><h3>Amendements à venir</h3><span class="cnt" id="avenir-cnt"></span></div>
       <div class="scroll tall">
         <table class="t-amdt">
-          <thead><tr><th>N°</th><th>Article</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Statut</th></tr></thead>
+          <thead><tr><th>Article</th><th>N°</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Statut</th></tr></thead>
           <tbody id="avenir-body"></tbody>
         </table>
       </div>
@@ -772,7 +773,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120115910";</script>
+<script>window.DEROULEUR_BUILD = "20261120120943";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1028,9 +1029,11 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   }
   // Numéro d'amendement sans rectification : « 28 rect. bis » → « 28 », « I-2738 rect. » → « I-2738 » (loi de finances).
   function cleAmdt(n) { var m = String(n || "").replace(/\s+/g, "").match(/^([A-Z]+-)?\d+/i); return m ? m[0].toUpperCase() : String(n || ""); }
-  function completerAvis(texte, ams) {
+  function completerAvis(texte, ams, divsAvant) {
     var base = texte.url.replace(/\/[^\/]*$/, ""), pref = texte.session + "/" + texte.numero + "/", now = Date.now();
     var restants = ams.filter(function (a) { return !a.s; }), proches = {};
+    // Les articles appelés en premier (ordre du jour) passent en tête de la lecture des fiches.
+    if (divsAvant && divsAvant.length) restants = restants.filter(function (a) { return divsAvant.indexOf(a.d) >= 0; }).concat(restants.filter(function (a) { return divsAvant.indexOf(a.d) < 0; }));
     restants.slice(0, 25).forEach(function (a) { proches[a.n] = 1; });
     var aLire = [];
     // D'abord les amendements à venir, puis les déjà examinés.
@@ -1040,7 +1043,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       else if (a.s && !e.f) aLire.push(b);
       else if (!a.s && proches[a.n] && now - (e.tl || 0) > 180000) aLire.push(b);
     });
-    var file = aLire.slice(0, 40), i = 0;
+    var file = aLire.slice(0, 60), i = 0;
     function suivant() {
       if (i >= file.length) return Promise.resolve();
       var b = file[i++];
@@ -1379,7 +1382,8 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       actif.verifie = Date.now();
       var base = actif.url.replace(/\/[^\/]*$/, "");
       var pc = res.idtxt ? lire(base + "/modifs/amd_courant_" + res.idtxt + ".txt").then(function (t) { t = t.replace(/\s+/g, ""); return /^[0-9A-Za-z .-]{1,30}$/.test(t) ? t : null; }, function () { return null; }) : Promise.resolve(null);
-      return Promise.all([pc, completerAvis(actif, res.amendements), completerGroupes(res.amendements)]);
+      var divsAvant = []; try { divsAvant = prioritesOdj(ODJ.page, actif.numero, actif.session, res.divisions).filter(function (p) { return p.aujourdHui && p.k >= 0; }).map(function (p) { return p.k; }); } catch (e) {}
+      return Promise.all([pc, completerAvis(actif, res.amendements, divsAvant), completerGroupes(res.amendements)]);
     }).then(function (r) {
       var pref = actif.session + "/" + actif.numero + "/";
       var et = noterEtat(actif, res, r[0]);
@@ -1841,12 +1845,12 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   function ligneAmdt(a, M, mode, now) {
     var url = urlAmdt(a, M.cfg), dv = M.divs[a.d], estProchain = M.prochain && a.k === M.prochain.k;
     var numCell = h("td", { class: "n" },
-      estProchain && mode === "cours" ? h("span", { class: "fleche", "aria-label": "Amendement en discussion" }, "➤") : null,
       url ? h("a", { href: url, target: "_blank", rel: "noopener", title: "Ouvrir l'amendement sur senat.fr" }, a.n) : a.n,
       a.sa ? h("span", { class: "tag sa" }, "sous-amdt") : null,
       estProchain && (mode === "venir" || mode === "cours") ? h("span", { class: "tag next" }, M.enDirect ? "En séance" : "Prochain") : null,
       a.ndc > 1 ? h("span", { class: "sub2" }, "discussion commune (" + a.ndc + ")") : null,
       a.nid > 1 ? h("span", { class: "sub2" }, "identiques (" + a.nid + ")") : null);
+    var celArticle;
     var dernier;
     if (mode === "venir") {
       var enDiscussion = estProchain || (M.prochain && a.dc && a.dc === M.prochain.dc && a.k < M.prochain.k);
@@ -1859,9 +1863,10 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     } else dernier = h("td", null, pillSort(a.s));
     var cls = [estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : ""), estSuivi(a) ? "suivi" : ""].join(" ").trim();
     var ligneObjet = a.o ? h("tr", { class: "objet-row" + (S.objets && S.objets[a.n] ? "" : " hidden") }, h("td", { colspan: 7 }, h("span", { class: "objet-box" }, h("span", { class: "objet-lab" }, "Objet du n° " + a.n + " : "), a.o))) : null;
+    var bObj = objet(a, ligneObjet); if (bObj) numCell.appendChild(h("span", { class: "obj-sous" }, bObj));
     var tr = h("tr", { class: cls || null },
+      h("td", null, estProchain && mode === "cours" ? h("span", { class: "fleche", "aria-label": "Amendement en discussion" }, "➤") : null, dv ? dv.libelle : "", alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null),
       numCell,
-      h("td", null, dv ? dv.libelle : "", objet(a, ligneObjet), alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null),
       h("td", null, estSuivi(a) ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, a.a, cosig(a)),
       h("td", null, celluleGroupe(a)),
       h("td", null, pillAvis(a.c)),
@@ -2108,7 +2113,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     if (deb > 0) cb2.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.coursOuvert = true; rendre(); } }, (deb > 1 ? "Voir les " + deb + " précédents" : "Voir le précédent") + " de la discussion commune ▴"))));
     enCours.slice(deb, finC).forEach(function (a) { cb2.appendChild(ligneAmdt(a, M, "cours", now)); });
     if (finC < enCours.length) cb2.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.coursOuvert = true; rendre(); } }, (enCours.length - finC > 1 ? "Voir les " + (enCours.length - finC) + " suivants" : "Voir le suivant") + " de la discussion commune ▾"))));
-    if (ouvC && enCours.length > 5) cb2.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.coursOuvert = false; rendre(); } }, "Replier autour de l'amendement en discussion ▴"))));
+    if (ouvC && (iC - 2 > 0 || iC + 3 < enCours.length)) cb2.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.coursOuvert = false; rendre(); } }, "Replier autour de l'amendement en discussion ▴"))));
 
     // À venir (hors amendements en cours)
     var avF = M.restants.filter(function (a) { return !setCours[a.k]; }).filter(passeFiltre);
@@ -2116,13 +2121,13 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     var vb = vide($("avenir-body"));
     if (!avF.length) vb.appendChild(ligneVide(7, R > nRestCours ? "Aucun amendement à venir ne correspond aux filtres." : "Plus aucun autre amendement à examiner."));
     // Textes très longs (loi de finances : plus de 2 000 amendements) : on n'affiche que les 150 prochains, les filtres permettent d'aller plus loin.
-    // Les 6 prochains toujours visibles, la suite dans un dépliant.
-    var MAXV = 150, VISIBLES = 6, ouvertAv = !!S.avenirOuvert;
+    // Les 3 prochains toujours visibles, la suite dans un dépliant.
+    var MAXV = 150, VISIBLES = 3, ouvertAv = !!S.avenirOuvert;
     avF.slice(0, ouvertAv ? MAXV : VISIBLES).forEach(function (a) { vb.appendChild(ligneAmdt(a, M, "venir", now)); });
     if (avF.length > VISIBLES) {
       var resteAv = Math.min(avF.length, MAXV) - VISIBLES;
       vb.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.avenirOuvert = !S.avenirOuvert; rendre(); if (!S.avenirOuvert) $("p-avenir").scrollIntoView({ block: "start" }); } },
-        ouvertAv ? "Replier : n'afficher que les 6 prochains ▴" : "Voir les " + nb(resteAv) + " amendements suivants ▾"))));
+        ouvertAv ? "Replier : n'afficher que les 3 prochains ▴" : "Voir les " + nb(resteAv) + " amendements suivants ▾"))));
     }
     if (ouvertAv && avF.length > MAXV) vb.appendChild(ligneVide(7, "… et " + nb(avF.length - MAXV) + " autres amendements à venir : utilisez les filtres (article, groupe, n°) pour les afficher."));
 
@@ -2395,7 +2400,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     var tbody3 = h("tbody");
     if (!liste.length) tbody3.appendChild(ligneVide(7, "Aucun amendement dans cette catégorie."));
     liste.forEach(function (a) { tbody3.appendChild(ligneAmdt(a, M, "passe", now)); });
-    c.appendChild(h("table", { class: "t-amdt" }, h("thead", null, h("tr", null, ["N°", "Article", "Sénateur", "Groupe", "Avis de la commission", "Avis du Gouvernement", "Sort"].map(function (x) { return h("th", null, x); }))), tbody3));
+    c.appendChild(h("table", { class: "t-amdt" }, h("thead", null, h("tr", null, ["Article", "N°", "Sénateur", "Groupe", "Avis de la commission", "Avis du Gouvernement", "Sort"].map(function (x) { return h("th", null, x); }))), tbody3));
   }
 
   /* ---------- interactions ---------- */
