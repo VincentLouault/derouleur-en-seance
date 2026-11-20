@@ -335,6 +335,8 @@ tr.objet-row td{padding:2px 12px 10px!important;border-top:0!important}
 tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-radius:10px;padding:9px 13px;font-size:13.5px;line-height:1.45}
 .objet-lab{font-weight:700;color:#ffd60a}
 .plus-tard{color:var(--muted);font-style:italic}
+tr.plus-row td{padding:10px 16px!important;background:#f6f8fc;text-align:center}
+tr.plus-row .voir-plus{margin:0}
 tr.odj-row td{font-style:italic;color:var(--muted);font-size:13.5px;padding:7px 14px!important;background:#fbfcfe;border-left:3px solid var(--line)}
 tr.odj-row .odj-lab{font-style:normal;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--navy2);margin-right:8px}
 tr.odj-row .odj-quand{font-style:normal;font-weight:600;color:var(--ink);margin-right:8px}
@@ -356,7 +358,8 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   .suivi-bar .sb-actions{margin-left:0}
   .alertes{left:12px;right:12px;bottom:12px;max-width:none}
   .art-cours button{padding:10px 14px}
-  tr.odj-row td{grid-column:1/-1!important}
+  tr.odj-row td,tr.plus-row td{grid-column:1/-1!important}
+  tr.plus-row td::before{display:none}
   tr.odj-row td::before{display:none}
   .resume{font-size:15.5px}
   .kpis{grid-template-columns:1fr 1fr;gap:10px}
@@ -513,7 +516,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       </div>
     </div>
 
-    <div class="panel gold" id="p-avenir" data-pli>
+    <div class="panel gold" id="p-avenir">
       <div class="ph"><h3>Amendements à venir</h3><span class="cnt" id="avenir-cnt"></span></div>
       <div class="scroll tall">
         <table class="t-amdt">
@@ -758,7 +761,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120113549";</script>
+<script>window.DEROULEUR_BUILD = "20261120113814";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1967,7 +1970,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     vide(ac); ac.classList.toggle("hidden", !dC);
     if (dC) {
       var direct = M.enDirect && M.etape && M.etape.idx === dC.i;
-      ac.appendChild(h("button", { type: "button", title: "Afficher les amendements de cet article", onclick: function () { S.f.article = String(dC.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
+      ac.appendChild(h("button", { type: "button", title: "Afficher les amendements de cet article", onclick: function () { S.f.article = String(dC.i); syncFiltres(); rendre(); S.avenirOuvert = true; rendre(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
         h("span", { class: "ac-lab" + (direct ? " live" : "") }, direct ? "En discussion" : "Prochain article"),
         h("span", { class: "ac-titre" }, dC.libelle),
         h("span", { class: "ac-det" }, nb(dC.restants) + " amendement" + (dC.restants > 1 ? "s" : "") + " restant" + (dC.restants > 1 ? "s" : "") + " sur " + nb(dC.total) +
@@ -2021,7 +2024,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     av.forEach(function (d) {
       if (d.debut) viderOdj(d.debut);
       var estCours = M.etape ? M.etape.idx === d.i : (M.prochain && M.prochain.d === d.i);
-      tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : "") + (d.suivi ? " suivi" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
+      tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : "") + (d.suivi ? " suivi" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); S.avenirOuvert = true; rendre(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
         h("td", null, d.suivi ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, h("span", { class: "art-bulle" }, d.libelle), estCours ? h("span", { class: "badge" }, "En cours") : null, tagOdj(d),
           filtreP ? h("span", { class: "tag-odj", style: "color:var(--navy2)" }, [d.fAm ? nb(d.fAm) + " amendement" + (d.fAm > 1 ? "s" : "") + " correspondant" + (d.fAm > 1 ? "s" : "") : "", d.fOr ? nb(d.fOr) + " orateur" + (d.fOr > 1 ? "s" : "") + " correspondant" + (d.fOr > 1 ? "s" : "") : ""].filter(Boolean).join(" · ")) : null),
         h("td", { class: "num" }, nb(d.total)), h("td", { class: "num" }, nb(d.restants)),
@@ -2066,9 +2069,15 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     var vb = vide($("avenir-body"));
     if (!avF.length) vb.appendChild(ligneVide(7, R > nRestCours ? "Aucun amendement à venir ne correspond aux filtres." : "Plus aucun autre amendement à examiner."));
     // Textes très longs (loi de finances : plus de 2 000 amendements) : on n'affiche que les 150 prochains, les filtres permettent d'aller plus loin.
-    var MAXV = 150;
-    avF.slice(0, MAXV).forEach(function (a) { vb.appendChild(ligneAmdt(a, M, "venir", now)); });
-    if (avF.length > MAXV) vb.appendChild(ligneVide(7, "… et " + nb(avF.length - MAXV) + " autres amendements à venir : utilisez les filtres (article, groupe, n°) pour les afficher."));
+    // Les 6 prochains toujours visibles, la suite dans un dépliant.
+    var MAXV = 150, VISIBLES = 6, ouvertAv = !!S.avenirOuvert;
+    avF.slice(0, ouvertAv ? MAXV : VISIBLES).forEach(function (a) { vb.appendChild(ligneAmdt(a, M, "venir", now)); });
+    if (avF.length > VISIBLES) {
+      var resteAv = Math.min(avF.length, MAXV) - VISIBLES;
+      vb.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.avenirOuvert = !S.avenirOuvert; rendre(); if (!S.avenirOuvert) $("p-avenir").scrollIntoView({ block: "start" }); } },
+        ouvertAv ? "Replier : n'afficher que les 6 prochains ▴" : "Voir les " + nb(resteAv) + " amendements suivants ▾"))));
+    }
+    if (ouvertAv && avF.length > MAXV) vb.appendChild(ligneVide(7, "… et " + nb(avF.length - MAXV) + " autres amendements à venir : utilisez les filtres (article, groupe, n°) pour les afficher."));
 
     // Archive
     $("arch-count").textContent = nb(M.examines.length);
