@@ -260,6 +260,13 @@ tbody tr:hover{background:#eef3fa}
 .rubriques .col-g{display:flex;flex-direction:column;gap:10px;min-width:0}
 .rubriques .kpis{margin:0;align-content:start;grid-template-columns:1fr 1fr}
 .rubriques .kpis .kpi:nth-child(5):last-child{grid-column:span 2}
+.kpis .kpi-etape,.kpis .kpi-fin{grid-column:1/-1!important}
+.kpis .kpi-fin{order:9}
+.kpis .kpi-etape{min-height:0}
+.kpis .kpi-fin{min-height:0!important;padding:8px 14px!important;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.kpis .kpi-fin .lab{font-size:11px}
+.kpis .kpi-fin .val.small.heure{font-size:clamp(13px,7cqi,17px)!important;margin:0}
+.kpis .kpi-fin .sub{font-size:11.5px;margin:0;flex-basis:100%}
 @media (min-width:1180px){.rubriques .kpis{grid-template-columns:repeat(3,1fr)}}
 .rub.a-venir{padding:10px 16px}
 .rub.a-venir h2{font-size:11px;margin:0 0 4px}
@@ -1288,14 +1295,14 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
   function hm(t) { var d = new Date(t); return d.getHours() + " h " + String(d.getMinutes()).padStart(2, "0"); }
   function hm2(t) { var d = new Date(t); return String(d.getHours()).padStart(2, "0") + " h " + String(d.getMinutes()).padStart(2, "0"); }
   // Heure, précédée du jour quand ce n'est pas le jour de la séance en cours (débats qui se prolongent).
-  function heureJ(t) { var d = new Date(t), auj = new Date(Date.now() - 6 * 3600000); return (d.toDateString() === auj.toDateString() || (d.getHours() < 6 && new Date(t - 6 * 3600000).toDateString() === auj.toDateString()) ? "" : jourCourt(t) + " ") + hm2(t).replace(/^0/, ""); }
+  function heureJ(t) { var d = new Date(t), auj = new Date(Date.now() - 6 * 3600000); return (d.toDateString() === auj.toDateString() || (d.getHours() < 6 && new Date(t - 6 * 3600000).toDateString() === auj.toDateString()) ? "" : jourCourt(t) + " - ") + hm2(t).replace(/^0/, ""); }
   function jourCourt(t) { var d = new Date(t); return JOURS[d.getDay()] + " " + d.getDate(); }
   function dateLongue(t) { var d = new Date(t); return d.getDate() + (d.getDate() === 1 ? "er" : "") + " " + MOIS[d.getMonth()]; }
   function memeJour(a, b) { var x = new Date(a), y = new Date(b); return x.toDateString() === y.toDateString(); }
   function heure(t, ref) {
     if (t === null) return "après les séances prévues";
     var d = new Date(t);
-    if (!memeJour(t, ref) && d.getHours() >= 6) return jourCourt(t) + " · " + hm(t);
+    if (!memeJour(t, ref) && d.getHours() >= 6) return jourCourt(t) + " - " + hm(t);
     return hm(t);
   }
   function fourchette(t1, t2, ref) {
@@ -1658,7 +1665,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 
     var R = M.restants.length, T = M.am.length;
     vide($("resume"));
-    if (R) $("resume").append("Il reste ", h("b", null, nb(R)), " amendements à examiner sur ", h("b", null, nb(T)), " au dérouleur ; au rythme de " + M.rMin + " à " + M.rMax + " amendements par heure, la fin des débats est estimée ", M.fin ? "entre " : "au-delà des séances prévues", M.fin ? h("b", null, hm(M.fin)) : "", M.fin ? " et " : "", M.fin ? h("b", null, M.fin2 ? hm(M.fin2) : "après les séances prévues") : "", ".");
+    if (R) $("resume").append("Il reste ", h("b", null, nb(R)), " amendements à examiner sur ", h("b", null, nb(T)), " au dérouleur ; au rythme de " + M.rMin + " à " + M.rMax + " amendements par heure, la fin des débats est estimée ", M.fin ? "entre " : "au-delà des séances prévues", M.fin ? h("b", null, heureJ(M.fin)) : "", M.fin ? " et " : "", M.fin ? h("b", null, M.fin2 ? heureJ(M.fin2) : "après les séances prévues") : "", ".");
     else if (M.statutTexte) $("resume").append("Texte : ", h("b", null, M.statutTexte), ". Tous les amendements du dérouleur ont été examinés (", h("b", null, nb(T)), ").");
     else if (M.etape) $("resume").append(T ? "Tous les amendements du dérouleur ont été examinés (" + nb(T) + "). " : "Aucun amendement au dérouleur pour ce texte. ", "Étape en cours : ", h("b", null, M.etape.libelle), ".");
     else $("resume").append("Tous les amendements du dérouleur ont été examinés (", h("b", null, nb(T)), ").");
@@ -1939,7 +1946,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
   }
   function insec(t) { return String(t).replace(/ /g, "\u00a0"); }
   function kpi(lab, val, sub, small) {
-    return h("div", { class: "kpi" }, h("div", { class: "lab" }, lab), h("div", { class: "val" + (small ? " small" : "") + (typeof small === "string" ? " " + small : "") }, val), h("div", { class: "sub" }, sub));
+    return h("div", { class: "kpi" + (lab === "Étape en cours" ? " kpi-etape" : lab === "Fin estimée des débats" ? " kpi-fin" : "") }, h("div", { class: "lab" }, lab), h("div", { class: "val" + (small ? " small" : "") + (typeof small === "string" ? " " + small : "") }, val), h("div", { class: "sub" }, sub));
   }
   function rythmeObserve(cur) {
     var hst = (cur && cur.historique) || [];
