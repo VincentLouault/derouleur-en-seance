@@ -351,13 +351,17 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 .cosig.on,.cosig:hover{background:var(--navy2);color:#fff}
 .cosig-liste{display:block;margin-top:5px;font-size:12.5px;line-height:1.4;color:var(--ink);background:var(--navy-bg);border:1px solid #c9d6ea;border-radius:8px;padding:6px 9px;max-width:420px}
 .batt{display:inline-flex;align-items:center;gap:7px;margin-left:10px;vertical-align:middle;white-space:nowrap}
-.batt-corps{position:relative;display:inline-block;width:64px;height:16px;border:2px solid var(--navy);border-radius:4px;padding:1px;box-sizing:border-box;background:#fff}
-.batt-corps:after{content:"";position:absolute;right:-6px;top:3px;width:4px;height:6px;background:var(--navy);border-radius:0 2px 2px 0}
+.batt{margin-left:16px}
+.batt-corps{position:relative;display:flex;justify-content:flex-end;width:76px;height:18px;border:2px solid var(--navy);border-radius:4px;padding:1px;box-sizing:border-box;background:#fff}
+.batt-corps:after{content:"";position:absolute;left:-6px;top:4px;width:4px;height:6px;background:var(--navy);border-radius:2px 0 0 2px}
 .batt-niveau{display:block;height:100%;border-radius:2px;background:var(--green-bar);transition:width .9s linear,background .3s}
+.batt-conclure{display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;letter-spacing:.08em;color:var(--red-btn);text-transform:uppercase}
+.batt.depasse .batt-conclure{display:flex;animation:clignote 1s steps(2) infinite}
 .batt.moyen .batt-niveau{background:#e8a317}
 .batt.faible .batt-niveau{background:var(--red-btn)}
 .batt-txt{font-size:12px;font-weight:600;color:var(--muted)}
-.batt.depasse .batt-corps{border-color:var(--red-btn);animation:clignote 1s steps(2) infinite}
+.batt.depasse .batt-corps{border-color:var(--red-btn)}
+.batt.depasse .batt-corps:after{background:var(--red-btn)}
 .batt.depasse .batt-txt{color:var(--red-btn)}
 @keyframes clignote{50%{opacity:.35}}
 h2.avec-audio{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -824,7 +828,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120142641";</script>
+<script>window.DEROULEUR_BUILD = "20261120143210";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2426,7 +2430,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   function batterie(l) {
     var m = String(l.temps || "").match(/(\d+)\s*'/), duree = m ? +m[1] * 60000 : 0;
     if (!duree || !l.debutParole) return null;
-    var el = h("span", { class: "batt", "data-debut": String(l.debutParole), "data-duree": String(duree) }, h("span", { class: "batt-corps" }, h("span", { class: "batt-niveau" })));
+    var el = h("span", { class: "batt", "data-debut": String(l.debutParole), "data-duree": String(duree) }, h("span", { class: "batt-corps" }, h("span", { class: "batt-niveau" }), h("span", { class: "batt-conclure" }, "Conclure")));
     majBatterie(el); return el;
   }
   function majBatterie(el) {
