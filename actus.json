@@ -1,5 +1,5 @@
 {
-"maj": 1795193027573,
+"maj": 1795196661313,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,18 @@
 ],
 "LCP": [
 {
+"titre": "Présidentielle 2027: que retenir des 258 propositions du programme de Dominique de Villepin?",
+"lien": "https://lcp.fr/actualites/presidentielle-2027-que-retenir-des-258-propositions-du-programme-de-dominique-de",
+"date": 1795195440000,
+"source": "LCP"
+},
+{
+"titre": "Logement: passoires thermiques, relance de la construction... Ce que contient le projet de loi avant le vote prévu mardi à l'Assemblée",
+"lien": "https://lcp.fr/actualites/logement-passoires-thermiques-relance-de-la-construction-ce-que-contient-le-projet-de",
+"date": 1795193460000,
+"source": "LCP"
+},
+{
 "titre": "\"Qui sait sortir autant de F-35 en moins de trois ans?\": Pourquoi l’Europe achète encore des avions américains",
 "lien": "https://lcp.fr/actualites/qui-sait-sortir-autant-de-f-35-en-moins-de-trois-ans-pourquoi-l-europe-achete-encore-des",
 "date": 1795190700000,
@@ -134,18 +146,6 @@
 "titre": "\"Des enfants en poussette aspergés de gaz\": l'avocat Arié Alimi dénonce un \"état de guerre entre l’État et sa population\"",
 "lien": "https://lcp.fr/actualites/des-enfants-en-poussette-asperges-de-gaz-l-avocat-arie-alimi-denonce-un-etat-de-guerre",
 "date": 1795106820000,
-"source": "LCP"
-},
-{
-"titre": "David Habib, député des Pyrénées-Atlantiques depuis 24 ans, est mort à 65 ans",
-"lien": "https://lcp.fr/actualites/david-habib-depute-des-pyrenees-atlantiques-depuis-24-ans-est-mort-a-65-ans-445340",
-"date": 1795103820000,
-"source": "LCP"
-},
-{
-"titre": "Emploi: le dispositif \"Territoires zéro chômeur de longue durée\" pérennisé à l'issue de l'adoption définitive d'un texte par les députés",
-"lien": "https://lcp.fr/actualites/emploi-le-dispositif-territoires-zero-chomeur-de-longue-duree-perennise-a-l-issue-de-l",
-"date": 1795097460000,
 "source": "LCP"
 }
 ]
