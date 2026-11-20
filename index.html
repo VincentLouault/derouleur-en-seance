@@ -817,7 +817,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120141440";</script>
+<script>window.DEROULEUR_BUILD = "20261120142000";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2416,16 +2416,16 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   function batterie(l) {
     var m = String(l.temps || "").match(/(\d+)\s*'/), duree = m ? +m[1] * 60000 : 0;
     if (!duree || !l.debutParole) return null;
-    var el = h("span", { class: "batt", "data-debut": String(l.debutParole), "data-duree": String(duree) }, h("span", { class: "batt-corps" }, h("span", { class: "batt-niveau" })), h("span", { class: "batt-txt" }));
+    var el = h("span", { class: "batt", "data-debut": String(l.debutParole), "data-duree": String(duree) }, h("span", { class: "batt-corps" }, h("span", { class: "batt-niveau" })));
     majBatterie(el); return el;
   }
   function majBatterie(el) {
     var debut = +el.getAttribute("data-debut"), duree = +el.getAttribute("data-duree"), ecoule = Date.now() - debut, reste = duree - ecoule;
-    var f = Math.max(0, Math.min(1, reste / duree)), niv = el.querySelector(".batt-niveau"), txt = el.querySelector(".batt-txt");
+    var f = Math.max(0, Math.min(1, reste / duree)), niv = el.querySelector(".batt-niveau");
     niv.style.width = (f * 100) + "%";
     el.className = "batt" + (reste <= 0 ? " depasse" : f < 0.2 ? " faible" : f < 0.5 ? " moyen" : "");
     function mmss(ms) { var s2 = Math.round(Math.abs(ms) / 1000); return Math.floor(s2 / 60) + " min " + String(s2 % 60).padStart(2, "0"); }
-    txt.textContent = reste > 0 ? mmss(reste) + " restantes" : "dépassement de " + mmss(reste);
+    el.title = reste > 0 ? mmss(reste) + " restantes" : "dépassement de " + mmss(reste); // au survol uniquement
   }
   setInterval(function () { document.querySelectorAll(".batt").forEach(majBatterie); }, 1000);
   function minutesBloc(b) {
