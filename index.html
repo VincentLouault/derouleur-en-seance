@@ -158,6 +158,8 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 @media (max-width:900px){.filtres{grid-template-columns:1fr 1fr 1fr}.filtres .f-q{grid-column:span 2}}
 .prog{padding:4px 24px 18px;background:#fff;border-bottom:1px solid var(--line)}
 .recherche{margin:4px 0 4px}
+.btn-direct{display:inline-block;background:var(--red-btn);color:#fff;text-decoration:none;font-weight:700;border-radius:99px;padding:8px 18px;margin:0 0 10px;box-shadow:0 6px 16px -10px rgba(196,43,43,.8)}
+.btn-direct:hover{background:#a51f1f}
 .recherche .filtres{margin-bottom:12px}
 .kpis .prog.prog-haut{grid-column:1/-1;margin:0;border-top:4px solid var(--green-d);padding:12px 18px 14px}
 .prog.prog-haut{border:0;border-radius:16px;padding:6px 22px 18px;margin-bottom:12px;box-shadow:0 4px 16px -12px rgba(20,33,61,.45)}
@@ -333,6 +335,10 @@ tr.objet-row td{padding:2px 12px 10px!important;border-top:0!important}
 tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-radius:10px;padding:9px 13px;font-size:13.5px;line-height:1.45}
 .objet-lab{font-weight:700;color:#ffd60a}
 .plus-tard{color:var(--muted);font-style:italic}
+tr.odj-row td{font-style:italic;color:var(--muted);font-size:13.5px;padding:7px 14px!important;background:#fbfcfe;border-left:3px solid var(--line)}
+tr.odj-row .odj-lab{font-style:normal;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--navy2);margin-right:8px}
+tr.odj-row .odj-quand{font-style:normal;font-weight:600;color:var(--ink);margin-right:8px}
+tr.odj-row .odj-txt.sous:before{content:"→ "}
 .tag-odj{display:block;margin-top:5px;font-size:12px;font-weight:600;color:var(--green-d)}
 .art-bulle{display:inline-block;background:var(--navy2);color:#fff;font-weight:700;border-radius:8px;padding:3px 10px;line-height:1.35;max-width:100%}
 .expl.in{margin:0;padding:12px 24px;background:#fff;font-size:13.5px;border-bottom:1px solid var(--line2);max-width:none}
@@ -350,6 +356,8 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
   .suivi-bar .sb-actions{margin-left:0}
   .alertes{left:12px;right:12px;bottom:12px;max-width:none}
   .art-cours button{padding:10px 14px}
+  tr.odj-row td{grid-column:1/-1!important}
+  tr.odj-row td::before{display:none}
   .resume{font-size:15.5px}
   .kpis{grid-template-columns:1fr 1fr;gap:10px}
   .kpi{min-height:0;padding:12px 14px}
@@ -435,6 +443,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
   <div class="meta hidden" id="meta"></div>
 
   <div class="recherche" id="recherche">
+    <a class="btn-direct" href="#p-cours" onclick="var p=document.getElementById('p-cours');if(p){p.scrollIntoView({behavior:'smooth',block:'start'});}return false;">● Amendements en cours (direct)</a>
     <div class="suivi-bar" id="suivi-bar"></div>
     <div class="suivi-panel hidden" id="suivi-panel"></div>
     <div class="filtres">
@@ -749,7 +758,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120111359";</script>
+<script>window.DEROULEUR_BUILD = "20261120113549";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1038,7 +1047,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       var m = sansAccent(h.id).match(/_(\d{1,2})_([a-z]+)_(\d{4})$/); if (!m || !(m[2] in MOIS)) return;
       var y = +m[3], mo = MOIS[m[2]], d = +m[1];
       jour.querySelectorAll("li.timeline-item").forEach(function (it) {
-        var paras = it.querySelectorAll(".activiteParagraphe1"), vise = false;
+        var paras = Array.prototype.filter.call(it.querySelectorAll(".activiteParagraphe1"), function (p) { return p.closest("li.timeline-item") === it; }), vise = false;
         (paras.length ? Array.prototype.slice.call(paras) : [it.querySelector(".timeline-body")]).forEach(function (p) {
           var c = txt(p);
           if (motif.test(c) && !/explications? de vote|scrutin public solennel/i.test(c)) vise = true;
@@ -1077,7 +1086,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
         else if (/apres-midi/.test(t)) mn = 14 * 60 + 30;
         else if (/soir|nuit/.test(t)) mn = 21 * 60 + 30;
         else if (/matin/.test(t)) mn = 9 * 60 + 30;
-        var paras = Array.prototype.map.call(it.querySelectorAll("[class^='activiteParagraphe']"), function (p) { return txt(p).replace(/\s*\*\s*$/, ""); }).filter(Boolean);
+        var paras = Array.prototype.map.call(Array.prototype.filter.call(it.querySelectorAll("[class^='activiteParagraphe']"), function (p) { return p.closest("li.timeline-item") === it; }), function (p) { return txt(p).replace(/\s*\*\s*$/, ""); }).filter(Boolean);
         if (!paras.length) return;
         items.push({ heure: heure, debut: mn === null ? null : Date.parse(iso(y, mo, d, Math.floor(mn / 60), mn % 60)), points: paras.map(function (c) {
           var nn = c.match(/n°\s*(\d+)\s*,\s*(\d{4})\s*-\s*(\d{4})/);
@@ -1109,6 +1118,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       jour.querySelectorAll("li.timeline-item").forEach(function (it) {
         var creneau = txt(it.querySelector(".timeline-title")), texteCourant = null, dernier = null;
         it.querySelectorAll("[class^='activiteParagraphe']").forEach(function (p) {
+          if (p.closest("li.timeline-item") !== it) return; // éléments imbriqués : chaque paragraphe à son propre créneau
           var t = txt(p), nn = t.match(/n°\s*(\d+)\s*,\s*(\d{4})\s*-\s*(\d{4})/);
           if (/activiteParagraphe1/.test(p.className)) {
             if (nn) texteCourant = +nn[1] + "|" + nn[2] + "-" + nn[3]; else if (!/^\s*=\s*>/.test(t)) texteCourant = null;
@@ -1963,7 +1973,53 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
         h("span", { class: "ac-det" }, nb(dC.restants) + " amendement" + (dC.restants > 1 ? "s" : "") + " restant" + (dC.restants > 1 ? "s" : "") + " sur " + nb(dC.total) +
           (dC.fin !== null && dC.fin !== undefined ? " · fin estimée " + fourchette(dC.fin, dC.fin2, M.depart) : ""))));
     }
+    // Ordre du jour des deux prochains jours de séance (autres textes, questions d'actualité, réunions de commission…),
+    // intercalé en italique à son heure entre les articles.
+    var odjL = [];
+    (function () {
+      var L2 = window.DEROULEUR_LIVE; if (!L2 || !L2.programme) return;
+      var PG2 = L2.programme().slice(0, 2), maintenant = Date.now();
+      var JRS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"], MS = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"];
+      function quandTexte(t, ref) {
+        var x = plain(t), m = x.match(/(\d{1,2})(?:er)?\s+(janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre)/);
+        if (!m) return null;
+        var d0 = new Date(ref || maintenant); d0.setMonth(MS.indexOf(m[2]), +m[1]);
+        var hh = x.match(/a\s+(\d{1,2})\s*h(?:eures?)?\s*(\d{2})?/);
+        if (hh) d0.setHours(+hh[1], +hh[2] || 0, 0, 0); else if (/apres-midi/.test(x)) d0.setHours(14, 30, 0, 0); else if (/soir/.test(x)) d0.setHours(21, 0, 0, 0); else d0.setHours(9, 0, 0, 0);
+        return d0.getTime();
+      }
+      PG2.forEach(function (g) {
+        g.items.forEach(function (it) {
+          if (it.fin && it.fin < maintenant) return;
+          if (!it.fin && it.debut && it.debut < maintenant - 4 * 3600000) return;
+          var texteCour = null;
+          it.points.forEach(function (pt) {
+            var t = pt.libelle.trim();
+            if (/^•/.test(t)) {
+              t.split("•").map(function (b) { return b.trim(); }).filter(function (b) { return /r[ée]union de la commission/i.test(b); }).forEach(function (b) {
+                var q = quandTexte(b.replace(/^.*?:\s*/, ""), it.debut);
+                if (q && q < maintenant - 2 * 3600000) return;
+                odjL.push({ t: q || it.debut, txt: b, quand: q || it.debut });
+              });
+              return;
+            }
+            if (pt.numero) texteCour = pt.numero + "|" + pt.session;
+            if (texteCour === cfg.numero + "|" + cfg.session) return; // le texte affiché : déjà dans les articles
+            if (/^=\s*>/.test(t) && !pt.numero) { if (texteCour && texteCour !== cfg.numero + "|" + cfg.session) odjL.push({ t: it.debut, txt: t.replace(/^=\s*>\s*/, ""), quand: it.debut, sous: true }); return; }
+            odjL.push({ t: it.debut, txt: t.replace(/\s*\(texte de la commission,[^)]*\)/i, "").replace(/\s*\(n°\s*\d+[^)]*\)/i, ""), quand: it.debut, creneau: it.heure });
+          });
+        });
+      });
+      odjL.sort(function (a, b) { return (a.t || 0) - (b.t || 0); });
+    })();
+    function ligneOdj(o) {
+      var quand = o.quand ? (memeJour(o.quand, Date.now()) ? "aujourd'hui" : jourCourt(o.quand)) + (o.creneau ? " - " + o.creneau.charAt(0).toLowerCase() + o.creneau.slice(1) : " - " + hm(o.quand)) : "";
+      return h("tr", { class: "odj-row" }, h("td", { colspan: 6 }, h("span", { class: "odj-lab" }, "Ordre du jour"), quand ? h("span", { class: "odj-quand" }, quand) : null, h("span", { class: "odj-txt" + (o.sous ? " sous" : "") }, o.txt)));
+    }
+    var iOdj = 0;
+    function viderOdj(jusque) { while (iOdj < odjL.length && (jusque === Infinity || (odjL[iOdj].t && odjL[iOdj].t <= jusque))) tb.appendChild(ligneOdj(odjL[iOdj++])); }
     av.forEach(function (d) {
+      if (d.debut) viderOdj(d.debut);
       var estCours = M.etape ? M.etape.idx === d.i : (M.prochain && M.prochain.d === d.i);
       tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : "") + (d.suivi ? " suivi" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
         h("td", null, d.suivi ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, h("span", { class: "art-bulle" }, d.libelle), estCours ? h("span", { class: "badge" }, "En cours") : null, tagOdj(d),
@@ -1973,6 +2029,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
         d.sansAmdt ? h("td", null, "—") : h("td", null, d.fin === null ? "—" : fourch2(d.fin, d.fin2)),
         h("td", null, d.sort ? pillSort(d.sort) : "")));
     });
+    viderOdj(Infinity);
 
     // Filtres (listes)
     remplirFiltres(M);
