@@ -347,6 +347,9 @@ tr.flash td{animation:flash 2s ease-out}
 @keyframes flash{0%{background:#ffe08a}100%{background:transparent}}
 #s-amendements .ph h3{font-size:16px}
 #s-amendements .amhead h2{font-size:20px}
+.derouleur-av{overflow-y:auto!important;overscroll-behavior:contain;position:relative}
+.derouleur-av thead th{position:sticky;top:0;z-index:2;background:#f7f9fc}
+.derouleur-av + .defile{display:block;text-align:center;font-size:12px;color:var(--muted);padding:6px 0 8px;background:#fff}
 tr.plus-row td{padding:10px 16px!important;background:#f6f8fc;text-align:center}
 tr.plus-row .voir-plus{margin:0}
 tr.odj-row td{font-style:italic;color:var(--muted);font-size:13.5px;padding:7px 14px!important;background:#fbfcfe;border-left:3px solid var(--line)}
@@ -530,12 +533,13 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 
     <div class="panel gold" id="p-avenir">
       <div class="ph"><h3>Amendements à venir</h3><span class="cnt" id="avenir-cnt"></span></div>
-      <div class="scroll tall">
+      <div class="scroll derouleur-av" id="avenir-scroll">
         <table class="t-amdt">
           <thead><tr><th>Article</th><th>N°</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Statut</th></tr></thead>
           <tbody id="avenir-body"></tbody>
         </table>
       </div>
+      <span class="defile">Faites défiler la liste pour voir les amendements suivants ↕</span>
     </div>
 
     <div class="panel grey" id="p-archive">
@@ -773,7 +777,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120120943";</script>
+<script>window.DEROULEUR_BUILD = "20261120121519";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2121,15 +2125,22 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     var vb = vide($("avenir-body"));
     if (!avF.length) vb.appendChild(ligneVide(7, R > nRestCours ? "Aucun amendement à venir ne correspond aux filtres." : "Plus aucun autre amendement à examiner."));
     // Textes très longs (loi de finances : plus de 2 000 amendements) : on n'affiche que les 150 prochains, les filtres permettent d'aller plus loin.
-    // Les 3 prochains toujours visibles, la suite dans un dépliant.
-    var MAXV = 150, VISIBLES = 3, ouvertAv = !!S.avenirOuvert;
-    avF.slice(0, ouvertAv ? MAXV : VISIBLES).forEach(function (a) { vb.appendChild(ligneAmdt(a, M, "venir", now)); });
-    if (avF.length > VISIBLES) {
-      var resteAv = Math.min(avF.length, MAXV) - VISIBLES;
-      vb.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.avenirOuvert = !S.avenirOuvert; rendre(); if (!S.avenirOuvert) $("p-avenir").scrollIntoView({ block: "start" }); } },
-        ouvertAv ? "Replier : n'afficher que les 3 prochains ▴" : "Voir les " + nb(resteAv) + " amendements suivants ▾"))));
-    }
-    if (ouvertAv && avF.length > MAXV) vb.appendChild(ligneVide(7, "… et " + nb(avF.length - MAXV) + " autres amendements à venir : utilisez les filtres (article, groupe, n°) pour les afficher."));
+    // Dérouleur : la liste défile dans un cadre haut de 3 amendements (jusqu'à 150, les filtres permettent d'aller plus loin).
+    var MAXV = 150, scrollAv = $("avenir-scroll"), sigAv = JSON.stringify(S.f) + SUIVI.seul;
+    if (!scrollAv._suivi) { scrollAv._suivi = 1; scrollAv.addEventListener("scroll", function () { S.posAv = scrollAv.scrollTop; }, { passive: true }); }
+    if (S.sigAv !== sigAv) { S.posAv = 0; S.sigAv = sigAv; } // nouvelle recherche : retour en haut de la liste
+    var posAv = S.posAv || 0;
+    avF.slice(0, MAXV).forEach(function (a) { vb.appendChild(ligneAmdt(a, M, "venir", now)); });
+    if (avF.length > MAXV) vb.appendChild(ligneVide(7, "… et " + nb(avF.length - MAXV) + " autres amendements à venir : utilisez les filtres (article, groupe, n°) pour les afficher."));
+    (function () {
+      // Hauteur du cadre : en-tête + 3 premiers amendements (et leurs objets dépliés), recalculée à chaque actualisation.
+      var lignes = Array.prototype.filter.call(vb.children, function (tr) { return !tr.classList.contains("objet-row") || !tr.classList.contains("hidden"); });
+      var n = 0, hauteur = 0, th = scrollAv.querySelector("thead");
+      for (var q = 0; q < lignes.length; q++) { if (!lignes[q].classList.contains("objet-row")) { if (n === 3) break; n++; } hauteur += lignes[q].getBoundingClientRect().height; }
+      var tete = th && getComputedStyle(th).display !== "none" ? th.getBoundingClientRect().height : 0;
+      scrollAv.style.maxHeight = avF.length > 3 && hauteur ? Math.round(tete + hauteur + 2) + "px" : "none";
+      scrollAv.scrollTop = posAv;
+    })();
 
     // Archive
     $("arch-count").textContent = nb(M.examines.length);
