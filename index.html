@@ -159,6 +159,7 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 .prog{padding:4px 24px 18px;background:#fff;border-bottom:1px solid var(--line)}
 .recherche{margin:4px 0 4px}
 .recherche .filtres{margin-bottom:12px}
+.kpis .prog.prog-haut{grid-column:1/-1;margin:0;border-top:4px solid var(--green-d);padding:12px 18px 14px}
 .prog.prog-haut{border:0;border-radius:16px;padding:6px 22px 18px;margin-bottom:12px;box-shadow:0 4px 16px -12px rgba(20,33,61,.45)}
 #banner{margin-top:30px}
 .prog .t{color:var(--muted);margin:10px 0 10px}
@@ -746,7 +747,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120110424";</script>
+<script>window.DEROULEUR_BUILD = "20261120111014";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1884,9 +1885,10 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       kpi("Restant à examiner", nb(R), R ? "soit environ " + duree(M.dureeRestante) + " à " + duree(M.dureeRestante2) + " de séance" : "examen des articles terminé"),
       (M.etape && (!M.prochain || (M.divs[M.etape.idx] && M.divs[M.etape.idx].restants === 0)))
         ? kpi("Étape en cours", M.etape.libelle, "selon le dérouleur du Sénat", M.etape.libelle.length > 90 ? "texte long" : M.etape.libelle.length > 30 ? "texte" : true)
-        : kpi(M.enDirect ? "Amendement en discussion" : "Prochain amendement", M.prochain ? "n° " + M.prochain.n : "—", M.prochain && M.divs[M.prochain.d] ? M.divs[M.prochain.d].libelle : "", true),
-      kpi("Fin estimée des débats", R ? (M.fin ? h("span", null, h("span", { class: "h1" }, heureJ(M.fin)), " ", h("span", { class: "h2" }, "– " + (M.fin2 ? heureJ(M.fin2) : "…"))) : "—") : "—", "", "heure")
+        : kpi(M.enDirect ? "Amendement en discussion" : "Prochain amendement", M.prochain ? "n° " + M.prochain.n : "—", M.prochain && M.divs[M.prochain.d] ? M.divs[M.prochain.d].libelle : "", true)
     );
+    // Jauge d'avancement du texte, à la place de l'ancienne case « Fin estimée des débats ».
+    S.jauge = S.jauge || document.querySelector(".prog.prog-haut"); if (S.jauge) $("kpis").appendChild(S.jauge);
 
     // Bandeau
     var age = (now - new Date(cur.releve)) / 60000;
