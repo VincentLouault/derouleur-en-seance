@@ -733,6 +733,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 })(typeof window !== "undefined" ? window : this);
 
 </script>
+<script>window.DEROULEUR_BUILD = "20261120095705";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2124,8 +2125,40 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     pliables();
     lierFiltres();
     chargerBase().then(function (d) { S.base = d; rendre(); }, function () { $("banner-txt").textContent = "Impossible de lire le site du Sénat depuis cet affichage. Ouvrez la page par son lien web (ship.place) ou dans un navigateur, puis rechargez-la."; ["rub-cours", "rub-venir"].forEach(function (id) { var e = document.getElementById(id); if (e) e.innerHTML = "<p class=\"vide\">Site du Sénat injoignable depuis cet affichage.</p>"; }); });
-    // Rechargement léger du fichier publié et recalcul des heures (statut « probablement passé »).
-    setInterval(function () { chargerBase().then(function (d) { if (!S.base || d.releve !== S.base.releve) { S.base = d; } rendre(); }, function () { rendre(); }); }, (window.DEROULEUR_LIVE && window.DEROULEUR_LIVE.intervalle) || 30000);
+    // Actualisation régulière. Les téléphones ralentissent ou suspendent les minuteries des pages restées ouvertes
+    // en arrière-plan : on actualise donc aussi dès que la page redevient visible, et un chien de garde rattrape
+    // les actualisations manquées. Après une longue absence, ou quand une nouvelle version est publiée,
+    // la page se recharge entièrement.
+    var PERIODE = (window.DEROULEUR_LIVE && window.DEROULEUR_LIVE.intervalle) || 30000;
+    var enCours = null, debutEnCours = 0, dernierOk = Date.now(), cacheeDepuis = 0, versionVue = 0;
+    function actualiser() {
+      if (enCours && Date.now() - debutEnCours < 60000) return enCours;
+      debutEnCours = Date.now();
+      enCours = chargerBase().then(function (d) { dernierOk = Date.now(); if (!S.base || d.releve !== S.base.releve) { S.base = d; } rendre(); }, function () { rendre(); })
+        .then(function () { enCours = null; }, function () { enCours = null; });
+      return enCours;
+    }
+    function verifierVersion() {
+      if (!window.DEROULEUR_BUILD || !window.fetch || Date.now() - versionVue < 60000) return;
+      versionVue = Date.now();
+      fetch(location.href.split("#")[0].split("?")[0] + "?v=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
+        var m = t.match(/DEROULEUR_BUILD = "(\d+)"/);
+        if (m && m[1] > window.DEROULEUR_BUILD && document.visibilityState === "visible") location.reload();
+      }, function () {});
+    }
+    function auRetour() {
+      if (document.visibilityState !== "visible") return;
+      if (cacheeDepuis && Date.now() - cacheeDepuis > 15 * 60000) { location.reload(); return; }
+      cacheeDepuis = 0;
+      actualiser(); verifierVersion();
+    }
+    setInterval(actualiser, PERIODE);
+    setInterval(function () { if (document.visibilityState === "visible" && Date.now() - dernierOk > 2 * PERIODE) actualiser(); }, 10000);
+    setInterval(function () { if (document.visibilityState === "visible") verifierVersion(); }, 5 * 60000);
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") cacheeDepuis = Date.now(); else auRetour(); });
+    window.addEventListener("pageshow", function (e) { if (e.persisted) { cacheeDepuis = cacheeDepuis || 1; auRetour(); } });
+    window.addEventListener("focus", auRetour);
+    window.addEventListener("online", function () { actualiser(); verifierVersion(); });
     // Données partagées : la dernière mise à jour collée par un lecteur.
     if (window.claude && typeof window.claude.use === "function") {
       window.claude.use("user").then(function (u) {
