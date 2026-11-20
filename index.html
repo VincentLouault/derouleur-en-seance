@@ -187,6 +187,8 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 .actu-lcp:hover{background:var(--navy)}
 .actu-liste .src{display:inline-block;font-size:11px;font-weight:700;border-radius:99px;padding:0 8px;margin-right:6px;color:#fff;background:var(--navy2)}
 .actu-liste .src.ps{background:var(--red-btn)}
+.actu-liste li.actu-plus{padding:8px 24px;background:#f6f8fc}
+.actu-liste li.actu-plus .voir-plus{margin:0}
 .actu-liens{display:flex;flex-wrap:wrap;gap:10px}
 .actu-fi{display:inline-block;background:#e10d1a;color:#fff;text-decoration:none;border-radius:10px;padding:10px 18px;font-weight:600}
 .actu-fi:hover{background:#b80a15}
@@ -738,7 +740,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120101458";</script>
+<script>window.DEROULEUR_BUILD = "20261120101958";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1175,7 +1177,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       var tous = [];
       Object.keys(d.sources || {}).forEach(function (k) { (d.sources[k] || []).forEach(function (x) { if (x.titre && /^https?:\/\//.test(x.lien)) tous.push({ titre: x.titre, lien: x.lien, date: x.date || null, source: x.source || k }); }); });
       tous.sort(function (a, b) { return (b.date || 0) - (a.date || 0); });
-      ACTUS = { lu: Date.now(), erreur: false, items: tous.slice(0, 12) };
+      ACTUS = { lu: Date.now(), erreur: false, items: tous.slice(0, 40) };
     }, function () { ACTUS = { lu: Date.now() - 240000, items: ACTUS.items, erreur: true }; });
   }
 
@@ -1941,8 +1943,15 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       return;
     }
     vide(ul);
-    if (!A.length) { ul.appendChild(h("li", { class: "vide" }, "Aucune information disponible pour l'instant.")); return; }
-    A.forEach(function (it) {
+    // Dernières 24 heures seulement ; les 3 plus récentes visibles, le reste dans un dépliant.
+    var lim = Date.now() - 24 * 3600000;
+    A = A.filter(function (it) { return it.date && it.date >= lim; });
+    if (!A.length) { ul.appendChild(h("li", { class: "vide" }, "Aucune information publiée ces dernières 24 heures.")); return; }
+    var reste = A.length - 3;
+    A.forEach(function (it, k) {
+      if (k === 3) ul.appendChild(h("li", { class: "actu-plus" }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.actusOuvert = !S.actusOuvert; rendreActus(); } },
+        S.actusOuvert ? "Masquer les infos plus anciennes ▴" : "Voir les " + reste + " autre" + (reste > 1 ? "s" : "") + " info" + (reste > 1 ? "s" : "") + " des dernières 24 heures ▾")));
+      if (k >= 3 && !S.actusOuvert) return;
       ul.appendChild(h("li", null, h("span", { class: "d" }, it.source ? h("span", { class: "src" + (/public/i.test(it.source) ? " ps" : "") }, it.source) : null, it.date ? (memeJour(it.date, Date.now()) ? hm(it.date) : dateLongue(it.date) + " - " + hm(it.date)) : ""), h("a", { href: it.lien, target: "_blank", rel: "noopener" }, it.titre)));
     });
   }
