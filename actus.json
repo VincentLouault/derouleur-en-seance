@@ -1,5 +1,5 @@
 {
-"maj": 1795189322202,
+"maj": 1795193027573,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "\"Qui sait sortir autant de F-35 en moins de trois ans?\": Pourquoi l’Europe achète encore des avions américains",
+"lien": "https://lcp.fr/actualites/qui-sait-sortir-autant-de-f-35-en-moins-de-trois-ans-pourquoi-l-europe-achete-encore-des",
+"date": 1795190700000,
+"source": "LCP"
+},
+{
 "titre": "Main tendue par Marine Tondelier à Jean-Luc Mélenchon: une \"trahison\" selon Yannick Jadot, qui quitte les Écologistes",
 "lien": "https://lcp.fr/actualites/main-tendue-par-marine-tondelier-a-jean-luc-melenchon-une-trahison-selon-yannick-jadot",
 "date": 1795175220000,
@@ -140,12 +146,6 @@
 "titre": "Emploi: le dispositif \"Territoires zéro chômeur de longue durée\" pérennisé à l'issue de l'adoption définitive d'un texte par les députés",
 "lien": "https://lcp.fr/actualites/emploi-le-dispositif-territoires-zero-chomeur-de-longue-duree-perennise-a-l-issue-de-l",
 "date": 1795097460000,
-"source": "LCP"
-},
-{
-"titre": "Des policiers manifestent devant Beauvau: Jean-Luc Mélenchon appelle à \"sévèrement\" les \"punir\"",
-"lien": "https://lcp.fr/actualites/des-policiers-manifestent-devant-beauvau-jean-luc-melenchon-appelle-a-severement-les",
-"date": 1795074120000,
 "source": "LCP"
 }
 ]
