@@ -162,7 +162,8 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 @media (max-width:900px){.filtres{grid-template-columns:1fr 1fr 1fr}.filtres .f-q{grid-column:span 2}}
 .prog{padding:4px 24px 18px;background:#fff;border-bottom:1px solid var(--line)}
 .recherche{margin:4px 0 4px}
-#titre-outil{cursor:help}
+#titre-outil{cursor:help;padding-right:190px}
+.logo-vince{position:absolute;right:22px;top:16px;height:58px;width:auto;background:#fff;border-radius:12px;padding:6px 12px;box-shadow:0 6px 18px -10px rgba(0,0,0,.6)}
 .bulle-titre{position:relative;max-width:820px;margin:4px 0 6px;background:#fff;color:var(--ink);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.5;box-shadow:0 10px 24px -12px rgba(0,0,0,.6);animation:bulle .2s ease-out}
 .bulle-titre:before{content:"";position:absolute;top:-7px;left:28px;border:7px solid transparent;border-top:0;border-bottom-color:#fff}
 @keyframes bulle{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
@@ -385,6 +386,8 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   h2{font-size:19px}
   .hero{padding:16px 16px 18px;border-radius:14px}
   .hero h1{font-size:21px}
+  #titre-outil{padding-right:96px}
+  .logo-vince{height:36px;right:12px;top:14px;padding:4px 7px;border-radius:9px}
   .hero .intro{font-size:12px}
   tr.cur{box-shadow:inset 4px 0 0 var(--red-btn)}
   .expl.in{padding:10px 14px}
@@ -458,11 +461,19 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   .rub .t-titre{font-size:19px}
 }
 </style>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Vince">
+<meta name="application-name" content="Vince">
+<meta name="theme-color" content="#14213d">
 </head>
 <body>
 <div class="wrap">
   <header class="hero">
   <h1 id="titre-outil">Dérouleur « En Séance » Vince</h1>
+  <img class="logo-vince" src="logo-vince.png" alt="Vince" onerror="this.remove()">
   <div class="bulle-titre hidden" id="bulle-titre" role="note">Conçu par l'équipe de Vincent Louault à sa demande, cet outil enrichit le dérouleur du Sénat : avis de la commission et du Gouvernement, groupes politiques et heures de passage estimées. Le tout est lu en direct sur le site du Sénat, actualisé toutes les 30 secondes, et suit automatiquement le texte en discussion au fil des jours.</div>
   <div class="intro">
     <p id="intro-avis"></p>
@@ -796,7 +807,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120132228";</script>
+<script>window.DEROULEUR_BUILD = "20261120134845";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
