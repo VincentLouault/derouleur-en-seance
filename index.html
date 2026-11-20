@@ -796,7 +796,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120125927";</script>
+<script>window.DEROULEUR_BUILD = "20261120132228";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1234,6 +1234,10 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   function noterEtat(t, res, courant) {
     var e = etape(res, courant);
     t.restants = e.restants; t.termine = e.termine; t.etape = e.libelle; t.statut = e.statut; t.verifie = Date.now();
+    // Activité constatée pendant que la page est ouverte : de nouveaux sorts publiés depuis la lecture précédente.
+    var nbEx = res.amendements.filter(function (a) { return a.s; }).length + res.divisions.filter(function (d) { return d.sort; }).length;
+    if (t.nbEx !== undefined && nbEx > t.nbEx) t.activite = Date.now();
+    t.nbEx = nbEx;
     if (res.tpsmaj) t.tpsmaj = res.tpsmaj;
     // Examen commencé : au moins un amendement ou une division dont le sort est publié, ou un amendement marqué en cours.
     var SORT = /adopt|rejet|retir|non soutenu|tomb|satisfait|vot/i;
@@ -1250,29 +1254,40 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 
   /* ---------- 6. Choix du texte suivi ---------- */
   var CHOIX = null; // texte choisi à la main par le lecteur (pour la journée)
+  /* Choix du texte en séance :
+     1. l'ordre du jour du jour fait foi : premier texte prévu aujourd'hui qui n'est ni terminé, ni interrompu pour la journée
+        (articles appelés en priorité déjà examinés) ;
+     2. mais si, pendant que la page est ouverte, de nouveaux sorts sont publiés sur un autre texte, c'est lui qui est en séance ;
+     3. sans ordre du jour, on part du dernier texte du jour dont l'examen a commencé. */
+  function ordreOdjDuJour() {
+    var out = [];
+    try {
+      var g = programme(ODJ.page).filter(function (x) { return x.aujourdHui; })[0];
+      if (g) g.items.forEach(function (it) { it.points.forEach(function (p) { if (p.numero) { var k = p.numero + "|" + p.session; if (out.indexOf(k) < 0) out.push(k); } }); });
+    } catch (e) {}
+    return out;
+  }
   function texteActif() {
     var ts = JOUR.textes; if (!ts.length) return null;
     if (CHOIX) { var c = ts.filter(function (t) { return t.url === CHOIX; })[0]; if (c) return c; }
-    // Le Sénat peut passer au texte suivant avant que tous les sorts du précédent soient publiés :
-    // on part donc du dernier texte du jour dont l'examen a commencé, les textes précédents étant considérés comme passés.
-    // Un texte est aussi considéré comme commencé quand le Sénat met à jour son dérouleur après le texte précédent
-    // (discussion générale, premiers amendements…), même si aucun sort n'est encore publié.
-    var debut = 0, i, maxAvant = 0, debJour = Date.now() - 18 * 3600000;
-    for (i = 0; i < ts.length; i++) {
-      var tp = ts[i].tpsmaj || 0;
-      if (ts[i].demarre || (i > 0 && tp > debJour && tp > maxAvant && maxAvant > debJour)) debut = i;
-      maxAvant = Math.max(maxAvant, tp);
+    function dispo(t) { return t.termine !== true && !t.pauseJour; }
+    var choisi = null, i, ordre = JOUR.aujourdHui ? ordreOdjDuJour() : [];
+    if (ordre.length) {
+      for (i = 0; i < ordre.length && !choisi; i++) { var t0 = ts.filter(function (t) { return t.numero + "|" + t.session === ordre[i]; })[0]; if (t0 && dispo(t0)) choisi = t0; }
     }
-    var choisi = null;
-    for (i = debut; i < ts.length; i++) if (ts[i].termine !== true && !ts[i].pauseJour) { choisi = ts[i]; break; }
-    if (!choisi) for (i = 0; i < ts.length; i++) if (ts[i].termine !== true && !ts[i].pauseJour) { choisi = ts[i]; break; }
-    // Retour sur un texte non terminé : s'il est mis à jour nettement plus récemment que le texte retenu, c'est lui qui est en séance.
-    var recent = null;
-    ts.forEach(function (t) { if (t.termine !== true && !t.pauseJour && t.tpsmaj && t.tpsmaj > debJour && (!recent || t.tpsmaj > recent.tpsmaj)) recent = t; });
-    if (recent && choisi && recent !== choisi && recent.tpsmaj > (choisi.tpsmaj || 0) + 120000) choisi = recent;
+    if (!choisi) {
+      var debut = 0;
+      for (i = 0; i < ts.length; i++) if (ts[i].demarre) debut = i;
+      for (i = debut; i < ts.length; i++) if (dispo(ts[i])) { choisi = ts[i]; break; }
+      if (!choisi) for (i = 0; i < ts.length; i++) if (dispo(ts[i])) { choisi = ts[i]; break; }
+    }
+    // Activité constatée en direct sur un autre texte (nouveaux sorts depuis moins de 15 minutes) : il prime.
+    var actifRecent = null;
+    ts.forEach(function (t) { if (t.termine !== true && t.activite && Date.now() - t.activite < 15 * 60000 && (!actifRecent || t.activite > actifRecent.activite)) actifRecent = t; });
+    if (actifRecent && actifRecent !== choisi && (!choisi || !choisi.activite || actifRecent.activite > choisi.activite)) choisi = actifRecent;
     if (!choisi) choisi = ts[ts.length - 1];
     var k = ts.indexOf(choisi);
-    ts.forEach(function (t, j) { t.depasse = j < k && t.termine !== true; });
+    ts.forEach(function (t, j) { t.depasse = j < k && t.termine !== true && !t.pauseJour && !(ordre.length && ordre.indexOf(t.numero + "|" + t.session) > ordre.indexOf(choisi.numero + "|" + choisi.session)); });
     return choisi;
   }
   function verifierAutres(actif) {
@@ -1384,7 +1399,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     if (enCours && dernier) return Promise.resolve(dernier);
     enCours = true;
     var actif, res;
-    return majJour().then(function () {
+    return majJour().then(function () { return majOdj(); }).then(function () {
       // Une première passe rapide sur les textes dont l'avancement est inconnu, pour choisir le bon.
       return Promise.all(JOUR.textes.filter(function (t) { return t.termine === undefined || t.termine === null; }).map(function (t) {
         return lire(t.url).then(function (pg) { noterEtat(t, analyser(pg), null); t._page = pg; }, function () { t.termine = null; });
@@ -2266,12 +2281,14 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
         else if (M.prochain) e.append(" · " + (M.enDirect ? "en discussion" : "prochain") + " : n° " + M.prochain.n);
       }
       if (fini) c.appendChild(e); // pendant l'examen, ces chiffres figurent déjà dans les indicateurs
-      var termines = J.textes.filter(function (t) { return t.url !== actif && (t.termine === true || t.depasse); });
-      if (termines.length) {
-        var a = h("div", { class: "autres" }, "Terminé" + (termines.length > 1 ? "s" : "") + " ce jour : ");
-        termines.forEach(function (t, i) { if (i) a.append(", "); a.append(h("button", { type: "button", onclick: basculer(t) }, t.court)); });
+      var termines = J.textes.filter(function (t) { return t.url !== actif && t.termine === true; });
+      var interrompus = J.textes.filter(function (t) { return t.url !== actif && t.termine !== true && (t.depasse || t.pauseJour); });
+      [[termines, "Terminé" + (termines.length > 1 ? "s" : "") + " ce jour : "], [interrompus, "Examen interrompu, reprise à une prochaine séance : "]].forEach(function (x) {
+        if (!x[0].length) return;
+        var a = h("div", { class: "autres" }, x[1]);
+        x[0].forEach(function (t, i) { if (i) a.append(", "); a.append(h("button", { type: "button", onclick: basculer(t) }, t.court)); });
         c.appendChild(a);
-      }
+      });
     } else c.appendChild(h("p", { class: "vide" }, "Aucun texte en séance."));
     // Textes à venir : autres textes du jour encore à examiner, puis ceux du prochain jour de séance publié
     var v = vide($("rub-venir")), items = [];
