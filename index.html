@@ -371,6 +371,25 @@ h2.avec-audio{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .btn-audio.on:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;margin-right:7px;vertical-align:1px;animation:clignote 1.2s steps(2) infinite}
 .btn-audio[disabled]{opacity:.5;cursor:default}
 .audio-msg{font-size:12.5px;font-weight:400;color:var(--muted);flex-basis:100%}
+.btn-tuto{all:unset;cursor:pointer;display:inline-block;margin:0 0 10px 8px;font-size:13px;font-weight:700;color:var(--navy2);background:#fff;border:1.5px solid var(--navy2);border-radius:99px;padding:6px 13px;vertical-align:top;box-shadow:0 4px 12px -8px rgba(20,33,61,.6)}
+.btn-tuto:hover{background:var(--navy-bg)}
+.tuto-voile{position:fixed;inset:0;z-index:9000;pointer-events:auto}
+.tuto-spot{position:fixed;z-index:9001;border-radius:14px;box-shadow:0 0 0 4px #ffd60a,0 0 0 9999px rgba(10,18,35,.7);transition:all .35s ease;pointer-events:none}
+.tuto-carte{position:fixed;z-index:9002;width:min(380px,calc(100vw - 24px));background:#fff;color:var(--ink);border-radius:16px;padding:16px 18px 14px;box-shadow:0 20px 50px -12px rgba(0,0,0,.6);transition:top .35s ease,left .35s ease}
+.tuto-carte .tuto-etape{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--green-d);margin-bottom:4px}
+.tuto-carte h4{margin:0 0 6px;font-size:17px;color:var(--navy)}
+.tuto-carte p{margin:0 0 6px;font-size:14px;line-height:1.5}
+.tuto-carte ul{margin:4px 0 6px;padding-left:18px;font-size:13.5px;line-height:1.45}
+.tuto-nav{display:flex;align-items:center;gap:8px;margin-top:10px}
+.tuto-nav .esp{flex:1}
+.tuto-nav button{all:unset;cursor:pointer;font-size:13.5px;font-weight:600;border-radius:99px;padding:6px 14px}
+.tuto-nav .prec{color:var(--navy2);border:1.5px solid var(--line)}
+.tuto-nav .suiv{color:#fff;background:var(--navy2)}
+.tuto-nav .fermer{color:var(--muted);padding:6px 4px}
+.tuto-points{display:flex;gap:4px;margin-top:10px}
+.tuto-points i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.tuto-points i.on{background:var(--navy2)}
+@media (max-width:720px){.tuto-carte{left:12px!important;right:12px;width:auto;top:auto!important;bottom:12px}}
 .fleche{color:var(--red-btn);font-size:16px;margin-right:6px;display:inline-block;animation:pousse 1.2s ease-in-out infinite}
 @keyframes pousse{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
 #cours-body tr.cur{box-shadow:inset 6px 0 0 var(--red-btn)!important}
@@ -512,7 +531,8 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   <div class="meta hidden" id="meta"></div>
 
   <div class="recherche" id="recherche">
-    <a class="btn-direct" href="#p-cours" onclick="var r=document.querySelector('#cours-body tr.cur')||document.getElementById('p-cours');if(r){r.scrollIntoView({behavior:'smooth',block:'center'});r.classList.add('flash');setTimeout(function(){r.classList.remove('flash');},2200);}return false;">● Amendements en cours (direct)</a>
+    <a class="btn-direct" id="btn-direct-ancre" href="#p-cours" onclick="var r=document.querySelector('#cours-body tr.cur')||document.getElementById('p-cours');if(r){r.scrollIntoView({behavior:'smooth',block:'center'});r.classList.add('flash');setTimeout(function(){r.classList.remove('flash');},2200);}return false;">● Amendements en cours (direct)</a>
+    <button type="button" class="btn-tuto" id="btn-tuto" title="Découvrir toutes les fonctions du dérouleur">❓ Tutoriel</button>
     <div class="suivi-bar" id="suivi-bar"></div>
     <div class="suivi-panel hidden" id="suivi-panel"></div>
     <div class="filtres">
@@ -828,7 +848,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120143210";</script>
+<script>window.DEROULEUR_BUILD = "20261120150344";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2699,6 +2719,69 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     // Changement de séance (matin → après-midi → soir) : on bascule sur le nouveau flux.
     setInterval(function () { var L = window.DEROULEUR_LIVE, V = L && L.video ? L.video() : null; if (AUDIO_D.on && V && V.flux && V.flux !== AUDIO_D.flux) { arreterAudio(); lancerAudio(); } }, 30000);
   }
+  /* ---------- Tutoriel : visite guidée des fonctions du dérouleur ---------- */
+  var TUTO = [
+    { cible: "#titre-outil", titre: "Bienvenue sur le dérouleur", html: "<p>Cet outil lit en direct le site du Sénat (dérouleur « En séance », ordre du jour, vidéo de la séance) et l'actualise toutes les 30 secondes. Il suit seul le texte en discussion, jour après jour.</p><p>Survolez ou touchez le titre pour revoir sa présentation.</p>" },
+    { cible: ".rubriques .col-g", titre: "Texte en cours et textes à venir", html: "<p>Le texte examiné en séance, avec la pastille <b>En séance</b>, puis le prochain texte de l'ordre du jour (« Voir le suivant » pour les autres jours). Un clic sur un texte à venir affiche son dérouleur.</p><p>La phrase dessous donne l'estimation de fin des débats.</p>" },
+    { cible: "#kpis", titre: "Les chiffres clés", html: "<ul><li>amendements déposés, examinés (adoptés, rejetés) et restants ;</li><li>l'étape ou l'amendement en discussion ;</li><li>la jauge d'avancement du texte.</li></ul><p>Les horaires sont estimés à 20-25 amendements par heure, en tenant compte des temps de parole et de l'ordre du jour.</p>" },
+    { cible: "#btn-direct-ancre", titre: "Aller au direct", html: "<p>Le bouton rouge vous amène directement sur l'amendement en discussion, signalé par une <b>flèche rouge</b>, avec les amendements qui l'entourent.</p>" },
+    { cible: "#suivi-bar", titre: "Mes sénateurs", html: "<p>« Choisir » : sélectionnez des sénateurs ou des groupes. Leurs amendements sont <b>surlignés en vert avec une ★</b> partout.</p><ul><li>cochez « Premier signataire » et/ou « Cosignataires » ;</li><li>« Seulement leurs amendements » filtre les tableaux ;</li><li>une <b>alerte</b> (vibration, notification) prévient quand un de leurs amendements arrive à 10 puis 3 amendements ;</li><li>« Envoyer mes favoris vers un autre appareil » les recopie sur votre téléphone.</li></ul>" },
+    { cible: ".recherche .filtres", titre: "Rechercher", html: "<p>Filtrez par article, groupe, statut, n° d'amendement (« I-27 » ou « 27 ») ou nom de sénateur. La recherche s'applique aux amendements, mais aussi aux articles et aux orateurs.</p>" },
+    { cible: "#s-orateurs", titre: "Prises de parole", html: "<p>Les orateurs inscrits de l'étape en cours, synchronisés avec le <b>sommaire du direct vidéo</b> :</p><ul><li>ceux qui ont parlé disparaissent ;</li><li>l'orateur <b>à la tribune</b> a une batterie qui se vide avec son temps de parole, puis affiche <b>« CONCLURE »</b>.</li></ul>" },
+    { cible: "#p-articles", titre: "Articles à venir", html: "<p>Chaque article avec ses amendements et ses heures de passage estimées (sur 2 jours de séance). En italique, les autres points de l'<b>ordre du jour</b> : autres textes, questions d'actualité, réunions de commission.</p><p>Cliquez sur un article pour voir ses amendements.</p>" },
+    { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>10 derniers examinés</b> (3 visibles), <b>en cours</b>, <b>à venir</b> (liste qui défile) et <b>déjà examinés</b> ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
+    { cible: "[data-audio]", titre: "Écouter la séance", html: "<p>« Activer l'audio » diffuse le son du direct de l'hémicycle, sans quitter la page.</p>" },
+    { cible: "#s-actus", titre: "Actualités", html: "<p>Les dernières infos de Public Sénat et de LCP sur 24 heures (3 visibles, les autres en dépliant).</p>" },
+    { cible: "#titre-outil", titre: "Sur votre téléphone et votre ordinateur", html: "<p>Ajoutez le dérouleur à l'écran d'accueil (iPhone : Partager → « Sur l'écran d'accueil » ; Android et ordinateur : « Installer l'application ») pour l'ouvrir comme une application, avec l'icône « V ».</p><p>La page se met à jour seule, même restée ouverte en arrière-plan.</p>" }
+  ];
+  var TU = { i: 0, voile: null, spot: null, carte: null };
+  function tutoCible(st) {
+    var els = Array.prototype.slice.call(document.querySelectorAll(st.cible)).filter(function (e) { return e.offsetParent !== null || getComputedStyle(e).position === "fixed"; });
+    return els[0] || null;
+  }
+  function tutoPlacer() {
+    var st = TUTO[TU.i], el = tutoCible(st), c = TU.carte, sp = TU.spot;
+    if (!el) { sp.style.opacity = "0"; c.style.top = "50%"; c.style.left = "50%"; c.style.transform = "translate(-50%,-50%)"; return; }
+    sp.style.opacity = "1"; c.style.transform = "";
+    var r = el.getBoundingClientRect(), m = 8, mobile = innerWidth <= 720, hMax = Math.min(r.height, innerHeight * 0.55);
+    if (mobile) hMax = Math.max(36, Math.min(r.height, innerHeight - c.offsetHeight - 30 - r.top - m));
+    sp.style.top = (r.top - m) + "px"; sp.style.left = (r.left - m) + "px"; sp.style.width = (r.width + 2 * m) + "px"; sp.style.height = (hMax + 2 * m) + "px";
+    var ch = c.offsetHeight, cw = c.offsetWidth, top = r.top + hMax + m + 14;
+    if (top + ch > innerHeight - 10) top = Math.max(10, r.top - m - 14 - ch);
+    c.style.top = top + "px"; c.style.left = Math.min(Math.max(12, r.left), innerWidth - cw - 12) + "px";
+  }
+  function tutoAller(i) {
+    TU.i = Math.max(0, Math.min(TUTO.length - 1, i));
+    var st = TUTO[TU.i], el = tutoCible(st), c = vide(TU.carte);
+    c.appendChild(h("div", { class: "tuto-etape" }, "Tutoriel · " + (TU.i + 1) + " / " + TUTO.length));
+    c.appendChild(h("h4", null, st.titre));
+    var corps = h("div"); corps.innerHTML = st.html; c.appendChild(corps);
+    var pts = h("div", { class: "tuto-points" }); TUTO.forEach(function (x, k) { pts.appendChild(h("i", { class: k === TU.i ? "on" : null })); }); c.appendChild(pts);
+    c.appendChild(h("div", { class: "tuto-nav" },
+      h("button", { type: "button", class: "fermer", onclick: tutoFermer }, "Fermer"), h("span", { class: "esp" }),
+      TU.i > 0 ? h("button", { type: "button", class: "prec", onclick: function () { tutoAller(TU.i - 1); } }, "‹ Précédent") : null,
+      h("button", { type: "button", class: "suiv", onclick: function () { if (TU.i < TUTO.length - 1) tutoAller(TU.i + 1); else tutoFermer(); } }, TU.i < TUTO.length - 1 ? "Suivant ›" : "Terminer")));
+    if (el) {
+      var r = el.getBoundingClientRect();
+      if (r.top < 70 || r.bottom > innerHeight * 0.55) window.scrollTo({ top: Math.max(0, scrollY + r.top - 90), behavior: "smooth" });
+    }
+    tutoPlacer(); setTimeout(tutoPlacer, 420); setTimeout(tutoPlacer, 900);
+  }
+  function tutoOuvrir() {
+    if (TU.carte) return;
+    TU.voile = h("div", { class: "tuto-voile", onclick: function (e) { e.stopPropagation(); } });
+    TU.spot = h("div", { class: "tuto-spot" }); TU.carte = h("div", { class: "tuto-carte", role: "dialog", "aria-label": "Tutoriel" });
+    document.body.appendChild(TU.voile); document.body.appendChild(TU.spot); document.body.appendChild(TU.carte);
+    window.addEventListener("scroll", tutoPlacer, { passive: true }); window.addEventListener("resize", tutoPlacer);
+    document.addEventListener("keydown", tutoTouches);
+    tutoAller(0);
+  }
+  function tutoTouches(e) { if (e.key === "Escape") tutoFermer(); else if (e.key === "ArrowRight") tutoAller(TU.i + 1); else if (e.key === "ArrowLeft") tutoAller(TU.i - 1); }
+  function tutoFermer() {
+    [TU.voile, TU.spot, TU.carte].forEach(function (x) { if (x) x.remove(); });
+    TU.voile = TU.spot = TU.carte = null;
+    window.removeEventListener("scroll", tutoPlacer); window.removeEventListener("resize", tutoPlacer); document.removeEventListener("keydown", tutoTouches);
+  }
   function lierBulleTitre() {
     var t = $("titre-outil"), b = $("bulle-titre"), minuterie = null; if (!t || !b) return;
     function montrer() { b.classList.remove("hidden"); clearTimeout(minuterie); minuterie = setTimeout(cacher, 30000); }
@@ -2711,6 +2794,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   }
   function demarrer() {
     lierBulleTitre(); lierAudio();
+    if ($("btn-tuto")) $("btn-tuto").addEventListener("click", tutoOuvrir);
     var o = lsGet("derouleur.onglet"); if (o) S.onglet = o;
     pliables();
     lierFiltres();
