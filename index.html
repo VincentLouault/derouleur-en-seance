@@ -157,6 +157,8 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 .filtres #f-reset{padding:0 12px;height:34px;font-size:14px;white-space:nowrap}
 @media (max-width:900px){.filtres{grid-template-columns:1fr 1fr 1fr}.filtres .f-q{grid-column:span 2}}
 .prog{padding:4px 24px 18px;background:#fff;border-bottom:1px solid var(--line)}
+.recherche{margin:4px 0 4px}
+.recherche .filtres{margin-bottom:12px}
 .prog.prog-haut{border:0;border-radius:16px;padding:6px 22px 18px;margin-bottom:12px;box-shadow:0 4px 16px -12px rgba(20,33,61,.45)}
 #banner{margin-top:30px}
 .prog .t{color:var(--muted);margin:10px 0 10px}
@@ -429,6 +431,21 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
   <div class="meta" id="meta"></div>
   <p class="resume" id="resume"></p>
 
+  <div class="recherche" id="recherche">
+    <div class="suivi-bar" id="suivi-bar"></div>
+    <div class="suivi-panel hidden" id="suivi-panel"></div>
+    <div class="filtres">
+      <div><label for="f-article">Article</label><select id="f-article"><option value="">Tous les articles</option></select></div>
+      <div><label for="f-groupe">Groupe</label><select id="f-groupe"><option value="">Tous les groupes</option></select></div>
+      <div><label for="f-statut">Statut</label><select id="f-statut">
+        <option value="">Tous les statuts</option><option value="avenir">À examiner</option><option value="passe">Examinés</option>
+        <option value="Adopté">Adoptés</option><option value="Rejeté">Rejetés</option><option value="Retiré">Retirés</option>
+        <option value="Non soutenu">Non soutenus</option><option value="Tombé">Tombés</option></select></div>
+      <div><label for="f-num">N° d'amendement</label><input id="f-num" inputmode="numeric" placeholder="N° d'amendement"></div>
+      <div class="f-q"><label for="f-q">Sénateur, Gouvernement ou commission</label><input id="f-q" placeholder="Sénateur, Gouvernement…"></div>
+      <div class="reset"><button class="btn" id="f-reset" type="button" title="Réinitialiser les filtres">Effacer</button></div>
+    </div>
+  </div>
   <div class="prog prog-haut"><div class="t" id="prog-t"></div><div class="bar"><div id="prog-bar" style="width:0"></div></div></div>
 
 
@@ -462,20 +479,6 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
         <h2>Amendements</h2>
         <p class="expl" id="expl-am">Dans l'ordre du dérouleur de séance. Le groupe est celui du premier signataire ; les amendements de la commission sont classés « Commission ».</p>
       </div>
-    </div>
-
-    <div class="suivi-bar" id="suivi-bar"></div>
-    <div class="suivi-panel hidden" id="suivi-panel"></div>
-    <div class="filtres">
-      <div><label for="f-article">Article</label><select id="f-article"><option value="">Tous les articles</option></select></div>
-      <div><label for="f-groupe">Groupe</label><select id="f-groupe"><option value="">Tous les groupes</option></select></div>
-      <div><label for="f-statut">Statut</label><select id="f-statut">
-        <option value="">Tous les statuts</option><option value="avenir">À examiner</option><option value="passe">Examinés</option>
-        <option value="Adopté">Adoptés</option><option value="Rejeté">Rejetés</option><option value="Retiré">Retirés</option>
-        <option value="Non soutenu">Non soutenus</option><option value="Tombé">Tombés</option></select></div>
-      <div><label for="f-num">N° d'amendement</label><input id="f-num" inputmode="numeric" placeholder="N° d'amendement"></div>
-      <div class="f-q"><label for="f-q">Sénateur, Gouvernement ou commission</label><input id="f-q" placeholder="Sénateur, Gouvernement…"></div>
-      <div class="reset"><button class="btn" id="f-reset" type="button" title="Réinitialiser les filtres">Effacer</button></div>
     </div>
 
     <div class="panel green" id="p-derniers" data-pli>
@@ -743,7 +746,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120105943";</script>
+<script>window.DEROULEUR_BUILD = "20261120110424";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1251,16 +1254,41 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     })(doc.querySelector("chapters") || doc);
     return { page: page, titre: titre, seq: seq, jour: new Date(Date.now() - 6 * 3600000).toDateString(), lu: Date.now() };
   }
+  // Toutes les vidéos de séance publique du jour (matin, après-midi, soir) sont réunies, pour ne pas perdre les orateurs
+  // passés lors d'une séance précédente ; la séance en direct est relue à chaque actualisation.
+  var VIDS = { jour: null, ids: {}, seqs: {}, luIndex: 0, luSeq: {} };
+  var MOIS_L = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"];
+  function lireSeq(id, titre) {
+    return fetch(VIDEOS + "Datas/senat/" + id + "/content/data.nvs?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (xml) {
+      VIDS.seqs[id] = analyserVideo(xml, VIDEOS + "video." + id, titre).seq; VIDS.luSeq[id] = Date.now();
+    }, function () {});
+  }
   function majVideo() {
     if (Date.now() - VIDEO.lu < 25000) return Promise.resolve();
     VIDEO.lu = Date.now();
-    if (VIDEO.data && VIDEO.data.jour !== new Date(Date.now() - 6 * 3600000).toDateString()) VIDEO.data = null;
-    return fetch(VIDEOS + "senat_lives.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (lives) {
-      var v = null; Object.keys(lives || {}).forEach(function (k) { var x = lives[k]; if (!v && x && (x.stream === "Hémicycle" || /s[ée]ance publique/i.test(x.title || ""))) v = x; });
-      if (!v || !v.url) { if (VIDEO.data) VIDEO.data.direct = false; return; }
-      var id = String(v.url).replace(/^\//, "");
-      return fetch(VIDEOS + "Datas/senat/" + id + "/content/data.nvs?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (xml) {
-        var d = analyserVideo(xml, VIDEOS + "video." + id, v.title); d.direct = true; VIDEO.data = d;
+    var p = partiesParis(Date.now() - 6 * 3600000), jour = p.y + "-" + p.m + "-" + p.d;
+    if (VIDS.jour !== jour) VIDS = { jour: jour, ids: {}, seqs: {}, luIndex: 0, luSeq: {} };
+    var slug = "seance-publique-du-" + p.d + "-" + MOIS_L[p.m] + "-" + p.y;
+    var direct = null;
+    var pIndex = Date.now() - VIDS.luIndex < 300000 ? Promise.resolve() : fetch(VIDEOS + "index?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) {
+      VIDS.luIndex = Date.now();
+      var rx = new RegExp("video\\.(\\d+_[0-9a-f]+)\\." + slug + "(?:-[a-z-]+)?", "g"), m;
+      while ((m = rx.exec(t))) VIDS.ids[m[1]] = VIDS.ids[m[1]] || "";
+    }, function () {});
+    var pLive = fetch(VIDEOS + "senat_lives.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (lives) {
+      Object.keys(lives || {}).forEach(function (k) { var x = lives[k]; if (!direct && x && x.url && (x.stream === "Hémicycle" || /s[ée]ance publique/i.test(x.title || ""))) direct = { id: String(x.url).replace(/^\//, ""), titre: x.title }; });
+      if (direct) VIDS.ids[direct.id] = direct.titre || "";
+    }, function () {});
+    return Promise.all([pIndex, pLive]).then(function () {
+      var ids = Object.keys(VIDS.ids).sort(function (a, b) { return parseInt(a, 10) - parseInt(b, 10); });
+      return Promise.all(ids.map(function (id) {
+        var vieux = Date.now() - (VIDS.luSeq[id] || 0);
+        if ((direct && id === direct.id) || vieux > 300000) return lireSeq(id, VIDS.ids[id]);
+      })).then(function () {
+        var seq = []; ids.forEach(function (id) { if (VIDS.seqs[id]) seq = seq.concat(VIDS.seqs[id]); });
+        if (!seq.length) return;
+        var dernierId = ids[ids.length - 1];
+        VIDEO.data = { page: VIDEOS + "video." + (direct ? direct.id : dernierId), seq: seq, direct: !!direct && direct.id === dernierId, lu: Date.now() };
       });
     }).catch(function () {});
   }
@@ -1576,6 +1604,23 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     if (f.q) { var q = plain(f.q); if (plain(a.a).indexOf(q) < 0 && plain(a.g).indexOf(q) < 0) return false; }
     return true;
   }
+  function filtrePersonnes() { var f = S.f; return !!(f.groupe || f.q || f.num || SUIVI.seul); }
+  function passePersonnes(a) { var st = S.f.statut, ar = S.f.article; S.f.statut = ""; S.f.article = ""; var r = passeFiltre(a); S.f.statut = st; S.f.article = ar; return r; }
+  // Orateurs : noms comparés sur le nom de famille (en capitales dans les sources du Sénat).
+  function famSen(s) { var m = String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[A-Z][A-Z'’-]+(?:\s+[A-Z][A-Z'’-]+)*/g) || []; m = m.filter(function (x) { return !/^(MM?E?S?|M)$/.test(x); }); return m.length ? m[0] : ""; }
+  function orateurSuivi(l) {
+    if (l.groupe && SUIVI.groupes.indexOf(l.groupe) >= 0) return true;
+    var f = famSen(l.nom); if (!f) return false;
+    return Object.keys(SUIVI.noms).some(function (k) { return famSen(SUIVI.noms[k]) === f; });
+  }
+  function orateurPasse(l) {
+    var f = S.f;
+    if (SUIVI.seul && !orateurSuivi(l)) return false;
+    if (f.groupe && (f.groupe === "__none" || l.groupe !== f.groupe)) return false;
+    if (f.q) { var q = plain(f.q); if (plain(l.nom).indexOf(q) < 0 && plain(l.groupe || l.role).indexOf(q) < 0) return false; }
+    if (f.num) return false;
+    return true;
+  }
   function filtreActif() { var f = S.f; return !!(f.article || f.groupe || f.statut || f.num || f.q || SUIVI.seul); }
 
   /* ---------- Mes sénateurs / mon groupe : suivi, surlignage et alertes ---------- */
@@ -1889,9 +1934,20 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       var j = p.aujourdHui ? "aujourd'hui" : (function () { var y = +p.jour.slice(0, 4), m = +p.jour.slice(4, 6) - 1, dd = +p.jour.slice(6, 8); return jourCourt(new Date(y, m, dd, 12).getTime()); })();
       return h("span", { class: "tag-odj", title: p.objet || "" }, "Ordre du jour : " + j + (p.creneau ? " - " + p.creneau.charAt(0).toLowerCase() + p.creneau.slice(1) : "") + (p.minutes ? " · " + duree(p.minutes) + " de temps de parole" : ""));
     }
-    $("art-cnt").textContent = nb(av.length) + " article" + (av.length > 1 ? "s" : "") + " · " + nb(R) + " amendement" + (R > 1 ? "s" : "");
+    var blocsOrat = (D.orateurs || []);
+    function oratDe(d) { var r = []; blocsOrat.forEach(function (b) { if (b.titre === d.libelle) r = r.concat(b.lignes || []); }); return r; }
+    var filtreP = filtrePersonnes(), nAvTot = av.length;
+    av.forEach(function (d) {
+      var ams = M.restants.filter(function (a) { return a.d === d.i; }), ors = oratDe(d);
+      d.fAm = filtreP ? ams.filter(passePersonnes).length : null;
+      d.fOr = filtreP ? ors.filter(orateurPasse).length : null;
+      d.suivi = ams.some(estSuivi) || ors.some(orateurSuivi);
+    });
+    if (filtreP) av = av.filter(function (d) { return d.fAm > 0 || d.fOr > 0; });
+    $("art-cnt").textContent = filtreP ? nb(av.length) + " article" + (av.length > 1 ? "s" : "") + " sur " + nb(nAvTot) + " selon la recherche" : nb(av.length) + " article" + (av.length > 1 ? "s" : "") + " · " + nb(R) + " amendement" + (R > 1 ? "s" : "");
     var tb = vide($("art-body"));
-    if (!av.length) tb.appendChild(ligneVide(6, M.statutTexte ? "Texte " + M.statutTexte.toLowerCase() + " : plus rien à examiner au dérouleur." : "Plus aucun article à examiner au dérouleur."));
+    if (!av.length && filtreP) tb.appendChild(ligneVide(6, "Aucun article à venir ne correspond à la recherche."));
+    else if (!av.length) tb.appendChild(ligneVide(6, M.statutTexte ? "Texte " + M.statutTexte.toLowerCase() + " : plus rien à examiner au dérouleur." : "Plus aucun article à examiner au dérouleur."));
     // Seul l'article dont les amendements sont en discussion (ou le prochain) reste visible, même rubrique repliée.
     var ac = $("art-cours"), dC = M.prochain ? M.divs.filter(function (d) { return d.i === M.prochain.d; })[0] : null;
     vide(ac); ac.classList.toggle("hidden", !dC);
@@ -1905,8 +1961,9 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     }
     av.forEach(function (d) {
       var estCours = M.etape ? M.etape.idx === d.i : (M.prochain && M.prochain.d === d.i);
-      tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
-        h("td", null, h("span", { class: "art-bulle" }, d.libelle), estCours ? h("span", { class: "badge" }, "En cours") : null, tagOdj(d)),
+      tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : "") + (d.suivi ? " suivi" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); if ($("p-avenir")._ouvrir) $("p-avenir")._ouvrir(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
+        h("td", null, d.suivi ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, h("span", { class: "art-bulle" }, d.libelle), estCours ? h("span", { class: "badge" }, "En cours") : null, tagOdj(d),
+          filtreP ? h("span", { class: "tag-odj", style: "color:var(--navy2)" }, [d.fAm ? nb(d.fAm) + " amendement" + (d.fAm > 1 ? "s" : "") + " correspondant" + (d.fAm > 1 ? "s" : "") : "", d.fOr ? nb(d.fOr) + " orateur" + (d.fOr > 1 ? "s" : "") + " correspondant" + (d.fOr > 1 ? "s" : "") : ""].filter(Boolean).join(" · ")) : null),
         h("td", { class: "num" }, nb(d.total)), h("td", { class: "num" }, nb(d.restants)),
         d.sansAmdt ? h("td", null, (d.libelle.match(/à (\d{1,2} h \d{2})/) || [])[1] || (d.debut ? fourch2(d.debut, d.debut2) : "—")) : h("td", null, fourch2(d.debut, d.debut2)),
         d.sansAmdt ? h("td", null, "—") : h("td", null, d.fin === null ? "—" : fourch2(d.fin, d.fin2)),
@@ -2085,10 +2142,13 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
       var minutes = 0;
       b.lignes.forEach(function (l) { var m = String(l.temps || "").match(/(\d+)\s*'/); if (m) minutes += +m[1]; });
       var tbody = h("tbody");
-      b.lignes.forEach(function (l) {
-        tbody.appendChild(h("tr", { class: l.tribune ? "cur" : null },
+      var lignesF = filtrePersonnes() ? b.lignes.filter(orateurPasse) : b.lignes;
+      if (filtrePersonnes() && !lignesF.length) tbody.appendChild(ligneVide(4, "Aucun orateur de cette étape ne correspond à la recherche."));
+      lignesF.forEach(function (l) {
+        var sv = orateurSuivi(l);
+        tbody.appendChild(h("tr", { class: [l.tribune ? "cur" : "", sv ? "suivi" : ""].join(" ").trim() || null },
           h("td", { class: "num", style: "width:48px" }, l.ordre ? String(l.ordre) : ""),
-          h("td", null, l.nom, l.tribune ? h("span", { class: "tag next" }, "À la tribune") : null),
+          h("td", null, sv ? h("span", { class: "etoile" }, "★ ") : null, l.nom, l.tribune ? h("span", { class: "tag next" }, "À la tribune") : null),
           h("td", null, l.groupe ? h("span", { class: "grp" }, l.groupe) : (l.role || "")),
           h("td", { class: "num" }, (l.temps || "").replace(/'\s*$/, " min").replace(/'/g, " min "))));
       });
