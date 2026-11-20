@@ -12,7 +12,8 @@
   --bg:#f2f4f8; --card:#fff; --ink:#14213d; --muted:#5b6578; --line:#d9dfe8; --line2:#e8ecf2;
   --navy:#14213d; --navy2:#1f3a68; --navy-bg:#eaf0f8;
   --gold:#1f3a68; --gold-bg:#eaf0f8; --gold-row:#dde7f5; --gold-ink:#1f3a68; --gold-badge:#1f3a68;
-  --green:#185c37; --green-bg:#e3f1e8; --green-line:#8fc3a2; --green-bar:#21a366; --green-panel:#e8f4ec; --green-d:#107c41;
+  --green:#7a5a1f; --green-bg:#f7efe0; --green-line:#dcc396; --green-bar:#c9a462; --green-panel:#f8f1e5; --green-d:#a27a3a;
+  --adopte:#185c37; --adopte-bg:#e3f1e8; --adopte-line:#8fc3a2;
   --red:#b3261e; --red-bg:#fbeaea; --red-line:#e3a3a0; --red-btn:#c42b2b;
   --amber:#8a5a00; --amber-bg:#fdf3dc; --amber-line:#e7c77d;
   --blue:#2f5d8a; --blue-bg:#e9f0f7; --blue-line:#a9c2db;
@@ -144,7 +145,8 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 .grp.none{color:#b2aca2;font-weight:400}
 .pill{display:inline-block;border:1px solid var(--grey-line);background:var(--grey-bg);color:var(--grey);border-radius:999px;padding:2px 12px;font-size:14px;white-space:nowrap}
 .pill.empty{min-width:44px;text-align:center;background:#fafaf8}
-.pill.fav,.pill.adopte{background:var(--green-bg);border-color:var(--green-line);color:var(--green)}
+.pill.fav{background:var(--green-bg);border-color:var(--green-line);color:var(--green)}
+.pill.adopte{background:var(--adopte-bg);border-color:var(--adopte-line);color:var(--adopte)}
 .pill.defav,.pill.rejete{background:var(--red-bg);border-color:var(--red-line);color:var(--red)}
 .pill.sagesse,.pill.retrait{background:var(--amber-bg);border-color:var(--amber-line);color:var(--amber)}
 .pill.retire{background:var(--blue-bg);border-color:var(--blue-line);color:var(--blue)}
@@ -325,7 +327,7 @@ tbody tr:hover{background:#eef3fa}
 .sp-etat{color:var(--muted);font-size:12.5px}
 .sp-bas{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .sp-note{color:var(--muted);font-size:12px;margin:10px 0 0}
-tr.suivi{background:#e3f4e9!important;box-shadow:inset 5px 0 0 var(--green-d)}
+tr.suivi{background:#f6ecd9!important;box-shadow:inset 5px 0 0 var(--green-d)}
 tr.suivi.cur{box-shadow:inset 5px 0 0 var(--red-btn)}
 .etoile{color:var(--green-d);font-weight:700}
 .alertes{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;flex-direction:column;gap:8px;max-width:min(380px,calc(100vw - 32px))}
@@ -849,7 +851,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120151029";</script>
+<script>window.DEROULEUR_BUILD = "20261120151326";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
