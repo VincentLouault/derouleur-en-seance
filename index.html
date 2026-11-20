@@ -279,6 +279,8 @@ tbody tr:hover{background:#eef3fa}
 .kpis .kpi-fin .sub{font-size:11.5px;margin:0;flex-basis:100%}
 @media (min-width:1180px){.rubriques .kpis{grid-template-columns:repeat(3,1fr)}}
 .rub.a-venir{padding:10px 16px}
+.rubriques .col-g .resume{margin:0;font-size:14px;line-height:1.5;background:#fff;border-radius:14px;padding:10px 16px;box-shadow:0 4px 16px -12px rgba(20,33,61,.4);max-width:none}
+.rubriques .col-g .resume:empty{display:none}
 .rub.a-venir h2{font-size:11px;margin:0 0 4px}
 .rub.a-venir li{padding:2px 0}
 .rub.a-venir .l-titre{font-size:14.5px}
@@ -426,11 +428,11 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
     <div class="col-g">
       <section class="rub en-cours"><h2>Texte en cours</h2><div id="rub-cours"><p class="vide">Lecture du site du Sénat…</p></div></section>
       <section class="rub a-venir"><h2>Textes à venir</h2><div id="rub-venir"><p class="vide">Lecture du site du Sénat…</p></div></section>
+      <p class="resume" id="resume"></p>
     </div>
     <div class="kpis" id="kpis"></div>
   </div>
   <div class="meta hidden" id="meta"></div>
-  <p class="resume" id="resume"></p>
 
   <div class="recherche" id="recherche">
     <div class="suivi-bar" id="suivi-bar"></div>
@@ -747,7 +749,7 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120111213";</script>
+<script>window.DEROULEUR_BUILD = "20261120111359";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
