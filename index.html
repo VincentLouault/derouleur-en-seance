@@ -350,6 +350,16 @@ tr.objet-row .objet-box{display:block;background:var(--navy2);color:#fff;border-
 .cosig{all:unset;cursor:pointer;display:inline-block;margin-left:6px;font-size:11.5px;font-weight:700;color:var(--navy2);border:1.5px solid var(--navy2);border-radius:99px;padding:0 7px;line-height:17px;vertical-align:1px}
 .cosig.on,.cosig:hover{background:var(--navy2);color:#fff}
 .cosig-liste{display:block;margin-top:5px;font-size:12.5px;line-height:1.4;color:var(--ink);background:var(--navy-bg);border:1px solid #c9d6ea;border-radius:8px;padding:6px 9px;max-width:420px}
+.batt{display:inline-flex;align-items:center;gap:7px;margin-left:10px;vertical-align:middle;white-space:nowrap}
+.batt-corps{position:relative;display:inline-block;width:64px;height:16px;border:2px solid var(--navy);border-radius:4px;padding:1px;box-sizing:border-box;background:#fff}
+.batt-corps:after{content:"";position:absolute;right:-6px;top:3px;width:4px;height:6px;background:var(--navy);border-radius:0 2px 2px 0}
+.batt-niveau{display:block;height:100%;border-radius:2px;background:var(--green-bar);transition:width .9s linear,background .3s}
+.batt.moyen .batt-niveau{background:#e8a317}
+.batt.faible .batt-niveau{background:var(--red-btn)}
+.batt-txt{font-size:12px;font-weight:600;color:var(--muted)}
+.batt.depasse .batt-corps{border-color:var(--red-btn);animation:clignote 1s steps(2) infinite}
+.batt.depasse .batt-txt{color:var(--red-btn)}
+@keyframes clignote{50%{opacity:.35}}
 .fleche{color:var(--red-btn);font-size:16px;margin-right:6px;display:inline-block;animation:pousse 1.2s ease-in-out infinite}
 @keyframes pousse{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
 #cours-body tr.cur{box-shadow:inset 6px 0 0 var(--red-btn)!important}
@@ -807,7 +817,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120140346";</script>
+<script>window.DEROULEUR_BUILD = "20261120141440";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1339,7 +1349,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       Array.prototype.forEach.call(el.children, function (ch) {
         if (ch.tagName !== "chapter") return;
         var lab = (ch.getAttribute("label") || "").trim(), ty = meta(ch, "type");
-        seq.push({ type: ty, label: lab, nom: ty === "IN" ? majFam(lab.replace(/^Orateur (pour|contre)\s*:\s*/i, "")) : "" });
+        seq.push({ type: ty, label: lab, id: ch.getAttribute("id"), nom: ty === "IN" ? majFam(lab.replace(/^Orateur (pour|contre)\s*:\s*/i, "")) : "" });
         parcourir(ch);
       });
     })(doc.querySelector("chapters") || doc);
@@ -1349,6 +1359,15 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   // passés lors d'une séance précédente ; la séance en direct est relue à chaque actualisation.
   var VIDS = { jour: null, ids: {}, seqs: {}, luIndex: 0, luSeq: {} };
   var MOIS_L = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"];
+  VIDS.sync = {};
+  function lireSync(id) {
+    return fetch(VIDEOS + "Datas/senat/" + id + "/content/liveplayer.nvs?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (xml) {
+      var doc = new DOMParser().parseFromString(xml, "text/xml"), pl = doc.querySelector("player"); if (!pl) return;
+      var debut = +pl.getAttribute("starttime") * 1000, decal = (+pl.getAttribute("cdndelay") || 0) * 1000, map = {};
+      doc.querySelectorAll("synchro").forEach(function (sy) { map[sy.getAttribute("id")] = debut + (+sy.getAttribute("timecode") || 0) + decal; });
+      VIDS.sync[id] = map;
+    }, function () {});
+  }
   function lireSeq(id, titre) {
     return fetch(VIDEOS + "Datas/senat/" + id + "/content/data.nvs?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (xml) {
       VIDS.seqs[id] = analyserVideo(xml, VIDEOS + "video." + id, titre).seq; VIDS.luSeq[id] = Date.now();
@@ -1358,7 +1377,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     if (Date.now() - VIDEO.lu < 25000) return Promise.resolve();
     VIDEO.lu = Date.now();
     var p = partiesParis(Date.now() - 6 * 3600000), jour = p.y + "-" + p.m + "-" + p.d;
-    if (VIDS.jour !== jour) VIDS = { jour: jour, ids: {}, seqs: {}, luIndex: 0, luSeq: {} };
+    if (VIDS.jour !== jour) VIDS = { jour: jour, ids: {}, seqs: {}, luIndex: 0, luSeq: {}, sync: {} };
     var slug = "seance-publique-du-" + p.d + "-" + MOIS_L[p.m] + "-" + p.y;
     var direct = null;
     // Vidéos de séance publique du jour : chaîne « Séance publique » (toutes les séances) et page d'accueil (la plus récente).
@@ -1376,9 +1395,10 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       var ids = Object.keys(VIDS.ids).sort(function (a, b) { return parseInt(a, 10) - parseInt(b, 10); });
       return Promise.all(ids.map(function (id) {
         var vieux = Date.now() - (VIDS.luSeq[id] || 0);
-        if ((direct && id === direct.id) || vieux > 300000) return lireSeq(id, VIDS.ids[id]);
+        if (direct && id === direct.id) return Promise.all([lireSeq(id, VIDS.ids[id]), lireSync(id)]);
+        if (vieux > 300000) return lireSeq(id, VIDS.ids[id]);
       })).then(function () {
-        var seq = []; ids.forEach(function (id) { if (VIDS.seqs[id]) seq = seq.concat(VIDS.seqs[id]); });
+        var seq = []; ids.forEach(function (id) { if (VIDS.seqs[id]) seq = seq.concat(VIDS.seqs[id].map(function (x) { var y = {}; for (var k in x) y[k] = x[k]; var sy = VIDS.sync[id]; if (sy && sy[x.id]) y.debut = sy[x.id]; return y; })); });
         if (!seq.length) return;
         var dernierId = ids[ids.length - 1];
         VIDEO.data = { page: VIDEOS + "video." + (direct ? direct.id : dernierId), seq: seq, direct: !!direct && direct.id === dernierId, lu: Date.now() };
@@ -1412,7 +1432,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       var passes = sec.noms, tribune = null;
       if (V.direct && dernierIN > sec.debut && dernierIN < sec.fin && sec.fin === seq.length) tribune = seq[dernierIN].nom;
       var avant = b.lignes.length;
-      b.lignes = b.lignes.filter(function (l) { var f = majFam(l.nom); if (f && f === tribune) { l.tribune = true; return true; } return !(f && passes[f]); });
+      b.lignes = b.lignes.filter(function (l) { var f = majFam(l.nom); if (f && f === tribune) { l.tribune = true; if (seq[dernierIN].debut) l.debutParole = seq[dernierIN].debut; return true; } return !(f && passes[f]); });
       b.passes = avant - b.lignes.length;
       if (b.passes) b.total = null; // temps restant = somme des orateurs encore à venir
       b.direct = true;
@@ -2380,7 +2400,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
         var sv = orateurSuivi(l);
         tbody.appendChild(h("tr", { class: [l.tribune ? "cur" : "", sv ? "suivi" : ""].join(" ").trim() || null },
           h("td", { class: "num", style: "width:48px" }, l.ordre ? String(l.ordre) : ""),
-          h("td", null, sv ? h("span", { class: "etoile" }, "★ ") : null, l.nom, l.tribune ? h("span", { class: "tag next" }, "À la tribune") : null),
+          h("td", null, sv ? h("span", { class: "etoile" }, "★ ") : null, l.nom, l.tribune ? h("span", { class: "tag next" }, "À la tribune") : null, l.tribune ? batterie(l) : null),
           h("td", null, l.groupe ? h("span", { class: "grp" }, l.groupe) : (l.role || "")),
           h("td", { class: "num" }, (l.temps || "").replace(/'\s*$/, " min").replace(/'/g, " min "))));
       });
@@ -2391,6 +2411,23 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
           tbody))));
     });
   }
+  // Jauge « batterie » de l'orateur à la tribune : pleine à sa prise de parole (heure tirée du direct vidéo),
+  // elle se vide au rythme de son temps de parole, puis signale le dépassement.
+  function batterie(l) {
+    var m = String(l.temps || "").match(/(\d+)\s*'/), duree = m ? +m[1] * 60000 : 0;
+    if (!duree || !l.debutParole) return null;
+    var el = h("span", { class: "batt", "data-debut": String(l.debutParole), "data-duree": String(duree) }, h("span", { class: "batt-corps" }, h("span", { class: "batt-niveau" })), h("span", { class: "batt-txt" }));
+    majBatterie(el); return el;
+  }
+  function majBatterie(el) {
+    var debut = +el.getAttribute("data-debut"), duree = +el.getAttribute("data-duree"), ecoule = Date.now() - debut, reste = duree - ecoule;
+    var f = Math.max(0, Math.min(1, reste / duree)), niv = el.querySelector(".batt-niveau"), txt = el.querySelector(".batt-txt");
+    niv.style.width = (f * 100) + "%";
+    el.className = "batt" + (reste <= 0 ? " depasse" : f < 0.2 ? " faible" : f < 0.5 ? " moyen" : "");
+    function mmss(ms) { var s2 = Math.round(Math.abs(ms) / 1000); return Math.floor(s2 / 60) + " min " + String(s2 % 60).padStart(2, "0"); }
+    txt.textContent = reste > 0 ? mmss(reste) + " restantes" : "dépassement de " + mmss(reste);
+  }
+  setInterval(function () { document.querySelectorAll(".batt").forEach(majBatterie); }, 1000);
   function minutesBloc(b) {
     var t = String(b.total || ""), m;
     if ((m = t.match(/(\d+)\s*h\s*(\d+)?/))) return +m[1] * 60 + (+m[2] || 0);
