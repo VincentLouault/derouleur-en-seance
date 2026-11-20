@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dérouleur « En Séance » optimisé par Vincent Louault</title>
+<title>Dérouleur « En Séance » Vince</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
@@ -212,7 +212,8 @@ tr.dcrow{box-shadow:inset 4px 0 0 #cfc9bf}
 h1,.rub .t-titre,.kpi .val{font-family:var(--sans)}
 .hero{position:relative;background:linear-gradient(120deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;border-radius:18px;padding:22px 26px 20px;margin-bottom:6px;overflow:hidden;box-shadow:0 10px 30px -18px rgba(20,33,61,.7)}
 .hero:after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--red-btn) 0 50%,var(--green-d) 50%)}
-.hero h1{color:#fff;font-weight:700;font-size:clamp(22px,2.6vw,32px);letter-spacing:-.02em;margin:0 0 8px}
+.hero h1{color:#fff;font-weight:700;font-size:clamp(22px,2.6vw,32px);letter-spacing:-.02em;margin:0}
+.hero .intro:has(#intro-avis:empty){display:none}
 .hero .intro{border:0;background:transparent;padding:0;max-width:900px;font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.72)}
 .hero .intro p+p{color:rgba(255,255,255,.6);font-size:12px}
 .rub{border-radius:16px;border:1px solid var(--line);box-shadow:0 4px 16px -12px rgba(20,33,61,.4)}
@@ -455,9 +456,8 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 <body>
 <div class="wrap">
   <header class="hero">
-  <h1 id="titre-outil">Dérouleur « En Séance » optimisé par Vincent Louault</h1>
+  <h1 id="titre-outil">Dérouleur « En Séance » Vince</h1>
   <div class="intro">
-    <p>Conçu par l'équipe de Vincent Louault à sa demande, cet outil enrichit le dérouleur du Sénat : avis de la commission et du Gouvernement, groupes politiques et heures de passage estimées. Le tout est lu en direct sur le site du Sénat, actualisé toutes les 30 secondes, et suit automatiquement le texte en discussion au fil des jours.</p>
     <p id="intro-avis"></p>
   </div>
   </header>
@@ -789,14 +789,14 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120123628";</script>
+<script>window.DEROULEUR_BUILD = "20261120124235";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
    le dérouleur du texte en discussion, en lecture directe depuis le navigateur du lecteur. */
 (function () {
   "use strict";
-  var BASE = {"titre_prefixe":"Dérouleur « En Séance » optimisé par Vincent Louault","rythme":25};              // titre, rythme, intervalle…
+  var BASE = {"titre_prefixe":"Dérouleur « En Séance » Vince","rythme":25};              // titre, rythme, intervalle…
   var GROUPES_FICHES = {"aeschlimann_marie_do21071f":"LR","amard_gabriel20684b":"NI","apourceau_poly_cathy19760e":"CRCE-K","aubey_francois14137p":"RDSE","baude_veronique21674d":"LR","bazin_malgras_valerie18503j":"LR","belim_audrey21035b":"SER","belrhiti_catherine19954n":"LR","benarroche_guy20110q":"GEST","berthet_martine19575f":"LR","billon_annick14030q":"UCI","blanchet_regis21652w":"UCI","bonfanti_dossat_christine19367y":"LR","bonhomme_francois14069u":"LR","bonneau_francois20042v":"UCI","bonnefoy_nicole08060w":"SER","borchio_fontimp_alexandra20138d":"LR","bost_christine21710p":"SER","bouquin_manon21223d":"UNT","bourcier_corinne21046e":"LIRT","bourgi_hussein20114u":"SER","bourguignon_brigitte18045d":"UCI","boyer_jean_marc19383y":"LR","brault_jean_luc21052c":"UCI","bravi_fabien21670y":"UNT","burgoa_laurent20090e":"LR","callet_marie_pierre21668f":"UNT","cambier_guislain21083k":"UCI","canales_marion21045d":"SER","canevet_michel14083s":"UCI","capus_emmanuel19545y":"LIRT","carrere_gee_marie_claire21090j":"LR","castillo_laurent21716v":"UNT","chantrel_yan20264j":"SER","conconne_catherine19295a":"SER","cuypers_pierre14357a":"LR","d_aigremont_thierry21704r":"UNT","darcos_laure19693l":"LIRT","daubet_raphael21041y":"RDSE","delahaye_vincent11070l":"UCI","delattre_nathalie19719d":"RDSE","devesa_brigitte20248j":"UCI","dhersin_franck15197g":"UCI","doineau_elisabeth14042u":"UCI","dossus_thomas20134y":"GEST","duche_frederic21682d":"LIRT","duplomb_laurent19507s":"LR","dupont_bertrand21672b":"LR","durox_aymeric21074j":"UNT","fargeot_daniel21086n":"UCI","faucon_mejean_claudie21646y":"SER","feret_corinne14281w":"SER","florennes_isabelle19111a":"UCI","fricoteaux_nicolas21664b":"RDPI","frontoni_gaelle21718x":"UNT","giletti_frank20874f":"UNT","gille_herve19820y":"SER","girardin_annick21032x":"RDSE","goulet_nathalie07004j":"UCI","greaume_michelle19565d":"CRCE-K","grosvalet_philippe21066j":"RDSE","guhl_antoinette21092l":"GEST","guidez_jocelyne19691j":"UCI","havet_nadege20106u":"RDPI","haye_ludovic20128b":"UCI","herve_loic14179a":"UCI","hochart_joshua21085m":"UNT","housseau_marie_lise21415k":"UCI","huin_benjamin21662y":"RDPI","imbert_corinne14213j":"LR","jacquin_olivier19551w":"SER","joly_patrice19531s":"SER","jomier_bernard19683j":"GEST","joseph_else20056c":"LR","josserand_sylvie21217f":"UNT","kervran_loic18543s":"LIRT","khalife_khalife21081h":"LR","klinger_christian20126y":"LR","laouedj_ahmed21078n":"RDSE","le_houerou_annie18193q":"SER","le_mener_dominique17305a":"LR","lermytte_marie_claude21087p":"RDSE","leroy_carine21698m":"UNT","levasseur_leon21692f":"UNT","levrier_martin19697q":"RDPI","louault_vincent21054e":"LIRT","lubin_monique17779h":"SER","lurel_victorin12016w":"SER","malet_viviane19657g":"LR","margueritte_david21486b":"LR","masset_michel21040x":"RDSE","matray_paulette21512k":"SER","mellouli_akli21073h":"GEST","menonville_franck19563b":"UCI","mercier_marie14147r":"LR","merillou_serge20028x":"SER","michau_jean_jacques20018v":"RDSE","micouleau_brigitte14223l":"LR","mohamed_soilihi_thani11072n":"RDPI","mouiller_philippe14071n":"LR","nadille_solanges21097r":"RDPI","ollivier_mathilde21037d":"GEST","pantel_guylene19866p":"RDSE","paoli_gagin_vanina20050v":"LIRT","patru_anne_sophie21421h":"UCI","pellevat_cyril14237s":"UCI","pla_sebastien20030r":"SER","puissat_frederique19679n":"LR","rapin_jean_francois14331p":"LR","rebsamen_francois08070y":"SER","reynaud_herve21068l":"LR","rhimini_samir21650u":"LR","robert_sylvie14229s":"SER","rochette_pierre_jean21070e":"NI","roiron_pierre_alain21056g":"SER","romagny_anne_sophie21064g":"UCI","ros_david21059k":"SER","rossignol_laurence11045k":"SER","roux_jean_yves14107h":"RDSE","santoni_dominique21702p":"LR","saury_hugues19421m":"LR","sautarel_stephane20044x":"LR","senee_ghislaine21079p":"GEST","sol_jean19703u":"LR","sollogoub_nadia19713w":"UCI","souyris_anne21094n":"GEST","szczurek_christopher21069m":"UNT","theophile_dominique19301e":"RDSE","uzenat_simon21051b":"SER","ventalon_anne20026v":"LR","berard_serge21728a":"LR","carrere_maryse19629c":"RDSE","diaz_edwige20390p":"UNT","genet_fabien20120s":"LR","goy_chavent_sylvie08056b":"UNT","houpert_alain08069g":"LR","iacovelli_xavier19591f":"RDPI","loisier_anne_catherine14205j":"UCI","muller_bronn_laurence20096l":"LR","noel_sylviane19768n":"LR","parigi_paul_toussaint20036x":"UCI","pernot_clement21047f":"LR","quentin_virginie21658d":"LR","renaud_garabedian_evelyne19705w":"LR","robin_alexis21660w":"LR","vogel_melanie20266l":"GEST"};     // fiche sénateur → groupe (complété en direct)
   var SENAT = "https://www.senat.fr";
   var REGLES = [
