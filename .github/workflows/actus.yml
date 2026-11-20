@@ -14,10 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Lire les fils
-        run: python3 scripts/actus.py
+        run: mkdir -p /tmp/a && cd /tmp/a && python3 "$GITHUB_WORKSPACE/scripts/actus.py"
       - name: Publier sur la branche actus
         run: |
-          mkdir -p /tmp/a && cp actus.json /tmp/a/
           git config user.name "dérouleur-bot"
           git config user.email "actions@users.noreply.github.com"
           git fetch origin actus --depth=1 || true
