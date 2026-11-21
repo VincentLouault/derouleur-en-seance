@@ -1,5 +1,5 @@
 {
-"maj": 1795280246528,
+"maj": 1795282955304,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "François Ruffin se retire de la présidentielle 2027 sans soutenir aucun des candidats de gauche encore en lice",
+"lien": "https://lcp.fr/actualites/francois-ruffin-se-retire-de-la-presidentielle-2027-sans-soutenir-aucun-des-candidats-de",
+"date": 1795281960000,
+"source": "LCP"
+},
+{
 "titre": "Législatives en Espagne: le pari de Pedro Sanchez peut-il ouvrir les portes du pouvoir à l’extrême droite ?",
 "lien": "https://lcp.fr/actualites/legislatives-en-espagne-le-pari-de-pedro-sanchez-peut-il-ouvrir-les-portes-du-pouvoir-a",
 "date": 1795248300000,
@@ -140,12 +146,6 @@
 "titre": "Présidentielle 2027: Dominique de Villepin sur le point d'officialiser sa candidature à l'Élysée",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-dominique-de-villepin-sur-le-point-d-officialiser-sa-candidature-a-l",
 "date": 1795160820000,
-"source": "LCP"
-},
-{
-"titre": "Fuites sur des enquêtes mettant en cause le RN: un préfet convoqué par Laurent Nuñez",
-"lien": "https://lcp.fr/actualites/fuites-sur-des-enquetes-mettant-en-cause-le-rn-un-prefet-convoque-par-laurent-nunez",
-"date": 1795160100000,
 "source": "LCP"
 }
 ]
