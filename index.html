@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dérouleur « En Séance » Vince</title>
+<title>Dérouleur « En Séance » by Vince</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
@@ -68,6 +68,7 @@ h2{font-size:22px;font-weight:500;margin:0 0 8px}
 .intro p+p{margin-top:6px;color:var(--muted);font-size:14px}
 .meta{color:var(--muted);font-size:14px;margin:22px 0 10px}
 .resume{font-size:17px;margin:0 0 22px;max-width:900px}
+.resume:empty{display:none}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-height:120px;min-width:0}
 .kpi .lab{color:var(--muted);font-size:14px}
@@ -414,6 +415,26 @@ tr.flash td{animation:flash 2s ease-out}
 .pill.scrutin{display:inline-flex;align-items:center;gap:6px;background:var(--red-btn);border-color:var(--red-btn);color:#fff;font-weight:700;white-space:nowrap;animation:clignoteScrutin 1.1s ease-in-out infinite}
 .pill.scrutin i{display:block;width:8px;height:8px;border-radius:50%;background:#fff}
 @keyframes clignoteScrutin{50%{opacity:.4}}
+.avis-app{font-size:14px;margin-top:8px}
+.kpi-avis{position:relative;overflow:visible}
+.kpi-avis .avis-lien{margin-left:0;flex-basis:100%;margin-top:4px}
+.kpi-avis .avis-form{position:absolute;right:0;top:calc(100% + 6px);z-index:60;width:max(100%,320px);max-width:calc(100vw - 24px);box-sizing:border-box;background:#fff;border-radius:14px;padding:12px;box-shadow:0 18px 40px -14px rgba(10,18,35,.55);margin:0}
+.kpi-avis .avis-merci{font-size:12.5px}
+@media (max-width:720px){.kpi-avis .avis-form{right:auto;left:0}}
+.avis-ligne{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.avis-q{font-weight:600;color:var(--navy);margin-right:2px}
+.avis-pouce{all:unset;cursor:pointer;font-size:19px;line-height:1;padding:5px 9px;border-radius:99px;border:1.5px solid var(--line);background:#fff;transition:transform .12s,background .12s}
+.avis-pouce:hover{transform:scale(1.08)}
+.avis-pouce[aria-pressed="true"][data-vote="up"]{background:var(--green-bg);border-color:var(--green-bar)}
+.avis-pouce[aria-pressed="true"][data-vote="down"]{background:#fde8e8;border-color:var(--red-btn)}
+.avis-lien{all:unset;cursor:pointer;font-size:13px;font-weight:600;color:var(--navy2);text-decoration:underline;text-underline-offset:3px;margin-left:auto}
+.avis-form{margin-top:9px}
+.avis-form textarea{width:100%;box-sizing:border-box;font:inherit;font-size:14px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;resize:vertical}
+.avis-form textarea:focus{outline:none;border-color:var(--navy2)}
+.avis-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.avis-env{all:unset;cursor:pointer;background:var(--navy2);color:#fff;font-weight:700;font-size:13.5px;padding:6px 16px;border-radius:99px}
+.avis-note{font-size:12px;color:var(--muted)}
+.avis-merci{margin-top:6px;font-size:13px;color:var(--green);font-weight:600}
 .tampon.nonsout{color:#b8650f;transform:rotate(-5deg)}
 tr:hover .tampon{filter:saturate(1.15)}
 tr.plus-row td{padding:10px 16px!important;background:#f6f8fc;text-align:center}
@@ -518,7 +539,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 <body>
 <div class="wrap">
   <header class="hero">
-  <h1 id="titre-outil">Dérouleur « En Séance » Vince</h1>
+  <h1 id="titre-outil">Dérouleur <span style="white-space:nowrap">« En Séance »</span> by Vince</h1>
   <img class="logo-vince" src="logo-vince.png" alt="Vince" onerror="this.remove()">
   <div class="bulle-titre hidden" id="bulle-titre" role="note">Conçu par l'équipe de Vincent Louault à sa demande, cet outil enrichit le dérouleur du Sénat : avis de la commission et du Gouvernement, groupes politiques et heures de passage estimées. Le tout est lu en direct sur le site du Sénat, actualisé toutes les 30 secondes, et suit automatiquement le texte en discussion au fil des jours.</div>
   <div class="intro">
@@ -531,6 +552,19 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       <section class="rub en-cours"><h2>Texte en cours</h2><div id="rub-cours"><p class="vide">Lecture du site du Sénat…</p></div></section>
       <section class="rub a-venir"><h2>Textes à venir</h2><div id="rub-venir"><p class="vide">Lecture du site du Sénat…</p></div></section>
       <p class="resume" id="resume"></p>
+      <div class="avis-app" id="avis-app">
+        <div class="avis-ligne">
+          <span class="avis-q">Utile ?</span>
+          <button type="button" class="avis-pouce" data-vote="up" aria-pressed="false" title="Utile">👍</button>
+          <button type="button" class="avis-pouce" data-vote="down" aria-pressed="false" title="Pas utile">👎</button>
+          <button type="button" class="avis-lien" id="avis-ouvrir">Donner un avis</button>
+        </div>
+        <div class="avis-form hidden" id="avis-form">
+          <textarea id="avis-texte" rows="3" maxlength="1500" placeholder="Votre avis sur l'usage de l'application : ce qui vous sert, ce qui manque, ce qui ne marche pas…"></textarea>
+          <div class="avis-actions"><button type="button" class="avis-env" id="avis-envoyer">Envoyer</button><span class="avis-note">Ouvre votre messagerie avec l'avis prérempli, à envoyer à l'équipe.</span></div>
+        </div>
+        <div class="avis-merci hidden" id="avis-merci"></div>
+      </div>
     </div>
     <div class="kpis" id="kpis"></div>
   </div>
@@ -854,14 +888,14 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261120163554";</script>
+<script>window.DEROULEUR_BUILD = "20261121233538";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
    le dérouleur du texte en discussion, en lecture directe depuis le navigateur du lecteur. */
 (function () {
   "use strict";
-  var BASE = {"titre_prefixe":"Dérouleur « En Séance » Vince","rythme":25};              // titre, rythme, intervalle…
+  var BASE = {"titre_prefixe":"Dérouleur « En Séance » by Vince","rythme":25};              // titre, rythme, intervalle…
   var GROUPES_FICHES = {"aeschlimann_marie_do21071f":"LR","amard_gabriel20684b":"NI","apourceau_poly_cathy19760e":"CRCE-K","aubey_francois14137p":"RDSE","baude_veronique21674d":"LR","bazin_malgras_valerie18503j":"LR","belim_audrey21035b":"SER","belrhiti_catherine19954n":"LR","benarroche_guy20110q":"GEST","berthet_martine19575f":"LR","billon_annick14030q":"UCI","blanchet_regis21652w":"UCI","bonfanti_dossat_christine19367y":"LR","bonhomme_francois14069u":"LR","bonneau_francois20042v":"UCI","bonnefoy_nicole08060w":"SER","borchio_fontimp_alexandra20138d":"LR","bost_christine21710p":"SER","bouquin_manon21223d":"UNT","bourcier_corinne21046e":"LIRT","bourgi_hussein20114u":"SER","bourguignon_brigitte18045d":"UCI","boyer_jean_marc19383y":"LR","brault_jean_luc21052c":"UCI","bravi_fabien21670y":"UNT","burgoa_laurent20090e":"LR","callet_marie_pierre21668f":"UNT","cambier_guislain21083k":"UCI","canales_marion21045d":"SER","canevet_michel14083s":"UCI","capus_emmanuel19545y":"LIRT","carrere_gee_marie_claire21090j":"LR","castillo_laurent21716v":"UNT","chantrel_yan20264j":"SER","conconne_catherine19295a":"SER","cuypers_pierre14357a":"LR","d_aigremont_thierry21704r":"UNT","darcos_laure19693l":"LIRT","daubet_raphael21041y":"RDSE","delahaye_vincent11070l":"UCI","delattre_nathalie19719d":"RDSE","devesa_brigitte20248j":"UCI","dhersin_franck15197g":"UCI","doineau_elisabeth14042u":"UCI","dossus_thomas20134y":"GEST","duche_frederic21682d":"LIRT","duplomb_laurent19507s":"LR","dupont_bertrand21672b":"LR","durox_aymeric21074j":"UNT","fargeot_daniel21086n":"UCI","faucon_mejean_claudie21646y":"SER","feret_corinne14281w":"SER","florennes_isabelle19111a":"UCI","fricoteaux_nicolas21664b":"RDPI","frontoni_gaelle21718x":"UNT","giletti_frank20874f":"UNT","gille_herve19820y":"SER","girardin_annick21032x":"RDSE","goulet_nathalie07004j":"UCI","greaume_michelle19565d":"CRCE-K","grosvalet_philippe21066j":"RDSE","guhl_antoinette21092l":"GEST","guidez_jocelyne19691j":"UCI","havet_nadege20106u":"RDPI","haye_ludovic20128b":"UCI","herve_loic14179a":"UCI","hochart_joshua21085m":"UNT","housseau_marie_lise21415k":"UCI","huin_benjamin21662y":"RDPI","imbert_corinne14213j":"LR","jacquin_olivier19551w":"SER","joly_patrice19531s":"SER","jomier_bernard19683j":"GEST","joseph_else20056c":"LR","josserand_sylvie21217f":"UNT","kervran_loic18543s":"LIRT","khalife_khalife21081h":"LR","klinger_christian20126y":"LR","laouedj_ahmed21078n":"RDSE","le_houerou_annie18193q":"SER","le_mener_dominique17305a":"LR","lermytte_marie_claude21087p":"RDSE","leroy_carine21698m":"UNT","levasseur_leon21692f":"UNT","levrier_martin19697q":"RDPI","louault_vincent21054e":"LIRT","lubin_monique17779h":"SER","lurel_victorin12016w":"SER","malet_viviane19657g":"LR","margueritte_david21486b":"LR","masset_michel21040x":"RDSE","matray_paulette21512k":"SER","mellouli_akli21073h":"GEST","menonville_franck19563b":"UCI","mercier_marie14147r":"LR","merillou_serge20028x":"SER","michau_jean_jacques20018v":"RDSE","micouleau_brigitte14223l":"LR","mohamed_soilihi_thani11072n":"RDPI","mouiller_philippe14071n":"LR","nadille_solanges21097r":"RDPI","ollivier_mathilde21037d":"GEST","pantel_guylene19866p":"RDSE","paoli_gagin_vanina20050v":"LIRT","patru_anne_sophie21421h":"UCI","pellevat_cyril14237s":"UCI","pla_sebastien20030r":"SER","puissat_frederique19679n":"LR","rapin_jean_francois14331p":"LR","rebsamen_francois08070y":"SER","reynaud_herve21068l":"LR","rhimini_samir21650u":"LR","robert_sylvie14229s":"SER","rochette_pierre_jean21070e":"NI","roiron_pierre_alain21056g":"SER","romagny_anne_sophie21064g":"UCI","ros_david21059k":"SER","rossignol_laurence11045k":"SER","roux_jean_yves14107h":"RDSE","santoni_dominique21702p":"LR","saury_hugues19421m":"LR","sautarel_stephane20044x":"LR","senee_ghislaine21079p":"GEST","sol_jean19703u":"LR","sollogoub_nadia19713w":"UCI","souyris_anne21094n":"GEST","szczurek_christopher21069m":"UNT","theophile_dominique19301e":"RDSE","uzenat_simon21051b":"SER","ventalon_anne20026v":"LR","berard_serge21728a":"LR","carrere_maryse19629c":"RDSE","diaz_edwige20390p":"UNT","genet_fabien20120s":"LR","goy_chavent_sylvie08056b":"UNT","houpert_alain08069g":"LR","iacovelli_xavier19591f":"RDPI","loisier_anne_catherine14205j":"UCI","muller_bronn_laurence20096l":"LR","noel_sylviane19768n":"LR","parigi_paul_toussaint20036x":"UCI","pernot_clement21047f":"LR","quentin_virginie21658d":"LR","renaud_garabedian_evelyne19705w":"LR","robin_alexis21660w":"LR","vogel_melanie20266l":"GEST"};     // fiche sénateur → groupe (complété en direct)
   var SENAT = "https://www.senat.fr";
   var REGLES = [
@@ -2110,7 +2144,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 
     var R = M.restants.length, T = M.am.length;
     vide($("resume"));
-    if (R) $("resume").append("Il reste ", h("b", null, nb(R)), " amendements à examiner sur ", h("b", null, nb(T)), " au dérouleur ; au rythme de " + M.rMin + " à " + M.rMax + " amendements par heure, la fin des débats est estimée ", M.fin ? "entre " : "au-delà des séances prévues", M.fin ? h("b", null, heureJ(M.fin)) : "", M.fin ? " et " : "", M.fin ? h("b", null, M.fin2 ? heureJ(M.fin2) : "après les séances prévues") : "", ".");
+    if (R) { /* phrase « Il reste X amendements… » retirée à la demande */ }
     else if (M.statutTexte) $("resume").append("Texte : ", h("b", null, M.statutTexte), ". Tous les amendements du dérouleur ont été examinés (", h("b", null, nb(T)), ").");
     else if (M.etape) $("resume").append(T ? "Tous les amendements du dérouleur ont été examinés (" + nb(T) + "). " : "Aucun amendement au dérouleur pour ce texte. ", "Étape en cours : ", h("b", null, M.etape.libelle), ".");
     else $("resume").append("Tous les amendements du dérouleur ont été examinés (", h("b", null, nb(T)), ").");
@@ -2121,7 +2155,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     vide($("kpis")).append(
       kpi("Amendements déposés", nb(D.deposes || T), "dont " + nb(T) + " au dérouleur de séance"),
       kpi("Examinés", nb(M.examines.length), nb(M.cpt["Adopté"] || 0) + " adoptés · " + nb(M.cpt["Rejeté"] || 0) + " rejetés"),
-      kpi("Restant à examiner", nb(R), R ? "soit environ " + duree(M.dureeRestante) + " à " + duree(M.dureeRestante2) + " de séance" : "examen des articles terminé"),
+      caseAvis(),
       (M.etape && (!M.prochain || (M.divs[M.etape.idx] && M.divs[M.etape.idx].restants === 0)))
         ? kpi("Étape en cours", M.etape.libelle, "selon le dérouleur du Sénat", M.etape.libelle.length > 90 ? "texte long" : M.etape.libelle.length > 30 ? "texte" : true)
         : kpi(M.enDirect ? "Amendement en discussion" : "Prochain amendement", M.prochain ? "n° " + M.prochain.n : "—", M.prochain && M.divs[M.prochain.d] ? M.divs[M.prochain.d].libelle : "", true)
@@ -2749,7 +2783,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   var TUTO = [
     { cible: "#titre-outil", titre: "Bienvenue sur le dérouleur", html: "<p>Cet outil lit en direct le site du Sénat (dérouleur « En séance », ordre du jour, vidéo de la séance) et l'actualise toutes les 30 secondes. Il suit seul le texte en discussion, jour après jour.</p><p>Survolez ou touchez le titre pour revoir sa présentation.</p>" },
     { cible: ".rubriques .col-g", titre: "Texte en cours et textes à venir", html: "<p>Le texte examiné en séance, avec la pastille <b>En séance</b>, puis le prochain texte de l'ordre du jour (« Voir le suivant » pour les autres jours). Un clic sur un texte à venir affiche son dérouleur.</p><p>La phrase dessous donne l'estimation de fin des débats.</p>" },
-    { cible: "#kpis", titre: "Les chiffres clés", html: "<ul><li>amendements déposés, examinés (adoptés, rejetés) et restants ;</li><li>l'étape ou l'amendement en discussion ;</li><li>la jauge d'avancement du texte.</li></ul><p>Les horaires sont estimés à 20-25 amendements par heure, en tenant compte des temps de parole et de l'ordre du jour.</p>" },
+    { cible: "#kpis", titre: "Les chiffres clés", html: "<ul><li>amendements déposés et examinés (adoptés, rejetés) ;</li><li>👍 / 👎 et « Donner un avis » : dites-nous ce que vous pensez du dérouleur ;</li><li>l'étape ou l'amendement en discussion ;</li><li>la jauge d'avancement du texte.</li></ul><p>Les horaires sont estimés à 20-25 amendements par heure, en tenant compte des temps de parole et de l'ordre du jour.</p>" },
     { cible: "#btn-direct-ancre", titre: "Aller au direct", html: "<p>Le bouton rouge vous amène directement sur l'amendement en discussion, signalé par une <b>flèche rouge</b>, avec les amendements qui l'entourent.</p>" },
     { cible: "#suivi-bar", titre: "Mes sénateurs", html: "<p>« Choisir » : sélectionnez des sénateurs ou des groupes. Leurs amendements sont <b>surlignés en vert avec une ★</b> partout.</p><ul><li>cochez « Premier signataire » et/ou « Cosignataires » ;</li><li>« Seulement leurs amendements » filtre les tableaux ;</li><li>une <b>alerte</b> (vibration, notification) prévient quand un de leurs amendements arrive à 10 puis 3 amendements ;</li><li>« Envoyer mes favoris vers un autre appareil » les recopie sur votre téléphone.</li></ul>" },
     { cible: ".recherche .filtres", titre: "Rechercher", html: "<p>Filtrez par article, groupe, statut, n° d'amendement (« I-27 » ou « 27 ») ou nom de sénateur. La recherche s'applique aux amendements, mais aussi aux articles et aux orateurs.</p>" },
@@ -2808,6 +2842,42 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     TU.voile = TU.spot = TU.carte = null;
     window.removeEventListener("scroll", tutoPlacer); window.removeEventListener("resize", tutoPlacer); document.removeEventListener("keydown", tutoTouches);
   }
+  /* ---------- Vote 👍/👎 et avis des usagers, envoyés par e-mail à l'équipe ---------- */
+  var AVIS_EMAIL = "p.chambolle@clb.senat.fr";
+  // Case des indicateurs qui accueille le vote (le bloc #avis-app est déplacé, pas recréé : son état est conservé).
+  function caseAvis() {
+    S.caseAvis = S.caseAvis || h("div", { class: "kpi kpi-avis" }, h("div", { class: "lab" }, "Votre avis sur le dérouleur"));
+    var b = $("avis-app"); if (b && b.parentNode !== S.caseAvis) S.caseAvis.appendChild(b);
+    return S.caseAvis;
+  }
+  function lierAvis() {
+    var box = $("avis-app"); if (!box) return;
+    var vote = null; try { vote = localStorage.getItem("derouleur.vote"); } catch (e) {}
+    var pouces = box.querySelectorAll(".avis-pouce");
+    function marquer() { pouces.forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-vote") === vote ? "true" : "false"); }); }
+    function ouvrir() { $("avis-form").classList.remove("hidden"); $("avis-merci").classList.add("hidden"); }
+    pouces.forEach(function (b) {
+      b.addEventListener("click", function () {
+        vote = b.getAttribute("data-vote") === vote ? null : b.getAttribute("data-vote");
+        try { if (vote) localStorage.setItem("derouleur.vote", vote); else localStorage.removeItem("derouleur.vote"); } catch (e) {}
+        marquer(); if (vote) { ouvrir(); $("avis-texte").focus({ preventScroll: true }); }
+      });
+    });
+    $("avis-ouvrir").addEventListener("click", function () { var f = $("avis-form"); if (f.classList.contains("hidden")) { ouvrir(); $("avis-texte").focus({ preventScroll: true }); } else f.classList.add("hidden"); });
+    $("avis-envoyer").addEventListener("click", function () {
+      var txt = $("avis-texte").value.trim();
+      if (!vote && !txt) { $("avis-texte").focus(); return; }
+      var lib = vote === "up" ? "👍 Utile" : vote === "down" ? "👎 Pas utile" : "sans vote";
+      var corps = "Vote : " + lib + "\n\nAvis :\n" + (txt || "(aucun commentaire)") +
+        "\n\n—\nEnvoyé depuis le Dérouleur « En Séance » by Vince\n" + location.href.split("#")[0] +
+        "\nAppareil : " + (matchMedia("(max-width:720px)").matches ? "téléphone" : "ordinateur/tablette");
+      location.href = "mailto:" + AVIS_EMAIL + "?subject=" + encodeURIComponent("Avis sur le Dérouleur « En Séance » – " + lib) + "&body=" + encodeURIComponent(corps);
+      $("avis-form").classList.add("hidden");
+      var m = $("avis-merci"); m.textContent = "Merci ! Votre messagerie s'est ouverte : il ne reste qu'à envoyer le message."; m.classList.remove("hidden");
+      $("avis-texte").value = "";
+    });
+    marquer();
+  }
   function lierBulleTitre() {
     var t = $("titre-outil"), b = $("bulle-titre"), minuterie = null; if (!t || !b) return;
     function montrer() { b.classList.remove("hidden"); clearTimeout(minuterie); minuterie = setTimeout(cacher, 30000); }
@@ -2819,7 +2889,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     window.addEventListener("scroll", function () { if (!b.classList.contains("hidden") && window.scrollY > 200) cacher(); }, { passive: true });
   }
   function demarrer() {
-    lierBulleTitre(); lierAudio();
+    lierBulleTitre(); lierAudio(); lierAvis();
     if ($("btn-tuto")) $("btn-tuto").addEventListener("click", tutoOuvrir);
     var o = lsGet("derouleur.onglet"); if (o) S.onglet = o;
     pliables();
