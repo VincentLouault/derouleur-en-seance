@@ -544,6 +544,20 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   .rub{padding:14px}
   .rub .t-titre{font-size:19px}
 }
+/* Cartes du haut de page en bleu marine, comme la catégorie « Articles à venir » */
+.rubriques .rub,.rubriques .kpi,.kpis .prog.prog-haut{background:var(--navy2)!important;color:#fff;border-color:transparent}
+.rubriques .rub.en-cours{box-shadow:inset 5px 0 0 var(--red-btn),0 6px 18px -12px rgba(10,18,35,.7)}
+.rubriques .rub h2,.rubriques .rub.a-venir h2,.rubriques .kpi .lab{color:#e3c58c}
+.rubriques .rub .t-titre,.rubriques .kpi .val,.rubriques .rub .l-titre,.rubriques .rub .t-etat,.rubriques .rub .t-etat b{color:#fff}
+.rubriques .rub .t-sous,.rubriques .rub .l-sous,.rubriques .rub .vide,.rubriques .rub .autres,.rubriques .kpi .sub,.kpis .prog .t{color:rgba(255,255,255,.75)}
+.rubriques .rub .autres button,.kpis .prog .t b{color:#fff}
+.rubriques .rub li,.rubriques .rub ul.reste,.rubriques .rub .autres,.rubriques .rub .qag{border-color:rgba(255,255,255,.18)}
+.rubriques .rub li.li-qag .l-titre{color:#ff9b9b}
+.kpis .prog .bar{background:rgba(255,255,255,.18)}
+.rubriques .avis-q{color:#fff}
+.rubriques .avis-lien{color:#e3c58c}
+.rubriques .avis-merci{color:#e3c58c}
+.rubriques .avis-form{color:var(--ink)}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -916,7 +930,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261122125317";</script>
+<script>window.DEROULEUR_BUILD = "20261122125614";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2627,7 +2641,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   }
   function insec(t) { return String(t).replace(/ /g, "\u00a0"); }
   function kpi(lab, val, sub, small) {
-    return h("div", { class: "kpi" + (lab === "Étape en cours" ? " kpi-etape" : lab === "Fin estimée des débats" ? " kpi-fin" : "") }, h("div", { class: "lab" }, lab), h("div", { class: "val" + (small ? " small" : "") + (typeof small === "string" ? " " + small : "") }, val), h("div", { class: "sub" }, sub));
+    return h("div", { class: "kpi" + ((lab === "Étape en cours" || lab === "Prochaine étape") ? " kpi-etape" : lab === "Fin estimée des débats" ? " kpi-fin" : "") }, h("div", { class: "lab" }, lab), h("div", { class: "val" + (small ? " small" : "") + (typeof small === "string" ? " " + small : "") }, val), h("div", { class: "sub" }, sub));
   }
   function rythmeObserve(cur) {
     var hst = (cur && cur.historique) || [];
