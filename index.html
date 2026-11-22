@@ -916,7 +916,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261122105934";</script>
+<script>window.DEROULEUR_BUILD = "20261122125317";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1125,6 +1125,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
         if (cur >= 0 && s) res.divisions[cur].sort = s;
       }
     });
+    try { Object.defineProperty(res.divisions, "_am", { value: res.amendements, enumerable: false }); } catch (e) {}
     return res;
   }
 
@@ -1298,6 +1299,12 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
             if (texteCourant !== numero + "|" + session) return;
             var ex = t.match(/=\s*>\s*Examen d(?:e l['’]|es )(articles?\s+[^:•]+?)(?:\s*:\s*([^•]*))?$/i);
             if (!ex) return;
+            var pa = ex[1].match(/^articles? de la (premi[eè]re|seconde|deuxi[eè]me) partie/i);
+            if (pa) {
+              var kp = premiereDivPartie(divisions, /^premi/i.test(pa[1]) ? "PREMIERE" : "SECONDE");
+              dernier = { jour: cle, aujourdHui: cle === cleAuj, creneau: creneau, article: ex[1].trim(), objet: "", k: kp, partie: true, minutes: 0 };
+              out.push(dernier); return;
+            }
             var cible = sansAccent("Article " + ex[1].replace(/^articles?\s+/i, "")).replace(/[’']/g, "'").replace(/\s+/g, " ").trim();
             var k = libs.indexOf(cible);
             dernier = { jour: cle, aujourdHui: cle === cleAuj, creneau: creneau, article: ex[1].trim(), objet: (ex[2] || "").trim(), k: k, minutes: 0 };
@@ -1310,6 +1317,24 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       });
     });
     return out;
+  }
+  // Première division d'une partie (PREMIÈRE / SECONDE PARTIE du dérouleur) qui reste à examiner :
+  // article sans sort ou division portant des amendements sans sort.
+  function premiereDivPartie(divisions, nom) {
+    var deb = -1, fin = divisions.length;
+    divisions.forEach(function (d, i) {
+      var l = sansAccent(d.libelle).toUpperCase();
+      if (d.type === "partie" || /^(PREMIERE|SECONDE|DEUXIEME) PARTIE\b/.test(l)) { if (deb < 0 && l.indexOf(nom) === 0) deb = i; else if (deb >= 0 && i > deb && fin === divisions.length) fin = i; }
+      if (deb >= 0 && i > deb && d.type === "vote" && fin === divisions.length) fin = i;
+    });
+    if (deb < 0) return -1;
+    for (var i = deb + 1; i < fin; i++) {
+      var d = divisions[i];
+      if (!/article|additionnel/.test(d.type)) continue;
+      var ams = (divisions._am || []).filter(function (a) { return a.d === i; }), ouverts = ams.filter(function (a) { return !a.s; }).length;
+      if (ouverts > 0 || (d.type === "article" && !d.sort && !ams.length)) return i;
+    }
+    return -1;
   }
   function majOdj() {
     if (Date.now() - ODJ.lu < 600000 && ODJ.page) return Promise.resolve();
@@ -1366,7 +1391,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     // la séance passe au texte suivant de l'ordre du jour, même si le texte n'est pas terminé.
     t.pauseJour = false;
     try {
-      var pr = prioritesOdj(ODJ.page, t.numero, t.session, res.divisions).filter(function (p) { return p.aujourdHui && p.k >= 0; });
+      var pr = prioritesOdj(ODJ.page, t.numero, t.session, res.divisions).filter(function (p) { return p.aujourdHui && p.k >= 0 && !p.partie; });
       if (pr.length) t.pauseJour = pr.every(function (p) { return !res.amendements.some(function (a) { return a.d === p.k && !a.s; }) && (res.divisions[p.k].sort || res.amendements.some(function (a) { return a.d === p.k; }) || e.idx > p.k); });
     } catch (x) {}
     return e;
@@ -1578,7 +1603,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       actif.verifie = Date.now();
       var base = actif.url.replace(/\/[^\/]*$/, "");
       var pc = res.idtxt ? lire(base + "/modifs/amd_courant_" + res.idtxt + ".txt").then(function (t) { t = t.replace(/\s+/g, ""); return /^[0-9A-Za-z .-]{1,30}$/.test(t) ? t : null; }, function () { return null; }) : Promise.resolve(null);
-      var divsAvant = []; try { divsAvant = prioritesOdj(ODJ.page, actif.numero, actif.session, res.divisions).filter(function (p) { return p.aujourdHui && p.k >= 0; }).map(function (p) { return p.k; }); } catch (e) {}
+      var divsAvant = []; try { divsAvant = prioritesOdj(ODJ.page, actif.numero, actif.session, res.divisions).filter(function (p) { return p.aujourdHui && p.k >= 0 && !p.partie; }).map(function (p) { return p.k; }); } catch (e) {}
       return Promise.all([pc, completerAvis(actif, res.amendements, divsAvant), completerGroupes(res.amendements)]);
     }).then(function (r) {
       var pref = actif.session + "/" + actif.numero + "/";
@@ -1586,11 +1611,24 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       // Ordre du jour : si des articles sont appelés en priorité aujourd'hui (ex. article 55 après l'article liminaire),
       // l'étape suivante est le premier d'entre eux qui reste à examiner, et non l'article suivant du dérouleur.
       try {
-        var prK = prioritesOdj(ODJ.page, actif.numero, actif.session, res.divisions).filter(function (p) { return p.aujourdHui && p.k >= 0; }).map(function (p) { return p.k; });
+        var prK = prioritesOdj(ODJ.page, actif.numero, actif.session, res.divisions).filter(function (p) { return p.aujourdHui && p.k >= 0 && !p.partie; }).map(function (p) { return p.k; });
         var courantOuvert = r[0] && res.amendements.some(function (a) { return cleAmdt(a.n) === cleAmdt(r[0]) && !a.s; });
         if (prK.length && et.idx >= 0 && prK.indexOf(et.idx) < 0 && !courantOuvert) {
           var kP = prK.filter(function (k) { return res.amendements.some(function (a) { return a.d === k && !a.s; }); })[0];
           if (kP !== undefined) { et.idx = kP; et.libelle = res.divisions[kP].libelle; et.type = res.divisions[kP].type; if (et.aVenir.indexOf(kP) < 0) et.aVenir = [kP].concat(et.aVenir); }
+        }
+      } catch (e) {}
+      var courantPub = r[0];
+      try {
+        if (actif.courantVu !== r[0]) { if (actif.courantVu !== undefined) actif.courantBouge = Date.now(); actif.courantVu = r[0]; }
+        var enDirectTexte = (actif.activite && Date.now() - actif.activite < 20 * 60000) || (actif.courantBouge && Date.now() - actif.courantBouge < 30 * 60000);
+        var prs = prioritesOdj(ODJ.page, actif.numero, actif.session, res.divisions);
+        var pP = prs.length && prs[0].partie ? prs[0] : null; // premier point à venir de ce texte à l'ordre du jour
+        if (pP && pP.k >= 0 && !enDirectTexte && (et.idx < 0 || et.idx > pP.k)) {
+          et.idx = pP.k; et.libelle = res.divisions[pP.k].libelle; et.type = res.divisions[pP.k].type;
+          et.aVenir = et.aVenir.filter(function (k) { return k !== pP.k; }); et.aVenir.unshift(pP.k);
+          et.odj = true;
+          courantPub = null; // le marqueur du Sénat est resté sur la dernière séance : on repart de la première division non réglée
         }
       } catch (e) {}
       res.amendements.forEach(function (a) {
@@ -1610,9 +1648,9 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       };
       dernier = {
         config: config, releve: new Date().toISOString(), source: "lecture directe de senat.fr",
-        donnees: { schema: 1, titre: res.titre || actif.titre, lecture: res.lecture || actif.lecture, deposes: res.deposes, a_examiner_senat: res.a_examiner_senat, courant: r[0],
+        donnees: { schema: 1, titre: res.titre || actif.titre, lecture: res.lecture || actif.lecture, deposes: res.deposes, a_examiner_senat: res.a_examiner_senat, courant: courantPub,
           divisions: res.divisions.map(function (d) { return { libelle: d.libelle, type: d.type, sort: d.sort }; }), amendements: res.amendements, stats_groupes: { fiche: 1 }, orateurs: res.orateurs,
-          etape: et.idx >= 0 ? { idx: et.idx, libelle: et.libelle, type: et.type } : null, divs_a_venir: et.aVenir, statut_texte: et.statut,
+          etape: et.idx >= 0 ? { idx: et.idx, libelle: et.libelle, type: et.type, odj: !!et.odj } : null, divs_a_venir: et.aVenir, statut_texte: et.statut,
           priorites: (function () { try { return prioritesOdj(ODJ.page, actif.numero, actif.session, res.divisions); } catch (e) { return []; } })() }
       };
       enCours = false;
@@ -1736,7 +1774,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       }
     }
     // Ordre du jour : articles appelés en priorité aujourd'hui (ex. article liminaire puis article 55 de la loi de finances).
-    var prio = (D.priorites || []).filter(function (p) { return p.k >= 0 && p.aujourdHui; }), posPrio = {}, minutesPrio = {};
+    var prio = (D.priorites || []).filter(function (p) { return p.k >= 0 && p.aujourdHui && !p.partie; }), posPrio = {}, minutesPrio = {};
     prio.forEach(function (p, i) { if (!(p.k in posPrio)) posPrio[p.k] = i - 100000; minutesPrio[p.k] = (minutesPrio[p.k] || 0) + (p.minutes || 0); });
     if (prio.length) {
       var cleDiv = function (d) { return d in posPrio ? posPrio[d] : d; };
@@ -1831,7 +1869,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       cur: cur, cfg: cfg, D: D, divs: divs, am: am, examines: examines, restants: restants, groupes: groupes, cpt: cpt,
       rMin: rMin, rMax: rMax, plages: plages, depart: depart,
       fin: restants.length ? (prio.length && restants.length - iProchain > nPrioRest ? avanceSuite(restants.length - iProchain - nPrioRest, mpa) : avance((restants.length - iProchain) * mpa + cumul)) : null,
-      fin2: restants.length ? (prio.length && restants.length - iProchain > nPrioRest ? avanceSuite(restants.length - iProchain - nPrioRest, mpa2) : avance((restants.length - iProchain) * mpa2 + cumul)) : null, prio: prio, priosFutures: (D.priorites || []).filter(function (p) { return !p.aujourdHui; }),
+      fin2: restants.length ? (prio.length && restants.length - iProchain > nPrioRest ? avanceSuite(restants.length - iProchain - nPrioRest, mpa2) : avance((restants.length - iProchain) * mpa2 + cumul)) : null, prio: prio, priosFutures: (D.priorites || []).filter(function (p) { return !p.aujourdHui || p.partie; }),
       dureeRestante: (restants.length - iProchain) * mpa + delai,
       dureeRestante2: (restants.length - iProchain) * mpa2 + delai,
       delai: delai, delaiBlocs: delaiBlocs,
@@ -2185,7 +2223,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
       kpi("Examinés", nb(M.examines.length), nb(M.cpt["Adopté"] || 0) + " adoptés · " + nb(M.cpt["Rejeté"] || 0) + " rejetés"),
       caseAvis(),
       (M.etape && (!M.prochain || (M.divs[M.etape.idx] && M.divs[M.etape.idx].restants === 0)))
-        ? kpi("Étape en cours", M.etape.libelle, "selon le dérouleur du Sénat", M.etape.libelle.length > 90 ? "texte long" : M.etape.libelle.length > 30 ? "texte" : true)
+        ? kpi(M.etape.odj ? "Prochaine étape" : "Étape en cours", M.etape.libelle, M.etape.odj ? "reprise selon l'ordre du jour du Sénat" : "selon le dérouleur du Sénat", M.etape.libelle.length > 90 ? "texte long" : M.etape.libelle.length > 30 ? "texte" : true)
         : kpi(M.enDirect ? "Amendement en discussion" : "Prochain amendement", M.prochain ? "n° " + M.prochain.n : "—", M.prochain && M.divs[M.prochain.d] ? M.divs[M.prochain.d].libelle : "", true)
     );
     // Jauge d'avancement du texte, à la place de l'ancienne case « Fin estimée des débats ».
