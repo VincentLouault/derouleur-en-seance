@@ -439,6 +439,19 @@ tr.flash td{animation:flash 2s ease-out}
 .avis-env{all:unset;cursor:pointer;background:var(--navy2);color:#fff;font-weight:700;font-size:13.5px;padding:6px 16px;border-radius:99px}
 .avis-note{font-size:12px;color:var(--muted)}
 .avis-merci{margin-top:6px;font-size:13px;color:var(--green);font-weight:600}
+.porte{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(14,24,46,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.porte.hidden{display:none}
+html.porte-ouverte,html.porte-ouverte body{overflow:hidden}
+.porte-carte{width:min(420px,100%);background:#fff;border-radius:20px;padding:26px 24px 20px;box-shadow:0 30px 70px -20px rgba(0,0,0,.6);border-top:5px solid var(--red-btn);text-align:center}
+.porte-logo{height:46px;width:auto;margin-bottom:8px}
+.porte-carte h2{margin:0 0 8px;font-size:20px;color:var(--navy)}
+.porte-carte p{margin:0 0 14px;font-size:14.5px;line-height:1.45;color:var(--ink)}
+.porte-carte input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:11px 14px;border:1.5px solid var(--line);border-radius:12px;text-align:center}
+.porte-carte input:focus{outline:none;border-color:var(--navy2)}
+.porte-err{color:var(--red-btn);font-size:13px;font-weight:600;margin-top:6px}
+.porte-carte button{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;margin-top:12px;background:var(--red-btn);color:#fff;font-weight:700;font-size:16px;padding:12px;border-radius:99px;text-align:center}
+.porte-carte button[disabled]{opacity:.6;cursor:wait}
+.porte-carte .porte-info{margin:14px 0 0;font-size:12px;color:var(--muted)}
 .tampon.nonsout{color:#b8650f;transform:rotate(-5deg)}
 tr:hover .tampon{filter:saturate(1.15)}
 tr.plus-row td{padding:10px 16px!important;background:#f6f8fc;text-align:center}
@@ -541,6 +554,17 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 <meta name="theme-color" content="#14213d">
 </head>
 <body>
+<div class="porte hidden" id="porte" role="dialog" aria-modal="true" aria-labelledby="porte-titre">
+  <form class="porte-carte" id="porte-form" novalidate>
+    <img class="porte-logo" src="logo-vince.png" alt="" width="120" height="48">
+    <h2 id="porte-titre">Dérouleur « En Séance » by Vince</h2>
+    <p>Pour accéder au dérouleur, indiquez votre adresse e-mail.</p>
+    <input type="email" id="porte-mail" autocomplete="email" inputmode="email" placeholder="prenom.nom@exemple.fr" required>
+    <div class="porte-err hidden" id="porte-err">Adresse e-mail invalide.</div>
+    <button type="submit" id="porte-ok">Accéder au dérouleur</button>
+    <p class="porte-info">Votre adresse sert uniquement à mesurer le nombre d'utilisateurs de l'outil. Elle n'est ni diffusée ni utilisée à d'autres fins. Elle n'est demandée qu'une fois sur cet appareil.</p>
+  </form>
+</div>
 <div class="wrap">
   <header class="hero">
   <h1 id="titre-outil">Dérouleur <span style="white-space:nowrap">« En Séance »</span> by Vince</h1>
@@ -892,7 +916,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261121233759";</script>
+<script>window.DEROULEUR_BUILD = "20261122105934";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2882,6 +2906,32 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     });
     marquer();
   }
+  /* ---------- Accès : adresse e-mail demandée une fois par appareil, envoyée au Google Form de l'équipe ---------- */
+  var PORTE_FORM = "https://docs.google.com/forms/d/e/1FAIpQLScCcbPsSZYFU7i9ybjjswLQQpPTUi0I6nQzojgy9UbdYPNWpA/formResponse";
+  var PORTE_CHAMP = "entry.1485625627";
+  function lierPorte() {
+    var deja = null; try { deja = localStorage.getItem("derouleur.inscrit"); } catch (e) { return; }
+    if (deja) return;
+    var porte = $("porte"), mail = $("porte-mail"), err = $("porte-err"), ok = $("porte-ok");
+    porte.classList.remove("hidden"); document.documentElement.classList.add("porte-ouverte");
+    setTimeout(function () { try { mail.focus(); } catch (e) {} }, 50);
+    $("porte-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var v = mail.value.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { err.classList.remove("hidden"); mail.focus(); return; }
+      err.classList.add("hidden"); ok.disabled = true; ok.textContent = "Un instant…";
+      var corps = new URLSearchParams(); corps.append(PORTE_CHAMP, v);
+      var fini = function () {
+        try { localStorage.setItem("derouleur.inscrit", v); } catch (x) {}
+        porte.classList.add("hidden"); document.documentElement.classList.remove("porte-ouverte");
+      };
+      // Réponse opaque (no-cors) : on ne bloque jamais l'accès si Google ne répond pas.
+      Promise.race([
+        fetch(PORTE_FORM, { method: "POST", mode: "no-cors", body: corps }).catch(function () {}),
+        new Promise(function (r) { setTimeout(r, 4000); })
+      ]).then(fini);
+    });
+  }
   function lierBulleTitre() {
     var t = $("titre-outil"), b = $("bulle-titre"), minuterie = null; if (!t || !b) return;
     function montrer() { b.classList.remove("hidden"); clearTimeout(minuterie); minuterie = setTimeout(cacher, 30000); }
@@ -2893,7 +2943,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     window.addEventListener("scroll", function () { if (!b.classList.contains("hidden") && window.scrollY > 200) cacher(); }, { passive: true });
   }
   function demarrer() {
-    lierBulleTitre(); lierAudio(); lierAvis();
+    lierPorte(); lierBulleTitre(); lierAudio(); lierAvis();
     if ($("btn-tuto")) $("btn-tuto").addEventListener("click", tutoOuvrir);
     var o = lsGet("derouleur.onglet"); if (o) S.onglet = o;
     pliables();
