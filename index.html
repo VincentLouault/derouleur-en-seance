@@ -566,6 +566,21 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 td.c-passage{color:var(--navy2);font-weight:700;background:rgba(31,58,104,.07);white-space:nowrap}
 th.c-passage{background:var(--navy2)!important;color:#fff!important}
 td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
+.ph h3 .ph-sous{font-weight:600;opacity:.85}
+.titre-derouleur{display:inline-block;margin:0 0 6px;background:var(--red-btn);color:#fff!important;font-size:24px!important;font-weight:800;letter-spacing:.01em;padding:9px 22px;border-radius:14px;box-shadow:0 10px 24px -12px rgba(196,43,43,.95)}
+.barre-direct{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;margin:0 0 12px}
+.barre-direct .btn-direct,.barre-direct .btn-audio-haut,.barre-direct .btn-tuto{margin:0!important;flex:0 0 auto}
+.audio-msg-haut{margin:-6px 0 10px}
+@media (max-width:720px){
+  .barre-direct{gap:8px}
+  .barre-direct .btn-direct{font-size:14.5px;padding:10px 15px;flex:1 1 auto;text-align:center;white-space:nowrap}
+  .barre-direct .btn-audio-haut,.barre-direct .btn-tuto{font-size:0!important;padding:0!important;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+  .barre-direct .btn-audio-haut::before{content:"🔊";font-size:17px}
+  .barre-direct .btn-audio-haut.on::before{content:"⏹"}
+  .barre-direct .btn-tuto::before{content:"❓";font-size:16px}
+  .titre-derouleur{font-size:21px!important;padding:8px 18px}
+  .kpis .kpi-avis{grid-column:1/-1}
+}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -621,9 +636,11 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   <div class="meta hidden" id="meta"></div>
 
   <div class="recherche" id="recherche">
+    <div class="barre-direct">
     <a class="btn-direct" id="btn-direct-ancre" href="#p-cours" onclick="var r=document.querySelector('#cours-body tr.cur')||document.getElementById('p-cours');if(r){r.scrollIntoView({behavior:'smooth',block:'center'});r.classList.add('flash');setTimeout(function(){r.classList.remove('flash');},2200);}return false;">● Amendements en cours (direct)</a>
-    <button type="button" class="btn-audio btn-audio-haut" data-audio>🔊 Activer l'audio</button>
+    <button type="button" class="btn-audio btn-audio-haut" data-audio aria-label="Activer l'audio">🔊 Activer l'audio</button>
     <button type="button" class="btn-tuto" id="btn-tuto" title="Découvrir toutes les fonctions du dérouleur">❓ Tutoriel</button>
+    </div>
     <div class="suivi-bar" id="suivi-bar"></div>
     <div class="suivi-panel hidden" id="suivi-panel"></div>
     <div class="filtres">
@@ -642,19 +659,16 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 
 
   <section id="s-orateurs" class="hidden">
-    <h2>Prises de parole</h2>
     <div class="panel navy" id="p-orateurs" data-pli>
-      <div class="ph"><h3>Orateurs inscrits</h3><span class="cnt" id="orat-cnt"></span></div>
+      <div class="ph"><h3>Prises de parole : <span class="ph-sous">Orateurs inscrits</span></h3><span class="cnt" id="orat-cnt"></span></div>
       <p class="expl in">Orateurs inscrits au dérouleur du Sénat pour l'étape en cours et les étapes à venir du texte affiché, dans l'ordre de passage, avec leur temps de parole. Pendant la séance, le sommaire du direct vidéo du Sénat retire ceux qui sont déjà intervenus et signale l'orateur à la tribune.</p>
       <div id="orateurs"></div>
     </div>
   </section>
 
   <section id="s-articles">
-    <h2>Heures de passage estimées par article</h2>
-    <p class="expl" id="expl-calc"></p>
     <div class="panel gold" id="p-articles" data-pli>
-      <div class="ph"><h3>Articles à venir</h3><span class="cnt" id="art-cnt"></span></div>
+      <div class="ph"><h3>Heures de passage estimées par article : <span class="ph-sous">Articles à venir</span></h3><span class="cnt" id="art-cnt"></span></div>
       <div class="art-cours hors-pli hidden" id="art-cours"></div>
       <div class="scroll">
         <table class="t-art">
@@ -668,8 +682,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   <section id="s-amendements">
     <div class="amhead">
       <div>
-        <h2>Amendements</h2>
-        <p class="expl" id="expl-am">Dans l'ordre du dérouleur de séance. Le groupe est celui du premier signataire ; les amendements de la commission sont classés « Commission ».</p>
+        <h2 class="titre-derouleur">Le Dérouleur</h2>
       </div>
     </div>
 
@@ -939,7 +952,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261122131204";</script>
+<script>window.DEROULEUR_BUILD = "20261122191127";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2244,10 +2257,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     vide($("kpis")).append(
       kpi("Amendements déposés", nb(D.deposes || T), "dont " + nb(T) + " au dérouleur de séance"),
       kpi("Examinés", nb(M.examines.length), nb(M.cpt["Adopté"] || 0) + " adoptés · " + nb(M.cpt["Rejeté"] || 0) + " rejetés"),
-      caseAvis(),
-      (M.etape && (!M.prochain || (M.divs[M.etape.idx] && M.divs[M.etape.idx].restants === 0)))
-        ? kpi(M.etape.odj ? "Prochaine étape" : "Étape en cours", M.etape.libelle, M.etape.odj ? "reprise selon l'ordre du jour du Sénat" : "selon le dérouleur du Sénat", M.etape.libelle.length > 90 ? "texte long" : M.etape.libelle.length > 30 ? "texte" : true)
-        : kpi(M.enDirect ? "Amendement en discussion" : "Prochain amendement", M.prochain ? "n° " + M.prochain.n : "—", M.prochain && M.divs[M.prochain.d] ? M.divs[M.prochain.d].libelle : "", true)
+      caseAvis()
     );
     // Jauge d'avancement du texte, à la place de l'ancienne case « Fin estimée des débats ».
     S.jauge = S.jauge || document.querySelector(".prog.prog-haut"); if (S.jauge) $("kpis").appendChild(S.jauge);
@@ -2264,12 +2274,6 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       prochaineMaj && prochaineMaj > now ? h("b", null, hm(prochaineMaj)) : "",
       perime ? " · relevé ancien de " + duree(age) : "",
       cur === S.local ? " · mise à jour visible sur cet écran uniquement" : "");
-
-    // Explication du calcul
-    var e = vide($("expl-calc"));
-    var obs = rythmeObserve(cur);
-    e.append("Calcul : fourchette de " + M.rMin + " à " + M.rMax + " amendements par heure.",
-      obs ? " Rythme observé entre les deux derniers relevés : " + obs + " amendements par heure." : "");
 
     // Articles à venir
     var av = M.divs.filter(function (d) { return d.restants > 0 || d.sansAmdt; });
@@ -2831,7 +2835,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   function messageAudio(t) {
     document.querySelectorAll(".audio-msg").forEach(function (m) { m.remove(); });
     if (!t) return;
-    document.querySelectorAll(".btn-audio-haut").forEach(function (b0) { b0.parentNode.insertBefore(h("div", { class: "audio-msg audio-msg-haut" }, t[0], t[1] ? h("a", { href: t[1], target: "_blank", rel: "noopener" }, " écouter sur videos.senat.fr ↗") : null), b0.nextSibling ? b0.parentNode.querySelector("#btn-tuto").nextSibling : null); });
+    document.querySelectorAll(".btn-audio-haut").forEach(function (b0) { var bd = b0.closest(".barre-direct") || b0; bd.parentNode.insertBefore(h("div", { class: "audio-msg audio-msg-haut" }, t[0], t[1] ? h("a", { href: t[1], target: "_blank", rel: "noopener" }, " écouter sur videos.senat.fr ↗") : null), bd.nextSibling); });
   }
   function arreterAudio() {
     AUDIO_D.on = false;
@@ -2872,7 +2876,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   var TUTO = [
     { cible: "#titre-outil", titre: "Bienvenue sur le dérouleur", html: "<p>Cet outil lit en direct le site du Sénat (dérouleur « En séance », ordre du jour, vidéo de la séance) et l'actualise toutes les 30 secondes. Il suit seul le texte en discussion, jour après jour.</p><p>Survolez ou touchez le titre pour revoir sa présentation.</p>" },
     { cible: ".rubriques .col-g", titre: "Texte en cours et textes à venir", html: "<p>Le texte examiné en séance, avec la pastille <b>En séance</b>, puis le prochain texte de l'ordre du jour (« Voir le suivant » pour les autres jours). Un clic sur un texte à venir affiche son dérouleur.</p><p>La phrase dessous donne l'estimation de fin des débats.</p>" },
-    { cible: "#kpis", titre: "Les chiffres clés", html: "<ul><li>amendements déposés et examinés (adoptés, rejetés) ;</li><li>👍 / 👎 et « Donner un avis » : dites-nous ce que vous pensez du dérouleur ;</li><li>l'étape ou l'amendement en discussion ;</li><li>la jauge d'avancement du texte.</li></ul><p>Les horaires sont estimés à 20-25 amendements par heure, en tenant compte des temps de parole et de l'ordre du jour.</p>" },
+    { cible: "#kpis", titre: "Les chiffres clés", html: "<ul><li>amendements déposés et examinés (adoptés, rejetés) ;</li><li>👍 / 👎 et « Donner un avis » : dites-nous ce que vous pensez du dérouleur ;</li><li>la jauge d'avancement du texte.</li></ul><p>Les horaires sont estimés à 20-25 amendements par heure, en tenant compte des temps de parole et de l'ordre du jour.</p>" },
     { cible: "#btn-direct-ancre", titre: "Aller au direct", html: "<p>Le bouton rouge vous amène directement sur l'amendement en discussion, signalé par une <b>flèche rouge</b>, avec les amendements qui l'entourent.</p>" },
     { cible: "#suivi-bar", titre: "Mes sénateurs", html: "<p>« Choisir » : sélectionnez des sénateurs ou des groupes. Leurs amendements sont <b>surlignés en vert avec une ★</b> partout.</p><ul><li>cochez « Premier signataire » et/ou « Cosignataires » ;</li><li>« Seulement leurs amendements » filtre les tableaux ;</li><li>une <b>alerte</b> (vibration, notification) prévient quand un de leurs amendements arrive à 10 puis 3 amendements ;</li><li>« Envoyer mes favoris vers un autre appareil » les recopie sur votre téléphone.</li></ul>" },
     { cible: ".recherche .filtres", titre: "Rechercher", html: "<p>Filtrez par article, groupe, statut, n° d'amendement (« I-27 » ou « 27 ») ou nom de sénateur. La recherche s'applique aux amendements, mais aussi aux articles et aux orateurs.</p>" },
