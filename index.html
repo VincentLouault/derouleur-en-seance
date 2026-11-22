@@ -558,6 +558,14 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 .rubriques .avis-lien{color:#e3c58c}
 .rubriques .avis-merci{color:#e3c58c}
 .rubriques .avis-form{color:var(--ink)}
+.btn-audio-haut{margin:10px 0 10px 8px;vertical-align:top;padding:5px 13px;font-size:13px}
+.audio-msg-haut{font-size:12.5px;margin:-4px 0 10px;color:var(--muted)}
+.ph.ph-audio{align-items:center}
+.ph .btn-audio-ph{margin-left:auto;background:#fff;color:var(--red-btn);border-color:#fff}
+.ph .btn-audio-ph.on{background:#ffe3e3}
+td.c-passage{color:var(--navy2);font-weight:700;background:rgba(31,58,104,.07);white-space:nowrap}
+th.c-passage{background:var(--navy2)!important;color:#fff!important}
+td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -614,6 +622,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 
   <div class="recherche" id="recherche">
     <a class="btn-direct" id="btn-direct-ancre" href="#p-cours" onclick="var r=document.querySelector('#cours-body tr.cur')||document.getElementById('p-cours');if(r){r.scrollIntoView({behavior:'smooth',block:'center'});r.classList.add('flash');setTimeout(function(){r.classList.remove('flash');},2200);}return false;">● Amendements en cours (direct)</a>
+    <button type="button" class="btn-audio btn-audio-haut" data-audio>🔊 Activer l'audio</button>
     <button type="button" class="btn-tuto" id="btn-tuto" title="Découvrir toutes les fonctions du dérouleur">❓ Tutoriel</button>
     <div class="suivi-bar" id="suivi-bar"></div>
     <div class="suivi-panel hidden" id="suivi-panel"></div>
@@ -633,7 +642,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 
 
   <section id="s-orateurs" class="hidden">
-    <h2 class="avec-audio">Prises de parole <button type="button" class="btn-audio" data-audio>🔊 Activer l'audio</button></h2>
+    <h2>Prises de parole</h2>
     <div class="panel navy" id="p-orateurs" data-pli>
       <div class="ph"><h3>Orateurs inscrits</h3><span class="cnt" id="orat-cnt"></span></div>
       <p class="expl in">Orateurs inscrits au dérouleur du Sénat pour l'étape en cours et les étapes à venir du texte affiché, dans l'ordre de passage, avec leur temps de parole. Pendant la séance, le sommaire du direct vidéo du Sénat retire ceux qui sont déjà intervenus et signale l'orateur à la tribune.</p>
@@ -642,14 +651,14 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   </section>
 
   <section id="s-articles">
-    <h2 class="avec-audio">Heures de passage estimées par article <button type="button" class="btn-audio" data-audio>🔊 Activer l'audio</button></h2>
+    <h2>Heures de passage estimées par article</h2>
     <p class="expl" id="expl-calc"></p>
     <div class="panel gold" id="p-articles" data-pli>
       <div class="ph"><h3>Articles à venir</h3><span class="cnt" id="art-cnt"></span></div>
       <div class="art-cours hors-pli hidden" id="art-cours"></div>
       <div class="scroll">
         <table class="t-art">
-          <thead><tr><th>Article</th><th class="num">Amendements</th><th class="num">Restants</th><th>Passage estimé</th><th>Fin estimée</th><th>Sort de l'article</th></tr></thead>
+          <thead><tr><th>Article</th><th class="num">Amendements</th><th class="num">Restants</th><th class="c-passage">Passage estimé</th><th>Fin estimée</th><th>Sort de l'article</th></tr></thead>
           <tbody id="art-body"></tbody>
         </table>
       </div>
@@ -659,7 +668,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   <section id="s-amendements">
     <div class="amhead">
       <div>
-        <h2 class="avec-audio">Amendements <button type="button" class="btn-audio" data-audio>🔊 Activer l'audio</button></h2>
+        <h2>Amendements</h2>
         <p class="expl" id="expl-am">Dans l'ordre du dérouleur de séance. Le groupe est celui du premier signataire ; les amendements de la commission sont classés « Commission ».</p>
       </div>
     </div>
@@ -675,7 +684,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     </div>
 
     <div class="panel red" id="p-cours">
-      <div class="ph"><h3>Amendements en cours</h3><span class="cnt" id="cours-cnt"></span></div>
+      <div class="ph ph-audio"><h3>Amendements en cours</h3><span class="cnt" id="cours-cnt"></span><button type="button" class="btn-audio btn-audio-ph" data-audio>🔊 Activer l'audio</button></div>
       <div class="scroll">
         <table class="t-amdt">
           <thead><tr><th>Article</th><th>N°</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Statut</th></tr></thead>
@@ -930,7 +939,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261122125614";</script>
+<script>window.DEROULEUR_BUILD = "20261122131204";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2366,7 +2375,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
         h("td", null, d.suivi ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, h("span", { class: "art-bulle" }, d.libelle), estCours ? h("span", { class: "badge" }, "En cours") : null, tagOdj(d),
           filtreP ? h("span", { class: "tag-odj", style: "color:var(--navy2)" }, [d.fAm ? nb(d.fAm) + " amendement" + (d.fAm > 1 ? "s" : "") + " correspondant" + (d.fAm > 1 ? "s" : "") : "", d.fOr ? nb(d.fOr) + " orateur" + (d.fOr > 1 ? "s" : "") + " correspondant" + (d.fOr > 1 ? "s" : "") : ""].filter(Boolean).join(" · ")) : null),
         h("td", { class: "num" }, nb(d.total)), h("td", { class: "num" }, nb(d.restants)),
-        d.sansAmdt ? h("td", null, (d.libelle.match(/à (\d{1,2} h \d{2})/) || [])[1] || (d.debut ? fourch2(d.debut, d.debut2) : "—")) : h("td", null, fourch2(d.debut, d.debut2)),
+        d.sansAmdt ? h("td", { class: "c-passage" }, (d.libelle.match(/à (\d{1,2} h \d{2})/) || [])[1] || (d.debut ? fourch2(d.debut, d.debut2) : "—")) : h("td", { class: "c-passage" }, fourch2(d.debut, d.debut2)),
         d.sansAmdt ? h("td", null, "—") : h("td", null, d.fin === null ? "—" : fourch2(d.fin, d.fin2)),
         h("td", null, d.sort ? pillSort(d.sort) : "")));
     });
@@ -2822,7 +2831,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
   function messageAudio(t) {
     document.querySelectorAll(".audio-msg").forEach(function (m) { m.remove(); });
     if (!t) return;
-    document.querySelectorAll("h2.avec-audio").forEach(function (h2) { h2.appendChild(h("span", { class: "audio-msg" }, t[0], t[1] ? h("a", { href: t[1], target: "_blank", rel: "noopener" }, " écouter sur videos.senat.fr ↗") : null)); });
+    document.querySelectorAll(".btn-audio-haut").forEach(function (b0) { b0.parentNode.insertBefore(h("div", { class: "audio-msg audio-msg-haut" }, t[0], t[1] ? h("a", { href: t[1], target: "_blank", rel: "noopener" }, " écouter sur videos.senat.fr ↗") : null), b0.nextSibling ? b0.parentNode.querySelector("#btn-tuto").nextSibling : null); });
   }
   function arreterAudio() {
     AUDIO_D.on = false;
@@ -2870,7 +2879,7 @@ tr.odj-row .odj-txt.sous:before{content:"→ "}
     { cible: "#s-orateurs", titre: "Prises de parole", html: "<p>Les orateurs inscrits de l'étape en cours, synchronisés avec le <b>sommaire du direct vidéo</b> :</p><ul><li>ceux qui ont parlé disparaissent ;</li><li>l'orateur <b>à la tribune</b> a une batterie qui se vide avec son temps de parole, puis affiche <b>« CONCLURE »</b>.</li></ul>" },
     { cible: "#p-articles", titre: "Articles à venir", html: "<p>Chaque article avec ses amendements et ses heures de passage estimées (sur 2 jours de séance). En italique, les autres points de l'<b>ordre du jour</b> : autres textes, questions d'actualité, réunions de commission.</p><p>Cliquez sur un article pour voir ses amendements.</p>" },
     { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>10 derniers examinés</b> (3 visibles), <b>en cours</b>, <b>à venir</b> (liste qui défile) et <b>déjà examinés</b> ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
-    { cible: "[data-audio]", titre: "Écouter la séance", html: "<p>« Activer l'audio » diffuse le son du direct de l'hémicycle, sans quitter la page.</p>" },
+    { cible: "[data-audio]", titre: "Écouter la séance", html: "<p>« Activer l'audio » (ici ou en tête des amendements en cours) diffuse le son du direct de l'hémicycle, sans quitter la page.</p>" },
     { cible: "#s-actus", titre: "Actualités", html: "<p>Les dernières infos de Public Sénat et de LCP sur 24 heures (3 visibles, les autres en dépliant).</p>" },
     { cible: "#titre-outil", titre: "Sur votre téléphone et votre ordinateur", html: "<p>Ajoutez le dérouleur à l'écran d'accueil (iPhone : Partager → « Sur l'écran d'accueil » ; Android et ordinateur : « Installer l'application ») pour l'ouvrir comme une application, avec l'icône « V ».</p><p>La page se met à jour seule, même restée ouverte en arrière-plan.</p>" }
   ];
