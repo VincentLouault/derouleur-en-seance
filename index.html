@@ -952,7 +952,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261122193634";</script>
+<script>window.DEROULEUR_BUILD = "20261122194111";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -3008,9 +3008,20 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     var t = $("titre-outil"), b = $("bulle-titre"), minuterie = null; if (!t || !b) return;
     function montrer() { b.classList.remove("hidden"); clearTimeout(minuterie); minuterie = setTimeout(cacher, 30000); }
     function cacher() { clearTimeout(minuterie); b.classList.add("hidden"); }
-    var souris = window.matchMedia && window.matchMedia("(hover: hover)").matches;
-    if (souris) { t.addEventListener("mouseenter", montrer); t.addEventListener("mouseleave", cacher); }
-    t.addEventListener("click", function (e) { e.stopPropagation(); if (b.classList.contains("hidden")) montrer(); else cacher(); });
+    // Survol à la souris (quel que soit l'appareil, y compris les écrans tactiles avec souris) ; toucher/clic sur téléphone.
+    var depart = null, parSurvol = 0;
+    var dernierTouch = 0;
+    function entrer(e) { if (e.pointerType === "touch") { dernierTouch = Date.now(); return; } if (Date.now() - dernierTouch < 1500) return; clearTimeout(depart); if (b.classList.contains("hidden")) { montrer(); parSurvol = Date.now(); } }
+    function sortir(e) { if (e.pointerType === "touch") { dernierTouch = Date.now(); return; } if (Date.now() - dernierTouch < 1500) return; clearTimeout(depart); depart = setTimeout(cacher, 350); }
+    [t, b].forEach(function (el) {
+      el.addEventListener("pointerenter", entrer); el.addEventListener("pointerleave", sortir);
+      el.addEventListener("mouseenter", function () { entrer({ pointerType: "mouse" }); }); el.addEventListener("mouseleave", function () { sortir({ pointerType: "mouse" }); });
+    });
+    t.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (b.classList.contains("hidden")) montrer();
+      else if (Date.now() - parSurvol > 800) cacher(); // un clic juste après le survol ne referme pas la bulle
+    });
     document.addEventListener("click", function (e) { if (e.target !== t && !b.contains(e.target)) cacher(); });
     window.addEventListener("scroll", function () { if (!b.classList.contains("hidden") && window.scrollY > 200) cacher(); }, { passive: true });
   }
