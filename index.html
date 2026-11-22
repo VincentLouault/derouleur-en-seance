@@ -952,7 +952,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261122191127";</script>
+<script>window.DEROULEUR_BUILD = "20261122193634";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2455,7 +2455,14 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     M.am.forEach(function (a) { st[a.g ? (a.gs || "explicite") : "none"]++; });
     var viaFiches = !!(D.stats_groupes && "fiche" in D.stats_groupes);
     vide($("foot")).append(
-      h("p", null, "Sources : ", h("a", { href: cfg.url_derouleur, target: "_blank", rel: "noopener" }, "dérouleur « En séance » du Sénat"), " et ", h("a", { href: cfg.url_odj, target: "_blank", rel: "noopener" }, "ordre du jour du Sénat"), "."),
+      (function () {
+        var V = window.DEROULEUR_LIVE && window.DEROULEUR_LIVE.video ? window.DEROULEUR_LIVE.video() : null;
+        var pv = V && V.page ? V.page + ".html" : "https://videos.senat.fr/";
+        var lien = function (u, t) { return h("a", { href: u, target: "_blank", rel: "noopener" }, t); };
+        return h("p", null, "Sources : ", lien(cfg.url_derouleur, "dérouleur « En séance » du Sénat"), ", ", lien(cfg.url_odj, "ordre du jour du Sénat"),
+          ", ", lien(pv, "direct vidéo de la séance et son sommaire"), " (videos.senat.fr), ",
+          lien("https://www.publicsenat.fr/", "Public Sénat"), " et ", lien("https://lcp.fr/", "LCP"), " pour les actualités.");
+      })(),
       viaFiches ? h("p", null, "Groupes politiques : groupe du premier signataire, tel qu'indiqué dans le dérouleur ou, à défaut, sur sa fiche de sénateur (senat.fr)" + (st.none ? " ; " + nb(st.none) + " amendements restent sans groupe (—)." : ".")) :
       h("p", null, "Groupes politiques : " + nb(st.explicite) + " amendements portent la mention du groupe ou de la commission dans le dérouleur ; " + nb(st.deduit) + " sont attribués à partir d'une autre mention du même sénateur (soulignés en pointillé)" + (st.manuel ? " ; " + nb(st.manuel) + " à partir d'une table complétée à la main (soulignés en tirets)" : "") + " ; " + nb(st.none) + " restent sans groupe (—)."),
       h("p", null, "Les heures de passage sont des estimations à rythme constant ; les suspensions, les scrutins publics et les discussions longues les décalent."));
