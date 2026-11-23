@@ -1,5 +1,5 @@
 {
-"maj": 1795411177303,
+"maj": 1795415639927,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Suspension des prestations sociales, peines planchers, responsabilité pénale à 16 ans... Les députés LR à l'offensive sur la sécurité",
+"lien": "https://lcp.fr/actualites/suspension-des-prestations-sociales-peines-planchers-responsabilite-penale-a-16-ans-les",
+"date": 1795413900000,
+"source": "LCP"
+},
+{
 "titre": "François Ruffin se retire de la présidentielle 2027 sans soutenir aucun des candidats de gauche encore en lice",
 "lien": "https://lcp.fr/actualites/francois-ruffin-se-retire-de-la-presidentielle-2027-sans-soutenir-aucun-des-candidats-de",
 "date": 1795281960000,
@@ -140,12 +146,6 @@
 "titre": "\"Une atteinte à la liberté de la presse\": les créateurs de contenu en colère contre les nouvelles règles de l'Arcom pour la présidentielle",
 "lien": "https://lcp.fr/actualites/une-atteinte-a-la-liberte-de-la-presse-les-createurs-de-contenu-en-colere-contre-les",
 "date": 1795162080000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle 2027: Dominique de Villepin sur le point d'officialiser sa candidature à l'Élysée",
-"lien": "https://lcp.fr/actualites/presidentielle-2027-dominique-de-villepin-sur-le-point-d-officialiser-sa-candidature-a-l",
-"date": 1795160820000,
 "source": "LCP"
 }
 ]
