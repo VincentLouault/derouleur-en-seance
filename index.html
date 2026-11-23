@@ -722,7 +722,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     </div>
 
     <div class="panel green" id="p-derniers">
-      <div class="ph"><h3>Les 10 derniers amendements examinés</h3><span class="cnt">dans l'ordre du dérouleur, le plus récent en bas</span></div>
+      <div class="ph"><h3>Les 10 derniers amendements examinés</h3><span class="cnt">dans l'ordre d'examen, le plus récent en bas</span></div>
       <div class="scroll">
         <table class="t-amdt">
           <thead><tr><th>Article</th><th>N°</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Sort</th></tr></thead>
@@ -987,7 +987,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123144852";</script>
+<script>window.DEROULEUR_BUILD = "20261123153000";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2295,6 +2295,23 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     if (/sort non publi/.test(p)) return h("span", { class: "pill big attente-sort", title: "Le marqueur de séance a dépassé cet amendement, mais le Sénat n'a pas encore publié son sort" }, s);
     return h("span", { class: "pill big " + cls }, s);
   }
+  // Ordre d'examen (le Sénat ne date pas les sorts) : les sorts vus apparaître pendant que la page est ouverte sont les
+  // plus récents ; sinon, les amendements placés après le marqueur de séance (articles appelés en priorité) sont plus
+  // anciens que ceux qui le précèdent, eux-mêmes dans l'ordre du dérouleur.
+  function ordreExamen(M) {
+    var cle = (M.cfg && M.cfg.url_derouleur) || "", vus = S.sortsVus = S.sortsVus || {}, deja = S.sortsDeja = S.sortsDeja || {}, now = Date.now();
+    if (S.sortsCle !== cle) { S.sortsCle = cle; vus = S.sortsVus = {}; deja = S.sortsDeja = null; try { var st = JSON.parse(lsGet("derouleur.sortsvus") || "{}"); if (st.cle === cle) vus = S.sortsVus = st.v || {}; } catch (e) {} }
+    if (deja) M.examines.forEach(function (a) { if (!deja[a.k] && !vus[a.n]) vus[a.n] = now; });
+    deja = S.sortsDeja = {}; M.examines.forEach(function (a) { deja[a.k] = 1; });
+    var lim = now - 3 * 86400000; Object.keys(vus).forEach(function (n) { if (vus[n] < lim) delete vus[n]; });
+    lsSet("derouleur.sortsvus", JSON.stringify({ cle: cle, v: vus }));
+    var iM = M.prochain ? M.am.indexOf(M.prochain) : -1;
+    return M.examines.slice().sort(function (x, y) {
+      var tx = vus[x.n] || 0, ty = vus[y.n] || 0; if (tx !== ty) return tx - ty;
+      var gx = iM >= 0 && x.k > M.prochain.k ? 0 : 1, gy = iM >= 0 && y.k > M.prochain.k ? 0 : 1; if (gx !== gy) return gx - gy;
+      return x.k - y.k;
+    });
+  }
   function noteSort(a) {
     if (a.sInfo === "equipe") return h("span", { class: "note-sort", title: "Sort transmis par l'équipe : le Sénat ne l'a pas encore publié" }, "info équipe · non publié par le Sénat");
     return null;
@@ -2626,8 +2643,10 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     remplirFiltres(M);
 
     // 10 derniers
-    var exF = M.examines.filter(passeFiltre);
-    var dern = exF.slice(-10);
+    var exF = ordreExamen(M).filter(passeFiltre);
+    // Glissement « à venir » → « en cours » → « examinés » : la discussion en cours reste dans « Amendements en cours ».
+    var P0d = M.prochain, dansCours = function (a) { return P0d && (a === P0d || (P0d.dc ? a.dc === P0d.dc : P0d.id && a.id === P0d.id)); };
+    var dern = exF.filter(function (a) { return !dansCours(a); }).slice(-10);
     var pct = T ? Math.round(M.examines.length / T * 100) : 0;
     vide($("prog-t")).append("Avancement : ", h("b", null, nb(M.examines.length)), " amendements examinés sur ", h("b", null, nb(T)), " (", h("b", null, pct + " %"), ")");
     $("prog-bar").style.width = (T ? M.examines.length / T * 100 : 0) + "%";
