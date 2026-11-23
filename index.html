@@ -582,6 +582,9 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   .kpis .kpi-avis{grid-column:1/-1}
 }
 .amdt-groupe{display:block;width:max-content;margin-top:4px;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;background:var(--navy2);border-radius:99px;padding:2px 8px;white-space:nowrap}
+#cours-body tr.sep-suite td{background:#f3f5f9;color:var(--muted);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-top:2px dashed var(--line)}
+#cours-body tr.apres-cours{opacity:.62;background:#fbfcfd}
+#cours-body tr.apres-cours:hover{opacity:.9}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -953,7 +956,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123105028";</script>
+<script>window.DEROULEUR_BUILD = "20261123112325";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2430,6 +2433,19 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     enCours.slice(deb, finC).forEach(function (a) { cb2.appendChild(ligneAmdt(a, M, "cours", now)); });
     if (finC < enCours.length) cb2.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.coursOuvert = true; rendre(); } }, (enCours.length - finC > 1 ? "Voir les " + (enCours.length - finC) + " suivants" : "Voir le suivant") + " de la discussion commune ▾"))));
     if (ouvC && (iC - 2 > 0 || iC + 3 < enCours.length)) cb2.appendChild(replierC());
+    // Les deux amendements qui suivent, même hors de la discussion commune, en plus clair.
+    if (P0) {
+      var suiteC = M.restants.filter(function (a) { return !setCours[a.k]; }).filter(passeFiltre).slice(0, 2);
+      if (suiteC.length) {
+        cb2.appendChild(h("tr", { class: "sep-suite" }, h("td", { colspan: 7 }, enCours.length > 1 && P0.dc ? "Ensuite, hors discussion commune" : "Ensuite")));
+        suiteC.forEach(function (a) {
+          setCours[a.k] = 1;
+          var l = ligneAmdt(a, M, "venir", now);
+          (l.nodeType === 11 ? Array.prototype.slice.call(l.childNodes) : [l]).forEach(function (r) { r.classList.add("apres-cours"); });
+          cb2.appendChild(l);
+        });
+      }
+    }
 
     // À venir (hors amendements en cours)
     var avF = M.restants.filter(function (a) { return !setCours[a.k]; }).filter(passeFiltre);
