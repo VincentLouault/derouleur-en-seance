@@ -1,5 +1,5 @@
 {
-"maj": 1795434742691,
+"maj": 1795439479936,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Présidentielle: Génération.s officialise son soutien à Jean-Luc Mélenchon",
+"lien": "https://lcp.fr/actualites/presidentielle-generations-officialise-son-soutien-a-jean-luc-melenchon-445502",
+"date": 1795436820000,
+"source": "LCP"
+},
+{
 "titre": "Sommet \"Choose France\": que recouvrent les 42,5 milliards d’euros d’investissements annoncés?",
 "lien": "https://lcp.fr/actualites/sommet-choose-france-que-recouvrent-les-425-milliards-d-euros-d-investissements-annonces",
 "date": 1795433820000,
@@ -140,12 +146,6 @@
 "titre": "Main tendue par Marine Tondelier à Jean-Luc Mélenchon: une \"trahison\" selon Yannick Jadot, qui quitte les Écologistes",
 "lien": "https://lcp.fr/actualites/main-tendue-par-marine-tondelier-a-jean-luc-melenchon-une-trahison-selon-yannick-jadot",
 "date": 1795175220000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle 2027: Dominique de Villepin officiellement candidat à l'Élysée",
-"lien": "https://lcp.fr/actualites/presidentielle-2027-dominique-de-villepin-officiellement-candidat-a-l-elysee-445372",
-"date": 1795170720000,
 "source": "LCP"
 }
 ]
