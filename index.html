@@ -953,7 +953,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123103848";</script>
+<script>window.DEROULEUR_BUILD = "20261123105028";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2418,12 +2418,18 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       (enCours.length > 1 ? " · " + (P0.dc ? "discussion commune de " : "") + nb(enCours.length) + " amendements" + (nRestCours < enCours.length ? ", dont " + nb(nRestCours) + " restant" + (nRestCours > 1 ? "s" : "") + " à voter" : "") : "");
     var cb2 = vide($("cours-body"));
     if (!enCours.length) cb2.appendChild(ligneVide(7, "Aucun amendement en cours d'examen."));
-    var iC = Math.max(0, enCours.indexOf(P0)), ouvC = !!S.coursOuvert;
+    // Discussion commune dépliée d'office ; « Replier » revient à la fenêtre autour de l'amendement en discussion.
+    // Le choix de l'usager vaut pour la discussion commune en cours et repart déplié à la suivante.
+    var cleDc = P0 ? (P0.dc || P0.k) : null;
+    if (S.coursDc !== cleDc) { S.coursDc = cleDc; S.coursOuvert = undefined; }
+    var iC = Math.max(0, enCours.indexOf(P0)), ouvC = S.coursOuvert !== false;
+    var replierC = function () { return h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.coursOuvert = false; rendre(); var r = document.querySelector("#cours-body tr.cur"); if (r) r.scrollIntoView({ block: "center" }); } }, "Replier autour de l'amendement en discussion ▴"))); };
+    if (ouvC && enCours.length > 8 && (iC - 2 > 0 || iC + 3 < enCours.length)) cb2.appendChild(replierC());
     var deb = ouvC ? 0 : Math.max(0, iC - 2), finC = ouvC ? enCours.length : Math.min(enCours.length, iC + 3);
     if (deb > 0) cb2.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.coursOuvert = true; rendre(); } }, (deb > 1 ? "Voir les " + deb + " précédents" : "Voir le précédent") + " de la discussion commune ▴"))));
     enCours.slice(deb, finC).forEach(function (a) { cb2.appendChild(ligneAmdt(a, M, "cours", now)); });
     if (finC < enCours.length) cb2.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.coursOuvert = true; rendre(); } }, (enCours.length - finC > 1 ? "Voir les " + (enCours.length - finC) + " suivants" : "Voir le suivant") + " de la discussion commune ▾"))));
-    if (ouvC && (iC - 2 > 0 || iC + 3 < enCours.length)) cb2.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.coursOuvert = false; rendre(); } }, "Replier autour de l'amendement en discussion ▴"))));
+    if (ouvC && (iC - 2 > 0 || iC + 3 < enCours.length)) cb2.appendChild(replierC());
 
     // À venir (hors amendements en cours)
     var avF = M.restants.filter(function (a) { return !setCours[a.k]; }).filter(passeFiltre);
