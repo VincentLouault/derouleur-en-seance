@@ -1,5 +1,5 @@
 {
-"maj": 1795448663606,
+"maj": 1795452159217,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "17 octobre: les circulaires de Gérald Darmanin n'ont entraîné \"aucune modification de la politique pénale du parquet de Paris\", selon la procureure",
+"lien": "https://lcp.fr/actualites/17-octobre-les-circulaires-de-gerald-darmanin-n-ont-entraine-aucune-modification-de-la",
+"date": 1795451880000,
+"source": "LCP"
+},
+{
 "titre": "\"C'est inacceptable\": une vidéo tournée par des jeunes dans l'hémicycle de l'Assemblée fait polémique",
 "lien": "https://lcp.fr/actualites/c-est-inacceptable-une-video-tournee-par-des-jeunes-dans-l-hemicycle-de-l-assemblee-fait",
 "date": 1795446060000,
@@ -140,12 +146,6 @@
 "titre": "Présidentielle 2027: que retenir des 258 propositions du programme de Dominique de Villepin?",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-que-retenir-des-258-propositions-du-programme-de-dominique-de",
 "date": 1795195440000,
-"source": "LCP"
-},
-{
-"titre": "Logement: passoires thermiques, relance de la construction... Ce que contient le projet de loi avant le vote prévu mardi à l'Assemblée",
-"lien": "https://lcp.fr/actualites/logement-passoires-thermiques-relance-de-la-construction-ce-que-contient-le-projet-de",
-"date": 1795193460000,
 "source": "LCP"
 }
 ]
