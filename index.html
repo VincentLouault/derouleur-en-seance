@@ -614,6 +614,8 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 .scr-gl .sg{display:block;height:100%}
 .scr-lien{display:block;text-align:center;margin-top:12px;font-weight:700;color:var(--navy2)}
 @media (max-width:720px){.scr-carte{padding:16px 14px}.scr-chiffres{grid-template-columns:repeat(2,1fr)}.scr-gl{grid-template-columns:minmax(0,1fr) 34px 46px 38px 38px;gap:4px;font-size:12px}.scr-gl .gbar{display:none}.scr-gh{font-size:9.5px;letter-spacing:0}}
+.note-sort{display:block;margin-top:3px;font-size:10.5px;color:var(--muted);font-style:italic}
+.pill.attente-sort{background:#f3f4f6;border-color:#d1d5db;color:#4b5563;font-style:italic;font-size:12px;white-space:normal;max-width:150px;line-height:1.25}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -985,7 +987,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123133506";</script>
+<script>window.DEROULEUR_BUILD = "20261123134915";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1513,6 +1515,9 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     }));
   }
 
+  /* Sorts transmis par l'équipe quand le Sénat ne les a pas encore publiés (le sort officiel l'emporte dès sa parution). */
+  var CORRECTIONS = {}; // ex. { "2026-2027/155": { "I-5": "Adopté" } }
+
   /* ---------- 6 ter. Scrutins publics (liste de la session sur senat.fr, relue toutes les 2 minutes) ---------- */
   var SCR = { lu: 0, cle: "", parAmdt: {}, details: {} };
   function texteHtml(x) { var d = document.createElement("div"); d.innerHTML = x; return (d.textContent || "").replace(/\s+/g, " ").trim(); }
@@ -1750,6 +1755,20 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
         }
       } catch (e) {}
       var courantPub = r[0];
+      // Sorts que le Sénat tarde à publier : un amendement sans sort, déjà dépassé par le marqueur de séance alors que des
+      // amendements placés après lui dans la même division ont reçu leur sort, a été examiné. Si l'équipe a transmis
+      // son sort, on l'affiche (marqué « info équipe ») ; sinon « Examiné · sort non publié ». Le sort officiel prime dès sa publication.
+      try {
+        var corr = (CORRECTIONS[actif.session + "/" + actif.numero] || {});
+        var iMarq = -1; if (r[0]) res.amendements.forEach(function (a, i) { if (iMarq < 0 && a.n.replace(/\s+/g, "") === String(r[0]).replace(/\s+/g, "")) iMarq = i; });
+        var dernierSort = {}; res.amendements.forEach(function (a, i) { if (a.s) dernierSort[a.d] = i; });
+        res.amendements.forEach(function (a, i) {
+          if (a.s) return;
+          var cle = a.n.replace(/\s+/g, "").match(/^([A-Z]+-)?\d+/i); cle = cle ? cle[0].toUpperCase() : a.n;
+          if (corr[cle]) { a.s = corr[cle]; a.sInfo = "equipe"; return; }
+          if (iMarq >= 0 && i < iMarq && dernierSort[a.d] > i) { a.s = "Examiné · sort non publié"; a.sInfo = "attente"; }
+        });
+      } catch (e) {}
       try {
         if (actif.courantVu !== r[0]) { if (actif.courantVu !== undefined) actif.courantBouge = Date.now(); actif.courantVu = r[0]; }
         var enDirectTexte = (actif.activite && Date.now() - actif.activite < 20 * 60000) || (actif.courantBouge && Date.now() - actif.courantBouge < 30 * 60000);
@@ -1885,7 +1904,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     var cfg = config(), D = cur.donnees;
     var divs = D.divisions.map(function (d, i) { return { i: i, libelle: d.libelle, type: d.type, sort: d.sort, total: 0, restants: 0, examines: 0, cpt: {} }; });
     var am = D.amendements.map(function (a, k) {
-      var x = { k: k, n: a.n, base: cleAmdt(a.n), d: a.d, al: a.al || "", a: a.a, g: a.g || null, gs: a.gs || null, s: a.s || null, sa: !!a.sa, ag: !!a.ag, c: a.c || null, v: a.v || null, o: a.o || null, cs: a.cs || null, dc: a.dc || null, id: a.id || null };
+      var x = { k: k, n: a.n, base: cleAmdt(a.n), d: a.d, al: a.al || "", a: a.a, g: a.g || null, gs: a.gs || null, s: a.s || null, sa: !!a.sa, ag: !!a.ag, sInfo: a.sInfo || null, c: a.c || null, v: a.v || null, o: a.o || null, cs: a.cs || null, dc: a.dc || null, id: a.id || null };
       var dv = divs[a.d];
       if (dv) { dv.total++; if (x.s) { dv.examines++; dv.cpt[x.s] = (dv.cpt[x.s] || 0) + 1; } else dv.restants++; }
       return x;
@@ -2236,7 +2255,12 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     var p = plain(s), cls = /^adopt/.test(p) ? "adopte" : /^rejet/.test(p) ? "rejete" : /^retir/.test(p) ? "retire" : /^tomb/.test(p) ? "tombe" : /^non sout/.test(p) ? "nonsout" : "";
     // Adopté / rejeté : tampon encreur ; « Adopté », « Adopté modifié »… gardent leur libellé exact.
     if (cls === "adopte" || cls === "rejete" || cls === "retire" || cls === "tombe" || cls === "nonsout") return h("span", { class: "tampon " + cls, title: s }, h("span", null, s));
+    if (/sort non publi/.test(p)) return h("span", { class: "pill big attente-sort", title: "Le marqueur de séance a dépassé cet amendement, mais le Sénat n'a pas encore publié son sort" }, s);
     return h("span", { class: "pill big " + cls }, s);
+  }
+  function noteSort(a) {
+    if (a.sInfo === "equipe") return h("span", { class: "note-sort", title: "Sort transmis par l'équipe : le Sénat ne l'a pas encore publié" }, "info équipe · non publié par le Sénat");
+    return null;
   }
   function celluleGroupe(a) {
     if (!a.g) return h("span", { class: "grp none", title: "Groupe non renseigné dans le dérouleur" }, "—");
@@ -2333,8 +2357,8 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
         estProchain && scrutinSur(a) ? pillScrutin() : enDiscussion ? h("span", { class: "pill encours" }, "En discussion") : h("span", { class: "pill aexam" }, "À examiner"),
         null);
     } else if (mode === "cours") {
-      dernier = h("td", null, a.s ? [pillSort(a.s)].concat(btnScrutin(a) || []) : estProchain && scrutinSur(a) ? pillScrutin() : estProchain ? h("span", { class: "pill encours" }, M.enDirect ? "En discussion" : "Prochain") : h("span", { class: "pill aexam" }, "En attente du vote"));
-    } else dernier = h("td", null, pillSort(a.s), btnScrutin(a));
+      dernier = h("td", null, a.s ? [pillSort(a.s), noteSort(a)].concat(btnScrutin(a) || []) : estProchain && scrutinSur(a) ? pillScrutin() : estProchain ? h("span", { class: "pill encours" }, M.enDirect ? "En discussion" : "Prochain") : h("span", { class: "pill aexam" }, "En attente du vote"));
+    } else dernier = h("td", null, pillSort(a.s), noteSort(a), btnScrutin(a));
     var cls = [estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : ""), estSuivi(a) ? "suivi" : ""].join(" ").trim();
     var ligneObjet = a.o ? h("tr", { class: "objet-row" + (S.objets && S.objets[a.n] ? "" : " hidden") }, h("td", { colspan: 7 }, h("span", { class: "objet-box" }, h("span", { class: "objet-lab" }, "Objet du n° " + a.n + " : "), a.o))) : null;
     var bObj = objet(a, ligneObjet); if (bObj) numCell.appendChild(h("span", { class: "obj-sous" }, bObj));
