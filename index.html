@@ -582,6 +582,38 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   .kpis .kpi-avis{grid-column:1/-1}
 }
 .amdt-groupe{display:block;width:max-content;margin-top:4px;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;background:var(--navy2);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.btn-scrutin{all:unset;cursor:pointer;display:block;width:max-content;margin-top:6px;background:#ffd60a;color:#3a2f00;font-size:11.5px;font-weight:800;letter-spacing:.02em;padding:3px 10px;border-radius:99px;box-shadow:0 3px 8px -4px rgba(120,90,0,.7)}
+.btn-scrutin:hover{background:#ffe14d}
+.modale-scrutin{position:fixed;inset:0;z-index:10001;background:rgba(10,18,35,.66);display:flex;align-items:center;justify-content:center;padding:14px}
+.scr-carte{position:relative;width:min(720px,100%);max-height:calc(100vh - 28px);overflow:auto;background:#fff;border-radius:18px;padding:20px 22px;box-shadow:0 30px 70px -20px rgba(0,0,0,.6);border-top:6px solid #ffd60a}
+.scr-fermer{all:unset;cursor:pointer;position:absolute;top:10px;right:14px;font-size:26px;line-height:1;color:var(--muted)}
+.scr-tete{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.scr-badge{background:#ffd60a;color:#3a2f00;font-weight:800;border-radius:99px;padding:3px 12px;font-size:13px}
+.scr-jour{color:var(--muted);font-size:13px}
+.scr-objet{font-size:13.5px;line-height:1.45;margin:0 28px 10px 0;color:var(--ink)}
+.scr-res{font-weight:800;font-size:16px;text-align:center;margin:4px 0 6px}
+.scr-res.ok{color:#2f7a3a}.scr-res.ko{color:var(--red-btn)}
+.scr-hemi{display:block;width:100%;max-width:560px;margin:0 auto}
+.scr-leg{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+.scr-leg .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px;box-sizing:border-box}
+.sw-p,.sg-p{background:#455491}.sw-c,.sg-c{background:#dc0425}
+.sw-a{background:#fff;border:1.5px solid #9aa1ad}.sg-a{background:#9aa1ad}
+.sw-n,.sg-n{background:#d1d5db}
+.scr-chiffres{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 4px;text-align:center;font-size:12.5px;color:var(--muted)}
+.scr-chiffres b{display:block;font-size:26px;color:var(--navy)}
+.scr-chiffres .pour b{color:#455491}.scr-chiffres .contre b{color:#dc0425}
+.scr-autres{text-align:center;font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.scr-groupes{font-size:12.5px}
+.scr-gl{display:grid;grid-template-columns:minmax(0,1fr) 24% 40px 50px 40px 42px;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #eef0f3}
+.scr-gh{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-bottom:1px solid var(--line)}
+.scr-gl .g{font-weight:600}.scr-gh .g{font-weight:500}
+.scr-gl .num{text-align:right;font-variant-numeric:tabular-nums}
+.scr-gl .np{color:#455491;font-weight:700}.scr-gl .nc{color:#dc0425;font-weight:700}
+.scr-gl .barre{display:flex;height:9px;border-radius:99px;overflow:hidden;background:#f1f3f6}
+.scr-gh .gbar{visibility:hidden}
+.scr-gl .sg{display:block;height:100%}
+.scr-lien{display:block;text-align:center;margin-top:12px;font-weight:700;color:var(--navy2)}
+@media (max-width:720px){.scr-carte{padding:16px 14px}.scr-chiffres{grid-template-columns:repeat(2,1fr)}.scr-gl{grid-template-columns:minmax(0,1fr) 34px 46px 38px 38px;gap:4px;font-size:12px}.scr-gl .gbar{display:none}.scr-gh{font-size:9.5px;letter-spacing:0}}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -953,7 +985,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123121202";</script>
+<script>window.DEROULEUR_BUILD = "20261123130854";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1481,6 +1513,67 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     }));
   }
 
+  /* ---------- 6 ter. Scrutins publics (liste de la session sur senat.fr, relue toutes les 2 minutes) ---------- */
+  var SCR = { lu: 0, cle: "", parAmdt: {}, details: {} };
+  function texteHtml(x) { var d = document.createElement("div"); d.innerHTML = x; return (d.textContent || "").replace(/\s+/g, " ").trim(); }
+  function majScrutins(actif) {
+    if (!actif || !actif.session) return Promise.resolve();
+    var an = actif.session.split("-")[0], cle = an + "|" + actif.numero;
+    if (SCR.cle === cle && Date.now() - SCR.lu < 120000) return Promise.resolve();
+    var titre = sansAccent(String(actif.titre || "").replace(/^[^:]*:\s*/, "").split(/\s+[–—-]\s+/)[0]).replace(/\s+/g, " ").trim();
+    return lire(SENAT + "/scrutin-public/scr" + an + ".html").then(function (pg) {
+      var map = {}, jour = "";
+      var morceaux = pg.split(/(<div class="list-group-subtitle">[\s\S]*?<\/div>|<p class="my-2">[\s\S]*?<\/p>)/);
+      morceaux.forEach(function (m) {
+        var mj = m.match(/^<div class="list-group-subtitle">([\s\S]*?)<\/div>/); if (mj) { jour = texteHtml(mj[1]); return; }
+        var ms = m.match(/^<p class="my-2">\s*<a href="([^"]+)">\s*Scrutin N(?:&deg;|°)\s*(\d+)\s*<\/a>([\s\S]*?)<\/p>/i); if (!ms) return;
+        var desc = texteHtml(ms[3]).replace(/^[:\s ]+/, "").replace(/\s*-\s*consulter le dossier l[ée]gislatif\.?/i, "");
+        var res = (m.match(/<span class="badge[^"]*">([^<]+)<\/span>/) || [])[1] || "";
+        desc = desc.replace(new RegExp("\\s*" + res.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*$"), "");
+        if (!/amendement/i.test(desc) || (titre && sansAccent(desc).replace(/\s+/g, " ").indexOf(titre) < 0)) return;
+        // Numéros mis aux voix (on écarte « à l'amendement n° … » qui désigne l'amendement sous-amendé)
+        // Numéros mis aux voix : « n° I-1142 rectifié par …, I-1155, présenté par …, et I-1483, … » (on s'arrête avant
+        // « à l'amendement n° … » qui désigne l'amendement sous-amendé, et avant l'article ou le texte visé).
+        var i0 = desc.search(/n°/); if (i0 < 0) return;
+        var corps = desc.slice(i0).split(/,?\s+(?:tendant\s+[àa]|[àa] l['’]amendement|[àa] l['’]article|apr[èe]s l['’]article|avant l['’]article|[àa] l['’]intitul|du projet|de la proposition)\b/i)[0];
+        var sc = { num: +ms[2], url: SENAT + "/scrutin-public/" + ms[1].replace(/^\//, ""), jour: jour, objet: desc, resultat: res.trim() };
+        corps.split(/,\s*(?:et\s+)?|\s+et\s+/).forEach(function (part) {
+          var x = part.trim().match(/^(?:n°\s*)?((?:[IVX]+-)?\d+)\b/i); if (!x) return;
+          var k = x[1].toUpperCase(); if ((map[k] = map[k] || []).indexOf(sc) < 0) map[k].push(sc);
+        });
+      });
+      SCR.parAmdt = map; SCR.lu = Date.now(); SCR.cle = cle; SCR.titre = titre;
+    }, function () {});
+  }
+  function detailScrutin(url) {
+    if (SCR.details[url]) return SCR.details[url];
+    var json = url.replace(/\.html$/, ".json");
+    var p = Promise.all([lire(url), fetch(json).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })]).then(function (r) {
+      var pg = r[0], doc = new DOMParser().parseFromString(pg, "text/html"), out = { url: url, groupes: [], votes: (r[1] && r[1].votes) || [] };
+      var carte = doc.querySelector("a[name='resultat']") ? doc.querySelector("a[name='resultat']").parentNode : doc;
+      var h2 = Array.prototype.find.call(doc.querySelectorAll(".card-title"), function (e) { return /sultat du scrutin/i.test(e.textContent); });
+      if (h2) { var pp = h2.parentNode.querySelector("p"); out.phrase = pp ? pp.textContent.replace(/\s+/g, " ").trim() : ""; carte = h2.closest(".card") || carte; }
+      Array.prototype.forEach.call(carte.querySelectorAll("li"), function (li) {
+        var t = li.textContent.replace(/\s+/g, " ").trim(), n = (t.match(/(\d+)/) || [])[1]; if (n == null) return; n = +n;
+        if (/votants/i.test(t)) out.votants = n; else if (/exprim/i.test(t)) out.exprimes = n; else if (/pour$/i.test(t)) out.pour = n; else if (/contre$/i.test(t)) out.contre = n;
+        else if (/abstention/i.test(t)) out.abst = n; else if (/pas pris part/i.test(t)) out.nppv = n;
+      });
+      var titre = doc.querySelector("h1"); out.titre = titre ? titre.textContent.replace(/\s+/g, " ").trim() : "";
+      Array.prototype.forEach.call(doc.querySelectorAll(".accordion-header h3"), function (h3) {
+        var t = h3.textContent.replace(/\s+/g, " ").trim(), m = t.match(/^(.*?)\s*:\s*(\d+)/); if (!m) return;
+        var g = { nom: m[1].replace(/^Groupe\s+/i, "").replace(/\s*sénateurs?$/i, ""), effectif: +m[2], pour: 0, contre: 0, abst: 0, nppv: 0 };
+        Array.prototype.forEach.call(h3.parentNode.querySelectorAll("li"), function (li) {
+          var tt = li.textContent.replace(/\s+/g, " "), v = +((tt.match(/(\d+)\s*$/) || [])[1] || 0);
+          if (/^\s*Pour/i.test(tt)) g.pour = v; else if (/^\s*Contre/i.test(tt)) g.contre = v; else if (/Abstention/i.test(tt)) g.abst = v; else if (/pas pris part/i.test(tt)) g.nppv = v;
+        });
+        out.groupes.push(g);
+      });
+      return out;
+    });
+    p.catch(function () { delete SCR.details[url]; });
+    SCR.details[url] = p; return p;
+  }
+
   /* ---------- 6 bis. Fil Public Sénat et LCP (relayé toutes les 10 minutes dans le dépôt GitHub, relu toutes les 5 minutes) ---------- */
   var FLUX_ACTU = "https://raw.githubusercontent.com/VincentLouault/derouleur-en-seance/actus/actus.json";
   var ACTUS = { lu: 0, items: null, erreur: false };
@@ -1630,7 +1723,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       if (!actif) throw new Error("aucun texte");
       var pageP = actif._page ? Promise.resolve(actif._page) : lire(actif.url);
       delete actif._page;
-      return Promise.all([pageP, majOdj(), verifierAutres(actif), majProchain(), majActus(), majVideo()]);
+      return Promise.all([pageP, majOdj(), verifierAutres(actif), majProchain(), majActus(), majVideo(), majScrutins(actif)]);
     }).then(function (r) {
       res = analyser(r[0]);
       try { appliquerVideo(res.orateurs, VIDEO.data); } catch (e) {}
@@ -1705,6 +1798,8 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     actif: function () { var a = texteActif(); return a ? a.url : null; },
     choisir: function (url) { CHOIX = url; dernier = null; },
     actus: function () { return ACTUS.items; },
+    scrutins: function () { return SCR.parAmdt; },
+    detailScrutin: detailScrutin,
     actusErreur: function () { return ACTUS.erreur; },
     plagesDepuisOdj: plagesDepuisOdj
   };
@@ -2160,6 +2255,66 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     if (!S.scrA || S.scrA.id !== sc.id) S.scrA = { id: sc.id, k: a.k };
     return S.scrA.k === a.k;
   }
+  /* ---------- Scrutins publics : bouton sous le sort et fenêtre avec le résultat (hémicycle) ---------- */
+  var SIEGES = [278.81,230.35,290.83,223.29,303.57,218.11,316.92,214.95,343.69,214.95,356.42,217.98,369.93,223.18,381.7,230.35,401.27,248.68,409.18,261.37,414.88,274.66,418.33,288.87,419.49,303.08,215.17,316.5,215.17,301.51,216.28,286.09,219.65,271.09,225.04,256.3,232.19,242.74,241.4,229.9,260.56,211.43,273.32,202.9,287.24,196.16,301.93,191.38,316.92,188.72,343.69,188.72,358.94,191.39,373.45,196.15,387.21,202.84,400.2,211.44,419.33,229.87,428.49,242.69,435.87,256.74,441.36,272.14,444.45,287.17,445.56,303.08,189.09,316.5,189.09,303.11,189.83,288.88,191.99,274.66,195.48,260.74,200.43,247.58,206.56,235.06,214.6,222.18,223.14,211.11,242.27,192.69,253.51,184.57,265.1,177.78,277.44,172.1,290.34,167.6,303.37,164.44,316.92,162.49,343.69,162.49,357.23,164.55,370.55,167.56,383.36,172.17,395.74,177.9,407.5,184.9,418.31,192.53,437.39,211.13,446.32,222.59,453.82,234.65,460.08,247.4,465.12,261.0,468.64,274.65,470.77,288.71,471.48,303.08,163.01,316.5,163.01,302.87,163.62,288.48,165.51,274.0,168.8,259.35,173.59,244.57,179.36,230.83,186.75,217.09,195.34,204.68,204.96,192.22,224.29,173.78,235.7,165.02,248.13,157.41,261.34,150.61,274.72,145.22,288.65,141.02,302.59,138.03,316.92,136.26,343.69,136.26,358.31,138.03,372.79,141.23,386.57,145.38,399.73,150.61,412.78,157.36,424.87,164.86,436.49,173.78,455.47,191.73,465.12,203.13,473.4,215.99,480.92,229.48,486.9,243.57,491.51,258.12,495.22,273.2,497.18,288.14,497.71,303.08,136.94,316.5,136.94,303.12,137.31,289.91,138.79,276.67,141.14,263.13,144.49,249.78,148.67,236.82,159.37,212.38,167.33,198.54,176.81,185.45,186.76,173.49,206.08,154.78,218.97,144.97,232.46,136.25,246.1,128.81,270.97,118.92,286.05,114.78,301.16,111.77,316.92,110.03,343.69,110.03,359.45,111.67,375.16,114.64,390.49,119.07,415.19,129.12,428.95,136.62,442.13,145.38,454.61,154.85,473.87,173.29,483.98,185.72,493.23,198.69,501.4,212.77,512.09,236.82,516.38,249.71,519.63,262.84,521.96,275.97,523.23,289.47,523.79,303.08,110.86,316.5,110.86,301.14,111.45,286.45,113.03,271.34,115.89,256.05,119.65,241.33,124.68,226.14,135.61,201.61,142.68,189.14,150.55,177.1,159.37,165.45,168.73,154.64,187.5,136.26,199.18,127.08,211.1,118.87,223.54,111.18,236.49,104.68,261.34,94.73,274.85,90.67,288.76,87.47,302.96,85.31,316.92,83.98,343.69,83.8,358.17,85.31,372.48,87.54,386.53,90.67,400.26,94.95,425.03,104.95,437.67,111.4,450.0,119.09,461.54,126.97,472.76,136.1,491.87,154.53,501.37,165.46,510.06,176.89,518.07,189.06,525.22,201.91,536.07,225.95,540.99,240.82,544.83,255.84,547.67,271.51,549.29,287.17,549.86,303.08,84.79,316.5,84.79,301.64,85.41,286.93,86.65,272.27,88.89,258.2,91.89,244.13,95.92,229.86,100.84,215.5,111.69,191.16,118.23,179.2,125.4,167.68,133.24,156.59,141.61,145.99,150.55,135.81,169.67,117.37,180.2,108.75,191.1,100.77,202.57,93.32,214.58,86.45,226.83,80.32,251.66,70.39,264.3,66.5,277.24,63.25,290.3,60.73,303.61,58.86,316.92,57.88,343.69,57.88,357.38,58.96,370.76,60.81,383.85,63.26,397.06,66.65,410.35,70.88,434.77,80.7,446.74,86.77,458.77,93.5,469.92,100.97,480.93,108.98,491.01,117.14,510.06,135.73,518.99,145.85,527.37,156.6,535.35,167.82,542.75,179.41,549.14,191.25,559.87,215.43,564.81,229.79,568.79,244.01,571.96,258.84,574.19,273.64,575.49,288.1,575.94,303.08,58.71,316.5,58.71,300.41,59.38,283.97,61.0,267.76,63.58,252.01,67.16,236.32,71.66,220.43,77.02,205.01,87.91,180.42,94.01,169.07,100.67,157.97,107.82,147.24,115.49,136.84,123.78,126.67,132.51,116.93,151.65,98.49,161.58,90.27,171.87,82.55,182.66,75.19,193.85,68.28,205.32,61.84,217.13,56.12,241.92,46.16,254.03,42.27,266.33,39.07,278.74,36.34,291.35,34.15,304.12,32.64,316.92,31.8,343.69,31.8,356.6,32.72,369.34,34.08,382.14,36.35,395.01,39.15,407.7,42.55,419.95,46.59,444.71,56.63,456.93,62.49,467.99,68.83,478.73,75.48,489.18,82.57,499.32,90.34,509.12,98.5,528.24,116.95,537.0,126.56,545.14,136.63,552.96,147.02,560.18,158.02,566.83,169.33,573.0,180.6,583.72,204.84,588.56,218.43,592.58,231.85,595.94,245.67,598.6,259.7,600.46,273.88,601.65,288.25,602.01,303.08,33.27,284.46,34.54,269.16,36.73,253.73,39.61,238.8,43.23,223.86,47.75,209.17,53.2,194.24,64.07,169.79,71.02,156.72,78.53,144.19,86.63,132.03,95.26,120.39,104.44,109.15,114.3,98.24,133.49,79.64,144.85,70.2,156.83,61.13,168.85,52.89,181.12,45.39,194.0,38.34,207.28,31.9,232.17,21.94,245.66,17.26,260.03,13.54,274.39,10.49,288.52,8.24,302.82,6.43,316.92,5.57,343.69,5.57,358.17,6.63,372.76,8.38,387.19,10.78,401.58,13.93,415.7,17.69,429.8,22.23,454.46,32.25,467.55,38.69,479.71,45.44,491.86,52.81,504.16,61.27,516.0,70.06,527.31,79.74,546.41,98.11,556.43,109.15,565.91,120.62,574.88,132.84,582.92,145.05,590.07,157.26,596.77,170.04,607.63,194.39,613.01,209.45,617.62,225.18,621.58,240.82,624.59,256.69,626.66,272.63,627.67,288.1,628.09,303.08];
+  function scrutinsDe(a) {
+    var L = window.DEROULEUR_LIVE, m = L && L.scrutins ? L.scrutins() : null;
+    return m && m[cleAmdt(a.n)] ? m[cleAmdt(a.n)] : null;
+  }
+  function btnScrutin(a) {
+    var l = a.s ? scrutinsDe(a) : null; if (!l) return null;
+    return l.map(function (sc) {
+      return h("button", { type: "button", class: "btn-scrutin", title: "Voir le résultat du scrutin public n° " + sc.num, onclick: function (e) { e.stopPropagation(); ouvrirScrutin(sc, a); } }, "Scrutin public" + (l.length > 1 ? " n° " + sc.num : ""));
+    });
+  }
+  function fermerScrutin() { var m = $("modale-scrutin"); if (m) m.remove(); document.documentElement.classList.remove("porte-ouverte"); document.removeEventListener("keydown", echapScrutin); }
+  function echapScrutin(e) { if (e.key === "Escape") fermerScrutin(); }
+  function ouvrirScrutin(sc, a) {
+    fermerScrutin();
+    var corps = h("div", { class: "scr-corps" }, h("p", { class: "scr-charge" }, "Lecture du résultat sur senat.fr…"));
+    var carte = h("div", { class: "scr-carte", role: "dialog", "aria-modal": "true", "aria-label": "Scrutin public n° " + sc.num, onclick: function (e) { e.stopPropagation(); } },
+      h("button", { type: "button", class: "scr-fermer", "aria-label": "Fermer", onclick: fermerScrutin }, "×"),
+      h("div", { class: "scr-tete" }, h("span", { class: "scr-badge" }, "Scrutin public n° " + sc.num), h("span", { class: "scr-jour" }, sc.jour || "")),
+      h("p", { class: "scr-objet" }, sc.objet), corps);
+    var fond = h("div", { class: "modale-scrutin", id: "modale-scrutin", onclick: fermerScrutin }, carte);
+    document.body.appendChild(fond); document.documentElement.classList.add("porte-ouverte"); document.addEventListener("keydown", echapScrutin);
+    window.DEROULEUR_LIVE.detailScrutin(sc.url).then(function (d) {
+      vide(corps);
+      var adopte = /n'a pas adopt|rejet/i.test(d.phrase || sc.resultat) ? false : /adopt/i.test(d.phrase || sc.resultat);
+      corps.appendChild(h("div", { class: "scr-res " + (adopte ? "ok" : "ko") }, d.phrase || sc.resultat));
+      corps.appendChild(hemicycle(d.votes));
+      corps.appendChild(h("div", { class: "scr-chiffres" },
+        h("div", { class: "c pour" }, h("b", null, nb(d.pour || 0)), "pour"),
+        h("div", { class: "c contre" }, h("b", null, nb(d.contre || 0)), "contre"),
+        h("div", { class: "c" }, h("b", null, nb(d.votants || 0)), "votants"),
+        h("div", { class: "c" }, h("b", null, nb(d.exprimes || 0)), "suffrages exprimés")));
+      corps.appendChild(h("p", { class: "scr-autres" }, "Abstention : " + nb(d.abst || 0) + " · N'ont pas pris part au vote : " + nb(d.nppv || 0)));
+      if (d.groupes.length) {
+        var lg = h("div", { class: "scr-groupes" }, h("div", { class: "scr-gl scr-gh" }, h("span", { class: "g" }, "Groupe"), h("span", { class: "gbar" }), h("span", { class: "num" }, "Pour"), h("span", { class: "num" }, "Contre"), h("span", { class: "num" }, "Abst."), h("span", { class: "num", title: "N'ont pas pris part au vote" }, "NPPV")));
+        d.groupes.forEach(function (g) {
+          var tot = Math.max(1, g.effectif), seg = function (n, c) { return n ? h("span", { class: "sg sg-" + c, style: "width:" + (100 * n / tot) + "%" }) : null; };
+          lg.appendChild(h("div", { class: "scr-gl" }, h("span", { class: "g" }, g.nom),
+            h("span", { class: "gbar" }, h("span", { class: "barre" }, seg(g.pour, "p"), seg(g.contre, "c"), seg(g.abst, "a"), seg(g.nppv, "n"))),
+            h("span", { class: "num np" }, nb(g.pour)), h("span", { class: "num nc" }, nb(g.contre)), h("span", { class: "num" }, nb(g.abst)), h("span", { class: "num" }, nb(g.nppv))));
+        });
+        corps.appendChild(lg);
+      }
+      corps.appendChild(h("a", { class: "scr-lien", href: sc.url, target: "_blank", rel: "noopener" }, "Voir le scrutin sur senat.fr ↗"));
+    }, function () { vide(corps); corps.appendChild(h("p", null, "Le résultat n'a pas pu être lu. ", h("a", { href: sc.url, target: "_blank", rel: "noopener" }, "Voir sur senat.fr ↗"))); });
+  }
+  function hemicycle(votes) {
+    var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), parSiege = {};
+    (votes || []).forEach(function (v) { if (v.siege) parSiege[v.siege] = v.vote; });
+    svg.setAttribute("viewBox", "0 0 655 322"); svg.setAttribute("class", "scr-hemi"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "Répartition des votes dans l'hémicycle");
+    var coul = { p: ["#455491", "#455491"], c: ["#dc0425", "#dc0425"], a: ["#fff", "#9aa1ad"], n: ["#d1d5db", "#d1d5db"] };
+    for (var i = 0; i < SIEGES.length / 2; i++) {
+      var c = document.createElementNS(ns, "circle"), k = coul[parSiege[i + 1]] || ["#eef0f3", "#d1d5db"];
+      c.setAttribute("cx", SIEGES[2 * i]); c.setAttribute("cy", SIEGES[2 * i + 1]); c.setAttribute("r", "4.61"); c.setAttribute("fill", k[0]); c.setAttribute("stroke", k[1]);
+      svg.appendChild(c);
+    }
+    return h("div", { class: "scr-hemi-box" }, svg, h("div", { class: "scr-leg" },
+      h("span", null, h("span", { class: "sw sw-p" }), "Pour"), h("span", null, h("span", { class: "sw sw-c" }), "Contre"), h("span", null, h("span", { class: "sw sw-a" }), "Abstention"), h("span", null, h("span", { class: "sw sw-n" }), "Ne prend pas part")));
+  }
   function pillScrutin() { return h("span", { class: "pill scrutin", title: "D'après le sommaire du direct vidéo du Sénat" }, h("i", { "aria-hidden": "true" }), "Scrutin public"); }
   function ligneAmdt(a, M, mode, now) {
     var url = urlAmdt(a, M.cfg), dv = M.divs[a.d], estProchain = M.prochain && a.k === M.prochain.k;
@@ -2178,8 +2333,8 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
         estProchain && scrutinSur(a) ? pillScrutin() : enDiscussion ? h("span", { class: "pill encours" }, "En discussion") : h("span", { class: "pill aexam" }, "À examiner"),
         null);
     } else if (mode === "cours") {
-      dernier = h("td", null, a.s ? pillSort(a.s) : estProchain && scrutinSur(a) ? pillScrutin() : estProchain ? h("span", { class: "pill encours" }, M.enDirect ? "En discussion" : "Prochain") : h("span", { class: "pill aexam" }, "En attente du vote"));
-    } else dernier = h("td", null, pillSort(a.s));
+      dernier = h("td", null, a.s ? [pillSort(a.s)].concat(btnScrutin(a) || []) : estProchain && scrutinSur(a) ? pillScrutin() : estProchain ? h("span", { class: "pill encours" }, M.enDirect ? "En discussion" : "Prochain") : h("span", { class: "pill aexam" }, "En attente du vote"));
+    } else dernier = h("td", null, pillSort(a.s), btnScrutin(a));
     var cls = [estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : ""), estSuivi(a) ? "suivi" : ""].join(" ").trim();
     var ligneObjet = a.o ? h("tr", { class: "objet-row" + (S.objets && S.objets[a.n] ? "" : " hidden") }, h("td", { colspan: 7 }, h("span", { class: "objet-box" }, h("span", { class: "objet-lab" }, "Objet du n° " + a.n + " : "), a.o))) : null;
     var bObj = objet(a, ligneObjet); if (bObj) numCell.appendChild(h("span", { class: "obj-sous" }, bObj));
@@ -2897,7 +3052,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     { cible: ".recherche .filtres", titre: "Rechercher", html: "<p>Filtrez par article, groupe, statut, n° d'amendement (« I-27 » ou « 27 ») ou nom de sénateur. La recherche s'applique aux amendements, mais aussi aux articles et aux orateurs.</p>" },
     { cible: "#s-orateurs", titre: "Prises de parole", html: "<p>Les orateurs inscrits de l'étape en cours, synchronisés avec le <b>sommaire du direct vidéo</b> :</p><ul><li>ceux qui ont parlé disparaissent ;</li><li>l'orateur <b>à la tribune</b> a une batterie qui se vide avec son temps de parole, puis affiche <b>« CONCLURE »</b>.</li></ul>" },
     { cible: "#p-articles", titre: "Articles à venir", html: "<p>Chaque article avec ses amendements et ses heures de passage estimées (sur 2 jours de séance). En italique, les autres points de l'<b>ordre du jour</b> : autres textes, questions d'actualité, réunions de commission.</p><p>Cliquez sur un article pour voir ses amendements.</p>" },
-    { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>10 derniers examinés</b> (3 visibles), <b>en cours</b>, <b>à venir</b> (liste qui défile) et <b>déjà examinés</b> ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« Amdt de groupe » : amendement déposé au nom d'un groupe ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
+    { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>10 derniers examinés</b> (3 visibles), <b>en cours</b>, <b>à venir</b> (liste qui défile) et <b>déjà examinés</b> ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« Amdt de groupe » : amendement déposé au nom d'un groupe ;</li><li>bouton jaune « Scrutin public » sous le sort : résultat détaillé du vote (hémicycle, groupes) ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
     { cible: "[data-audio]", titre: "Écouter la séance", html: "<p>« Activer l'audio » (ici ou en tête des amendements en cours) diffuse le son du direct de l'hémicycle, sans quitter la page.</p>" },
     { cible: "#s-actus", titre: "Actualités", html: "<p>Les dernières infos de Public Sénat et de LCP sur 24 heures (3 visibles, les autres en dépliant).</p>" },
     { cible: "#titre-outil", titre: "Sur votre téléphone et votre ordinateur", html: "<p>Ajoutez le dérouleur à l'écran d'accueil (iPhone : Partager → « Sur l'écran d'accueil » ; Android et ordinateur : « Installer l'application ») pour l'ouvrir comme une application, avec l'icône « V ».</p><p>La page se met à jour seule, même restée ouverte en arrière-plan.</p>" }
