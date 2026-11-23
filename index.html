@@ -985,7 +985,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123132911";</script>
+<script>window.DEROULEUR_BUILD = "20261123133506";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2614,12 +2614,12 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     };
     if (!scrollAv._suivi) { scrollAv._suivi = 1; scrollAv.addEventListener("scroll", function () { S.posAv = scrollAv.scrollTop; if (scrollAv._plus) scrollAv._plus(); }, { passive: true }); }
     (function () {
-      // Hauteur du cadre : en-tête + 10 premiers amendements (et leurs objets dépliés), recalculée à chaque actualisation.
+      // Hauteur du cadre : en-tête + 5 premiers amendements (et leurs objets dépliés), recalculée à chaque actualisation.
       var lignes = Array.prototype.filter.call(vb.children, function (tr) { return !tr.classList.contains("objet-row") || !tr.classList.contains("hidden"); });
       var n = 0, hauteur = 0, th = scrollAv.querySelector("thead");
-      for (var q = 0; q < lignes.length; q++) { if (!lignes[q].classList.contains("objet-row")) { if (n === 10) break; n++; } hauteur += lignes[q].getBoundingClientRect().height; }
+      for (var q = 0; q < lignes.length; q++) { if (!lignes[q].classList.contains("objet-row")) { if (n === 5) break; n++; } hauteur += lignes[q].getBoundingClientRect().height; }
       var tete = th && getComputedStyle(th).display !== "none" ? th.getBoundingClientRect().height : 0;
-      scrollAv.style.maxHeight = avF.length > 10 && hauteur ? Math.round(tete + hauteur + 2) + "px" : "none";
+      scrollAv.style.maxHeight = avF.length > 5 && hauteur ? Math.round(tete + hauteur + 2) + "px" : "none";
       scrollAv.scrollTop = posAv;
     })();
 
