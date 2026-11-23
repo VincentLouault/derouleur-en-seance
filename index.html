@@ -987,7 +987,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123153000";</script>
+<script>window.DEROULEUR_BUILD = "20261123172644";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1404,6 +1404,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     for (var i = deb + 1; i < fin; i++) {
       var d = divisions[i];
       if (!/article|additionnel/.test(d.type)) continue;
+      if (/r[ée]serv[ée]/i.test(d.libelle)) continue; // article réservé (« réservé jusqu'à … mardi 24 novembre ») : la séance le saute
       var ams = (divisions._am || []).filter(function (a) { return a.d === i; }), ouverts = ams.filter(function (a) { return !a.s; }).length;
       if (ouverts > 0 || (d.type === "article" && !d.sort && !ams.length)) return i;
     }
@@ -1767,7 +1768,10 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
           if (a.s) return;
           var cle = a.n.replace(/\s+/g, "").match(/^([A-Z]+-)?\d+/i); cle = cle ? cle[0].toUpperCase() : a.n;
           if (corr[cle]) { a.s = corr[cle]; a.sInfo = "equipe"; return; }
-          if (iMarq >= 0 && i < iMarq && dernierSort[a.d] > i) { a.s = "Examiné · sort non publié"; a.sInfo = "attente"; }
+          // Dépassé par le marqueur : soit un amendement placé après lui dans sa division a déjà son sort, soit le marqueur
+          // est dans la même division (hors de sa discussion commune, dont les votes peuvent suivre la présentation).
+          var mq = res.amendements[iMarq];
+          if (iMarq >= 0 && i < iMarq && (dernierSort[a.d] > i || (mq && mq.d === a.d && !(a.dc && a.dc === mq.dc)))) { a.s = "Examiné · sort non publié"; a.sInfo = "attente"; }
         });
       } catch (e) {}
       try {
@@ -1966,6 +1970,8 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
         Array.prototype.splice.apply(out, [j, 0].concat(ams));
       });
       restants = out;
+      // Sans marqueur en direct, le prochain amendement n'est pas dans un article réservé : la séance le saute.
+      if (prochain && !enDirect && prochain.d in resT) prochain = out.filter(function (a) { return !(a.d in resT); })[0] || prochain;
     })();
     var iProchain = prochain ? restants.indexOf(prochain) : 0;
     // Estimation : rythme constant, dans les plages de séance, à partir du relevé.
