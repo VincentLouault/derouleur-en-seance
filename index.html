@@ -614,9 +614,6 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 .scr-gl .sg{display:block;height:100%}
 .scr-lien{display:block;text-align:center;margin-top:12px;font-weight:700;color:var(--navy2)}
 @media (max-width:720px){.scr-carte{padding:16px 14px}.scr-chiffres{grid-template-columns:repeat(2,1fr)}.scr-gl{grid-template-columns:minmax(0,1fr) 34px 46px 38px 38px;gap:4px;font-size:12px}.scr-gl .gbar{display:none}.scr-gh{font-size:9.5px;letter-spacing:0}}
-.derouleur-art{overflow-y:auto!important;overscroll-behavior:contain;position:relative}
-.derouleur-art thead th{position:sticky;top:0;z-index:2;background:#f7f9fc}
-@media (max-width:720px){td.c-passage{white-space:normal}}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -703,10 +700,10 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   </section>
 
   <section id="s-articles">
-    <div class="panel gold" id="p-articles">
+    <div class="panel gold" id="p-articles" data-pli>
       <div class="ph"><h3>Heures de passage estimées par article : <span class="ph-sous">Articles à venir</span></h3><span class="cnt" id="art-cnt"></span></div>
-      <div class="art-cours hidden" id="art-cours"></div>
-      <div class="scroll derouleur-art" id="art-scroll">
+      <div class="art-cours hors-pli hidden" id="art-cours"></div>
+      <div class="scroll">
         <table class="t-art">
           <thead><tr><th>Article</th><th class="num">Amendements</th><th class="num">Restants</th><th class="c-passage">Passage estimé</th><th>Fin estimée</th><th>Sort de l'article</th></tr></thead>
           <tbody id="art-body"></tbody>
@@ -988,7 +985,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123132350";</script>
+<script>window.DEROULEUR_BUILD = "20261123132911";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2478,8 +2475,8 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     else if (!av.length) tb.appendChild(ligneVide(6, M.statutTexte ? "Texte " + M.statutTexte.toLowerCase() + " : plus rien à examiner au dérouleur." : "Plus aucun article à examiner au dérouleur."));
     // Seul l'article dont les amendements sont en discussion (ou le prochain) reste visible, même rubrique repliée.
     var ac = $("art-cours"), dC = M.prochain ? M.divs.filter(function (d) { return d.i === M.prochain.d; })[0] : null;
-    vide(ac); ac.classList.add("hidden");
-    if (false) {
+    vide(ac); ac.classList.toggle("hidden", !dC);
+    if (dC) {
       var direct = M.enDirect && M.etape && M.etape.idx === dC.i;
       ac.appendChild(h("button", { type: "button", title: "Afficher les amendements de cet article", onclick: function () { S.f.article = String(dC.i); syncFiltres(); rendre(); S.avenirOuvert = true; rendre(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
         h("span", { class: "ac-lab" + (direct ? " live" : "") }, direct ? "En discussion" : "Prochain article"),
@@ -2544,14 +2541,6 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
         h("td", null, d.sort ? pillSort(d.sort) : "")));
     });
     viderOdj(Infinity);
-    // Dérouleur des articles : l'en-tête + les 6 premières lignes visibles, la suite défile dans le cadre.
-    (function () {
-      var sc = $("art-scroll"); if (!sc) return;
-      var rows = sc.querySelectorAll("#art-body > tr"), th = sc.querySelector("thead"), haut = 0;
-      for (var q = 0; q < rows.length && q < 6; q++) haut += rows[q].getBoundingClientRect().height;
-      var tete = th && getComputedStyle(th).display !== "none" ? th.getBoundingClientRect().height : 0;
-      sc.style.maxHeight = rows.length > 6 && haut ? Math.round(tete + haut + 2) + "px" : "none";
-    })();
 
     // Filtres (listes)
     remplirFiltres(M);
@@ -2604,12 +2593,26 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     if (!avF.length) vb.appendChild(ligneVide(7, R > nRestCours ? "Aucun amendement à venir ne correspond aux filtres." : "Plus aucun autre amendement à examiner."));
     // Textes très longs (loi de finances : plus de 2 000 amendements) : on n'affiche que les 150 prochains, les filtres permettent d'aller plus loin.
     // Dérouleur : la liste défile dans un cadre haut de 3 amendements (jusqu'à 150, les filtres permettent d'aller plus loin).
-    var MAXV = 150, scrollAv = $("avenir-scroll"), sigAv = JSON.stringify(S.f) + SUIVI.seul;
-    if (!scrollAv._suivi) { scrollAv._suivi = 1; scrollAv.addEventListener("scroll", function () { S.posAv = scrollAv.scrollTop; }, { passive: true }); }
-    if (S.sigAv !== sigAv) { S.posAv = 0; S.sigAv = sigAv; } // nouvelle recherche : retour en haut de la liste
+    // Tous les amendements à venir, chargés par tranches au fil du défilement (la liste peut en compter plusieurs milliers).
+    var scrollAv = $("avenir-scroll"), sigAv = JSON.stringify(S.f) + SUIVI.seul;
+    if (S.sigAv !== sigAv) { S.posAv = 0; S.sigAv = sigAv; S.maxAv = 150; } // nouvelle recherche : retour en haut de la liste
+    S.maxAv = Math.max(150, S.maxAv || 150);
     var posAv = S.posAv || 0;
-    avF.slice(0, MAXV).forEach(function (a) { vb.appendChild(ligneAmdt(a, M, "venir", now)); });
-    if (avF.length > MAXV) vb.appendChild(ligneVide(7, "… et " + nb(avF.length - MAXV) + " autres amendements à venir : utilisez les filtres (article, groupe, n°) pour les afficher."));
+    var ligneSuite = null;
+    function ajouterAv(jusque) {
+      if (ligneSuite) { ligneSuite.remove(); ligneSuite = null; }
+      var deja = vb._nAv || 0;
+      avF.slice(deja, jusque).forEach(function (a) { vb.appendChild(ligneAmdt(a, M, "venir", now)); });
+      vb._nAv = Math.min(jusque, avF.length);
+      if (avF.length > vb._nAv) { ligneSuite = ligneVide(7, "Chargement des " + nb(avF.length - vb._nAv) + " amendements suivants en faisant défiler…"); ligneSuite.classList.add("av-suite"); vb.appendChild(ligneSuite); }
+    }
+    vb._nAv = 0; ajouterAv(S.maxAv);
+    scrollAv._plus = function () {
+      if (scrollAv.scrollTop < 1500) S.maxAv = 150; // revenu en haut : la prochaine actualisation reste légère
+      if (vb._nAv >= avF.length) return;
+      if (scrollAv.scrollTop + scrollAv.clientHeight > scrollAv.scrollHeight - 600) { S.maxAv = vb._nAv + 200; ajouterAv(S.maxAv); }
+    };
+    if (!scrollAv._suivi) { scrollAv._suivi = 1; scrollAv.addEventListener("scroll", function () { S.posAv = scrollAv.scrollTop; if (scrollAv._plus) scrollAv._plus(); }, { passive: true }); }
     (function () {
       // Hauteur du cadre : en-tête + 10 premiers amendements (et leurs objets dépliés), recalculée à chaque actualisation.
       var lignes = Array.prototype.filter.call(vb.children, function (tr) { return !tr.classList.contains("objet-row") || !tr.classList.contains("hidden"); });
@@ -3062,7 +3065,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     { cible: "#suivi-bar", titre: "Mes sénateurs", html: "<p>« Choisir » : sélectionnez des sénateurs ou des groupes. Leurs amendements sont <b>surlignés en vert avec une ★</b> partout.</p><ul><li>cochez « Premier signataire » et/ou « Cosignataires » ;</li><li>« Seulement leurs amendements » filtre les tableaux ;</li><li>une <b>alerte</b> (vibration, notification) prévient quand un de leurs amendements arrive à 10 puis 3 amendements ;</li><li>« Envoyer mes favoris vers un autre appareil » les recopie sur votre téléphone.</li></ul>" },
     { cible: ".recherche .filtres", titre: "Rechercher", html: "<p>Filtrez par article, groupe, statut, n° d'amendement (« I-27 » ou « 27 ») ou nom de sénateur. La recherche s'applique aux amendements, mais aussi aux articles et aux orateurs.</p>" },
     { cible: "#s-orateurs", titre: "Prises de parole", html: "<p>Les orateurs inscrits de l'étape en cours, synchronisés avec le <b>sommaire du direct vidéo</b> :</p><ul><li>ceux qui ont parlé disparaissent ;</li><li>l'orateur <b>à la tribune</b> a une batterie qui se vide avec son temps de parole, puis affiche <b>« CONCLURE »</b>.</li></ul>" },
-    { cible: "#p-articles", titre: "Articles à venir", html: "<p>Le dérouleur de tous les articles restant à examiner (faites défiler la liste) : chaque article avec ses amendements et ses heures de passage estimées (sur 2 jours de séance). En italique, les autres points de l'<b>ordre du jour</b> : autres textes, questions d'actualité, réunions de commission.</p><p>Cliquez sur un article pour voir ses amendements.</p>" },
+    { cible: "#p-articles", titre: "Articles à venir", html: "<p>Chaque article avec ses amendements et ses heures de passage estimées (sur 2 jours de séance). En italique, les autres points de l'<b>ordre du jour</b> : autres textes, questions d'actualité, réunions de commission.</p><p>Cliquez sur un article pour voir ses amendements.</p>" },
     { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>10 derniers examinés</b> (3 visibles), <b>en cours</b>, <b>à venir</b> (liste qui défile) et <b>déjà examinés</b> ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« Amdt de groupe » : amendement déposé au nom d'un groupe ;</li><li>bouton jaune « Scrutin public » sous le sort : résultat détaillé du vote (hémicycle, groupes) ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
     { cible: "[data-audio]", titre: "Écouter la séance", html: "<p>« Activer l'audio » (ici ou en tête des amendements en cours) diffuse le son du direct de l'hémicycle, sans quitter la page.</p>" },
     { cible: "#s-actus", titre: "Actualités", html: "<p>Les dernières infos de Public Sénat et de LCP sur 24 heures (3 visibles, les autres en dépliant).</p>" },
