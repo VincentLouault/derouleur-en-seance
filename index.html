@@ -987,7 +987,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123141328";</script>
+<script>window.DEROULEUR_BUILD = "20261123144852";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1300,7 +1300,8 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
         if (!vise) return;
         var titre = sansAccent(txt(it.querySelector(".timeline-title")));
         // Toutes les heures du titre (« À 10 h 30, à 14 h 30 et le soir ») : matin, après-midi et soir.
-        var heures = [], rx = /a\s+(\d{1,2})\s*h(?:eures?)?\s*(\d{2})?/g, hm;
+        // (aussi « À 9 h 30, 14 h 30, le soir et la nuit » : seule la première heure est précédée de « à »)
+        var heures = [], rx = /(?:^|[^\d])(\d{1,2})\s*h(?:eures?)?\s*(\d{2})?/g, hm;
         while ((hm = rx.exec(titre))) heures.push(+hm[1] * 60 + (+hm[2] || 0));
         var apm = /apres-midi/.test(titre), soir = /soir/.test(titre), nuit = /nuit/.test(titre);
         var matin = heures.filter(function (x) { return x < 13 * 60; })[0], aprem = heures.filter(function (x) { return x >= 13 * 60 && x < 20 * 60; })[0], tard = heures.filter(function (x) { return x >= 20 * 60; })[0];
@@ -1934,6 +1935,38 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     }
     // Le marqueur du Sénat pointe un amendement réglé : le prochain est le premier amendement de l'article appelé par l'ordre du jour.
     if (prio.length && prochain && !(prochain.d in posPrio) && restants.length && restants[0].d in posPrio) { prochain = restants[0]; enDirect = false; }
+    // Articles « réservés jusqu'au … » : leurs amendements ne passent pas dans l'ordre du dérouleur mais à la date de la
+    // réserve (« jusqu'au mercredi 25 novembre à 16 h 30 », « jusqu'à la reprise de l'examen du texte mardi 24 novembre »).
+    (function () {
+      var plR = (cfg.seances || []).map(function (p) { return { a: +new Date(p.debut), b: +new Date(p.fin) }; }).sort(function (x, y) { return x.a - y.a; });
+      var dep = +new Date(cur.releve), resT = {};
+      if (!plR.length || isNaN(dep)) return;
+      var MO = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"];
+      divs.forEach(function (dv) {
+        var m = plain(dv.libelle).match(/reserve[es]* jusqu[^)]*?(\d{1,2})(?:er)?\s+(janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre)(?:\s+(\d{4}))?(?:\s+a\s+(\d{1,2})\s*h\s*(\d{2})?)?/);
+        if (!m) return;
+        var d0 = new Date(dep), an = m[3] ? +m[3] : d0.getFullYear(), mo = MO.indexOf(m[2]);
+        if (!m[3] && mo < d0.getMonth() - 6) an++;
+        var t;
+        if (m[4]) t = new Date(an, mo, +m[1], +m[4], +m[5] || 0).getTime();
+        else { var j0 = new Date(an, mo, +m[1]).getTime(), p0 = plR.filter(function (p) { return p.a >= j0 && p.a < j0 + 86400000; })[0]; t = p0 ? p0.a : j0 + 14.5 * 3600000; }
+        if (t > dep) { resT[dv.i] = t; dv.reserveT = t; }
+      });
+      if (!Object.keys(resT).length) return;
+      function av(n) { // fin estimée de n amendements (rythme médian de 22,5 par heure) dans les plages de séance
+        var t = dep, reste = n * 60 / 22.5 * 60000;
+        for (var i = 0; i < plR.length; i++) { var p = plR[i]; if (p.b <= t) continue; var s0 = Math.max(p.a, t), dispo = p.b - s0; if (reste <= dispo) return s0 + reste; reste -= dispo; t = p.b; }
+        return Infinity;
+      }
+      var reserves = restants.filter(function (a) { return a.d in resT && a !== prochain; });
+      var out = restants.filter(function (a) { return !(a.d in resT) || a === prochain; }), iP = Math.max(0, prochain ? out.indexOf(prochain) : 0);
+      Object.keys(resT).map(Number).sort(function (x, y) { return resT[x] - resT[y] || x - y; }).forEach(function (k) {
+        var ams = reserves.filter(function (a) { return a.d === k; }); if (!ams.length) return;
+        var j = iP; while (j < out.length && av(j - iP) < resT[k]) j++;
+        Array.prototype.splice.apply(out, [j, 0].concat(ams));
+      });
+      restants = out;
+    })();
     var iProchain = prochain ? restants.indexOf(prochain) : 0;
     // Estimation : rythme constant, dans les plages de séance, à partir du relevé.
     // Fourchette fixe : 25 amendements par heure (estimation haute) à 20 par heure (estimation basse).
@@ -2014,6 +2047,10 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       else { dv.debut = avance(r0 * mpa, avant); dv.debut2 = avance(r0 * mpa2, avant); }
       dv.fin = dv.debut; dv.fin2 = dv.debut2; dv.sansAmdt = true;
     });
+    // Un article réservé ne peut pas passer avant la date de sa réserve.
+    function pasAvant(t, r) { return t === null || t === undefined || !r ? t : Math.max(t, r); }
+    restants.forEach(function (a) { var r = divs[a.d] && divs[a.d].reserveT; if (r) { a.eta = pasAvant(a.eta, r); a.eta2 = pasAvant(a.eta2, r); } });
+    divs.forEach(function (dv) { if (!dv.reserveT) return; ["debut", "fin", "debut2", "fin2"].forEach(function (k) { dv[k] = pasAvant(dv[k], dv.reserveT); }); });
     var groupes = {};
     am.forEach(function (a) { var k = a.g || "__none"; groupes[k] = groupes[k] || { g: a.g, total: 0, examines: 0, restants: 0, cpt: {} }; var G = groupes[k]; G.total++; if (a.s) { G.examines++; G.cpt[a.s] = (G.cpt[a.s] || 0) + 1; } else G.restants++; });
     var cpt = {}; examines.forEach(function (a) { cpt[a.s] = (cpt[a.s] || 0) + 1; });
