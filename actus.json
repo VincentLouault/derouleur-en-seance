@@ -1,5 +1,5 @@
 {
-"maj": 1795431012520,
+"maj": 1795434742691,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Sommet \"Choose France\": que recouvrent les 42,5 milliards d’euros d’investissements annoncés?",
+"lien": "https://lcp.fr/actualites/sommet-choose-france-que-recouvrent-les-425-milliards-d-euros-d-investissements-annonces",
+"date": 1795433820000,
+"source": "LCP"
+},
+{
 "titre": "Finances publiques: pourquoi Emmanuel Macron rouvre le débat sur la \"règle d’or\" de 2011",
 "lien": "https://lcp.fr/actualites/finances-publiques-pourquoi-emmanuel-macron-rouvre-le-debat-sur-la-regle-d-or-de-2011",
 "date": 1795422240000,
@@ -140,12 +146,6 @@
 "titre": "Présidentielle 2027: Dominique de Villepin officiellement candidat à l'Élysée",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-dominique-de-villepin-officiellement-candidat-a-l-elysee-445372",
 "date": 1795170720000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle: Clémentine Autain appelle à soutenir la candidature de Jean-Luc Mélenchon",
-"lien": "https://lcp.fr/actualites/presidentielle-clementine-autain-appelle-a-soutenir-la-candidature-de-jean-luc-melenchon",
-"date": 1795167780000,
 "source": "LCP"
 }
 ]
