@@ -987,7 +987,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123134915";</script>
+<script>window.DEROULEUR_BUILD = "20261123141328";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2276,25 +2276,44 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   // Le scrutin reste attaché à l'amendement en discussion quand il a été annoncé (pas au suivant si le marqueur avance).
   function scrutinSur(a) {
     var sc = scrutinEnCours(); if (!sc) return false;
-    if (!S.scrA || S.scrA.id !== sc.id) S.scrA = { id: sc.id, k: a.k };
+    if (!S.scrA || S.scrA.id !== sc.id) { S.scrA = { id: sc.id, k: a.k }; noterScrutinVu(a); }
     return S.scrA.k === a.k;
   }
   /* ---------- Scrutins publics : bouton sous le sort et fenêtre avec le résultat (hémicycle) ---------- */
   var SIEGES = [278.81,230.35,290.83,223.29,303.57,218.11,316.92,214.95,343.69,214.95,356.42,217.98,369.93,223.18,381.7,230.35,401.27,248.68,409.18,261.37,414.88,274.66,418.33,288.87,419.49,303.08,215.17,316.5,215.17,301.51,216.28,286.09,219.65,271.09,225.04,256.3,232.19,242.74,241.4,229.9,260.56,211.43,273.32,202.9,287.24,196.16,301.93,191.38,316.92,188.72,343.69,188.72,358.94,191.39,373.45,196.15,387.21,202.84,400.2,211.44,419.33,229.87,428.49,242.69,435.87,256.74,441.36,272.14,444.45,287.17,445.56,303.08,189.09,316.5,189.09,303.11,189.83,288.88,191.99,274.66,195.48,260.74,200.43,247.58,206.56,235.06,214.6,222.18,223.14,211.11,242.27,192.69,253.51,184.57,265.1,177.78,277.44,172.1,290.34,167.6,303.37,164.44,316.92,162.49,343.69,162.49,357.23,164.55,370.55,167.56,383.36,172.17,395.74,177.9,407.5,184.9,418.31,192.53,437.39,211.13,446.32,222.59,453.82,234.65,460.08,247.4,465.12,261.0,468.64,274.65,470.77,288.71,471.48,303.08,163.01,316.5,163.01,302.87,163.62,288.48,165.51,274.0,168.8,259.35,173.59,244.57,179.36,230.83,186.75,217.09,195.34,204.68,204.96,192.22,224.29,173.78,235.7,165.02,248.13,157.41,261.34,150.61,274.72,145.22,288.65,141.02,302.59,138.03,316.92,136.26,343.69,136.26,358.31,138.03,372.79,141.23,386.57,145.38,399.73,150.61,412.78,157.36,424.87,164.86,436.49,173.78,455.47,191.73,465.12,203.13,473.4,215.99,480.92,229.48,486.9,243.57,491.51,258.12,495.22,273.2,497.18,288.14,497.71,303.08,136.94,316.5,136.94,303.12,137.31,289.91,138.79,276.67,141.14,263.13,144.49,249.78,148.67,236.82,159.37,212.38,167.33,198.54,176.81,185.45,186.76,173.49,206.08,154.78,218.97,144.97,232.46,136.25,246.1,128.81,270.97,118.92,286.05,114.78,301.16,111.77,316.92,110.03,343.69,110.03,359.45,111.67,375.16,114.64,390.49,119.07,415.19,129.12,428.95,136.62,442.13,145.38,454.61,154.85,473.87,173.29,483.98,185.72,493.23,198.69,501.4,212.77,512.09,236.82,516.38,249.71,519.63,262.84,521.96,275.97,523.23,289.47,523.79,303.08,110.86,316.5,110.86,301.14,111.45,286.45,113.03,271.34,115.89,256.05,119.65,241.33,124.68,226.14,135.61,201.61,142.68,189.14,150.55,177.1,159.37,165.45,168.73,154.64,187.5,136.26,199.18,127.08,211.1,118.87,223.54,111.18,236.49,104.68,261.34,94.73,274.85,90.67,288.76,87.47,302.96,85.31,316.92,83.98,343.69,83.8,358.17,85.31,372.48,87.54,386.53,90.67,400.26,94.95,425.03,104.95,437.67,111.4,450.0,119.09,461.54,126.97,472.76,136.1,491.87,154.53,501.37,165.46,510.06,176.89,518.07,189.06,525.22,201.91,536.07,225.95,540.99,240.82,544.83,255.84,547.67,271.51,549.29,287.17,549.86,303.08,84.79,316.5,84.79,301.64,85.41,286.93,86.65,272.27,88.89,258.2,91.89,244.13,95.92,229.86,100.84,215.5,111.69,191.16,118.23,179.2,125.4,167.68,133.24,156.59,141.61,145.99,150.55,135.81,169.67,117.37,180.2,108.75,191.1,100.77,202.57,93.32,214.58,86.45,226.83,80.32,251.66,70.39,264.3,66.5,277.24,63.25,290.3,60.73,303.61,58.86,316.92,57.88,343.69,57.88,357.38,58.96,370.76,60.81,383.85,63.26,397.06,66.65,410.35,70.88,434.77,80.7,446.74,86.77,458.77,93.5,469.92,100.97,480.93,108.98,491.01,117.14,510.06,135.73,518.99,145.85,527.37,156.6,535.35,167.82,542.75,179.41,549.14,191.25,559.87,215.43,564.81,229.79,568.79,244.01,571.96,258.84,574.19,273.64,575.49,288.1,575.94,303.08,58.71,316.5,58.71,300.41,59.38,283.97,61.0,267.76,63.58,252.01,67.16,236.32,71.66,220.43,77.02,205.01,87.91,180.42,94.01,169.07,100.67,157.97,107.82,147.24,115.49,136.84,123.78,126.67,132.51,116.93,151.65,98.49,161.58,90.27,171.87,82.55,182.66,75.19,193.85,68.28,205.32,61.84,217.13,56.12,241.92,46.16,254.03,42.27,266.33,39.07,278.74,36.34,291.35,34.15,304.12,32.64,316.92,31.8,343.69,31.8,356.6,32.72,369.34,34.08,382.14,36.35,395.01,39.15,407.7,42.55,419.95,46.59,444.71,56.63,456.93,62.49,467.99,68.83,478.73,75.48,489.18,82.57,499.32,90.34,509.12,98.5,528.24,116.95,537.0,126.56,545.14,136.63,552.96,147.02,560.18,158.02,566.83,169.33,573.0,180.6,583.72,204.84,588.56,218.43,592.58,231.85,595.94,245.67,598.6,259.7,600.46,273.88,601.65,288.25,602.01,303.08,33.27,284.46,34.54,269.16,36.73,253.73,39.61,238.8,43.23,223.86,47.75,209.17,53.2,194.24,64.07,169.79,71.02,156.72,78.53,144.19,86.63,132.03,95.26,120.39,104.44,109.15,114.3,98.24,133.49,79.64,144.85,70.2,156.83,61.13,168.85,52.89,181.12,45.39,194.0,38.34,207.28,31.9,232.17,21.94,245.66,17.26,260.03,13.54,274.39,10.49,288.52,8.24,302.82,6.43,316.92,5.57,343.69,5.57,358.17,6.63,372.76,8.38,387.19,10.78,401.58,13.93,415.7,17.69,429.8,22.23,454.46,32.25,467.55,38.69,479.71,45.44,491.86,52.81,504.16,61.27,516.0,70.06,527.31,79.74,546.41,98.11,556.43,109.15,565.91,120.62,574.88,132.84,582.92,145.05,590.07,157.26,596.77,170.04,607.63,194.39,613.01,209.45,617.62,225.18,621.58,240.82,624.59,256.69,626.66,272.63,627.67,288.1,628.09,303.08];
+  // Scrutins vus en direct (sommaire vidéo) mais pas encore publiés par le Sénat : le bouton reste sous le sort.
+  function scrutinsVus() { try { return JSON.parse(lsGet("derouleur.scrvus") || "{}") || {}; } catch (e) { return {}; } }
+  function noterScrutinVu(a) {
+    var v = scrutinsVus(), lim = Date.now() - 7 * 86400000;
+    Object.keys(v).forEach(function (k) { if (v[k] < lim) delete v[k]; });
+    v[cleAmdt(a.n)] = Date.now(); lsSet("derouleur.scrvus", JSON.stringify(v));
+  }
   function scrutinsDe(a) {
     var L = window.DEROULEUR_LIVE, m = L && L.scrutins ? L.scrutins() : null;
     return m && m[cleAmdt(a.n)] ? m[cleAmdt(a.n)] : null;
   }
   function btnScrutin(a) {
-    var l = a.s ? scrutinsDe(a) : null; if (!l) return null;
+    var l = a.s ? scrutinsDe(a) : null;
+    if (!l && a.s && scrutinsVus()[cleAmdt(a.n)]) l = [{ num: null, attente: true }];
+    if (!l) return null;
     return l.map(function (sc) {
-      return h("button", { type: "button", class: "btn-scrutin", title: "Voir le résultat du scrutin public n° " + sc.num, onclick: function (e) { e.stopPropagation(); ouvrirScrutin(sc, a); } }, "Scrutin public" + (l.length > 1 ? " n° " + sc.num : ""));
+      return h("button", { type: "button", class: "btn-scrutin", title: "Voir le résultat du scrutin public n° " + sc.num, onclick: function (e) { e.stopPropagation(); ouvrirScrutin(sc, a); } }, "Scrutin public" + (l.length > 1 && sc.num ? " n° " + sc.num : ""));
     });
   }
   function fermerScrutin() { var m = $("modale-scrutin"); if (m) m.remove(); document.documentElement.classList.remove("porte-ouverte"); document.removeEventListener("keydown", echapScrutin); }
   function echapScrutin(e) { if (e.key === "Escape") fermerScrutin(); }
   function ouvrirScrutin(sc, a) {
     fermerScrutin();
+    if (sc.attente) {
+      var c0 = h("div", { class: "scr-carte", role: "dialog", "aria-modal": "true", onclick: function (e) { e.stopPropagation(); } },
+        h("button", { type: "button", class: "scr-fermer", "aria-label": "Fermer", onclick: fermerScrutin }, "×"),
+        h("div", { class: "scr-tete" }, h("span", { class: "scr-badge" }, "Scrutin public"), h("span", { class: "scr-jour" }, "amendement n° " + a.n)),
+        h("p", { class: "scr-objet" }, "Cet amendement a été mis aux voix par scrutin public (sommaire du direct de la séance). Le Sénat n'a pas encore publié le résultat détaillé : il s'affichera ici, avec l'hémicycle et le détail par groupe, dès sa mise en ligne."),
+        h("a", { class: "scr-lien", href: "https://www.senat.fr/scrutin-public/scr" + (new Date().getMonth() < 9 ? new Date().getFullYear() - 1 : new Date().getFullYear()) + ".html", target: "_blank", rel: "noopener" }, "Liste des scrutins sur senat.fr ↗"));
+      document.body.appendChild(h("div", { class: "modale-scrutin", id: "modale-scrutin", onclick: fermerScrutin }, c0));
+      document.documentElement.classList.add("porte-ouverte"); document.addEventListener("keydown", echapScrutin);
+      return;
+    }
     var corps = h("div", { class: "scr-corps" }, h("p", { class: "scr-charge" }, "Lecture du résultat sur senat.fr…"));
     var carte = h("div", { class: "scr-carte", role: "dialog", "aria-modal": "true", "aria-label": "Scrutin public n° " + sc.num, onclick: function (e) { e.stopPropagation(); } },
       h("button", { type: "button", class: "scr-fermer", "aria-label": "Fermer", onclick: fermerScrutin }, "×"),
