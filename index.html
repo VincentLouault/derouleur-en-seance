@@ -616,6 +616,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 @media (max-width:720px){.scr-carte{padding:16px 14px}.scr-chiffres{grid-template-columns:repeat(2,1fr)}.scr-gl{grid-template-columns:minmax(0,1fr) 34px 46px 38px 38px;gap:4px;font-size:12px}.scr-gl .gbar{display:none}.scr-gh{font-size:9.5px;letter-spacing:0}}
 .note-sort{display:block;margin-top:3px;font-size:10.5px;color:var(--muted);font-style:italic}
 .pill.attente-sort{background:#f3f4f6;border-color:#d1d5db;color:#4b5563;font-style:italic;font-size:12px;white-space:normal;max-width:150px;line-height:1.25}
+@media (max-width:720px){td.c-passage,.t-art td{white-space:normal!important;overflow-wrap:anywhere;min-width:0}.t-art td.c-passage,.t-art td.c-passage+td{font-size:13.5px;letter-spacing:-.01em;overflow-wrap:normal}}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -987,7 +988,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123172644";</script>
+<script>window.DEROULEUR_BUILD = "20261123210739";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2550,11 +2551,13 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     M.plages.forEach(function (p) { if (p.b <= M.depart) return; var j = new Date(p.a - 6 * 3600000).toDateString(); if (joursSeance.indexOf(j) < 0) joursSeance.push(j); });
     if (joursSeance.length > 2) M.plages.forEach(function (p) { if (new Date(p.a - 6 * 3600000).toDateString() === joursSeance[1]) limite = Math.max(limite || 0, p.b); });
     var auDela = limite ? "après " + jourCourt(limite - 6 * 3600000) : "";
+    // Heures insécables (« 14 h 45 », « mar. 24 ») : sur téléphone la fourchette passe à la ligne entre ses deux bornes.
+    function insecable(x) { return typeof x === "string" ? x.replace(/(\d{1,2}) h (\d{2})/g, "$1\u00a0h\u00a0$2").replace(/([a-zé]{3,4}\.) (\d{1,2})/g, "$1\u00a0$2").replace(/ - /g, "\u00a0-\u00a0") : x; }
     function fourch2(t1, t2) {
-      if (!limite || t1 === null || t1 === undefined) return fourchette(t1, t2, M.depart);
+      if (!limite || t1 === null || t1 === undefined) return insecable(fourchette(t1, t2, M.depart));
       if (t1 > limite) return h("span", { class: "plus-tard" }, auDela);
-      if (t2 === null || t2 === undefined || t2 > limite) return heure(t1, M.depart) + " – " + auDela;
-      return fourchette(t1, t2, M.depart);
+      if (t2 === null || t2 === undefined || t2 > limite) return insecable(heure(t1, M.depart)) + " – " + auDela;
+      return insecable(fourchette(t1, t2, M.depart));
     }
     function tagOdj(d) {
       var p = (M.prio || []).filter(function (x) { return x.k === d.i; })[0] || (M.priosFutures || []).filter(function (x) { return x.k === d.i; })[0];
