@@ -581,6 +581,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   .titre-derouleur{font-size:21px!important;padding:8px 18px}
   .kpis .kpi-avis{grid-column:1/-1}
 }
+.amdt-groupe{display:block;width:max-content;margin-top:4px;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;background:var(--navy2);border-radius:99px;padding:2px 8px;white-space:nowrap}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -952,7 +953,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261122194111";</script>
+<script>window.DEROULEUR_BUILD = "20261123103848";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1149,6 +1150,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
         var a = { n: num, d: cur, a: nom, s: txt(e.querySelector("span.status")) || null, _slug: slug };
         var g = qual || grp || (slug && GROUPES_FICHES[slug]) || null;
         if (g) a.g = g;
+        if (grp) a.ag = 1; // « M. X (groupe …) » dans le dérouleur : amendement déposé au nom du groupe
         if (e.getAttribute("data-amdperid")) a.sa = 1;
         if (al) a.al = al;
         var dup = e.getAttribute("data-duplicate"), thr = e.getAttribute("data-thread");
@@ -1788,7 +1790,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     var cfg = config(), D = cur.donnees;
     var divs = D.divisions.map(function (d, i) { return { i: i, libelle: d.libelle, type: d.type, sort: d.sort, total: 0, restants: 0, examines: 0, cpt: {} }; });
     var am = D.amendements.map(function (a, k) {
-      var x = { k: k, n: a.n, base: cleAmdt(a.n), d: a.d, al: a.al || "", a: a.a, g: a.g || null, gs: a.gs || null, s: a.s || null, sa: !!a.sa, c: a.c || null, v: a.v || null, o: a.o || null, cs: a.cs || null, dc: a.dc || null, id: a.id || null };
+      var x = { k: k, n: a.n, base: cleAmdt(a.n), d: a.d, al: a.al || "", a: a.a, g: a.g || null, gs: a.gs || null, s: a.s || null, sa: !!a.sa, ag: !!a.ag, c: a.c || null, v: a.v || null, o: a.o || null, cs: a.cs || null, dc: a.dc || null, id: a.id || null };
       var dv = divs[a.d];
       if (dv) { dv.total++; if (x.s) { dv.examines++; dv.cpt[x.s] = (dv.cpt[x.s] || 0) + 1; } else dv.restants++; }
       return x;
@@ -2185,7 +2187,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       h("td", null, estProchain && mode === "cours" ? h("span", { class: "fleche", "aria-label": "Amendement en discussion" }, "➤") : null, dv ? dv.libelle : "", alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null),
       numCell,
       h("td", null, estSuivi(a) ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, a.a, cosig(a)),
-      h("td", null, celluleGroupe(a)),
+      h("td", null, celluleGroupe(a), a.ag ? h("span", { class: "amdt-groupe", title: "Amendement déposé au nom du groupe (indication du dérouleur « En séance »)" }, "Amdt de groupe") : null),
       h("td", null, pillAvis(a.c)),
       h("td", null, pillAvis(a.v)),
       dernier);
@@ -2889,7 +2891,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     { cible: ".recherche .filtres", titre: "Rechercher", html: "<p>Filtrez par article, groupe, statut, n° d'amendement (« I-27 » ou « 27 ») ou nom de sénateur. La recherche s'applique aux amendements, mais aussi aux articles et aux orateurs.</p>" },
     { cible: "#s-orateurs", titre: "Prises de parole", html: "<p>Les orateurs inscrits de l'étape en cours, synchronisés avec le <b>sommaire du direct vidéo</b> :</p><ul><li>ceux qui ont parlé disparaissent ;</li><li>l'orateur <b>à la tribune</b> a une batterie qui se vide avec son temps de parole, puis affiche <b>« CONCLURE »</b>.</li></ul>" },
     { cible: "#p-articles", titre: "Articles à venir", html: "<p>Chaque article avec ses amendements et ses heures de passage estimées (sur 2 jours de séance). En italique, les autres points de l'<b>ordre du jour</b> : autres textes, questions d'actualité, réunions de commission.</p><p>Cliquez sur un article pour voir ses amendements.</p>" },
-    { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>10 derniers examinés</b> (3 visibles), <b>en cours</b>, <b>à venir</b> (liste qui défile) et <b>déjà examinés</b> ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
+    { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>10 derniers examinés</b> (3 visibles), <b>en cours</b>, <b>à venir</b> (liste qui défile) et <b>déjà examinés</b> ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« Amdt de groupe » : amendement déposé au nom d'un groupe ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
     { cible: "[data-audio]", titre: "Écouter la séance", html: "<p>« Activer l'audio » (ici ou en tête des amendements en cours) diffuse le son du direct de l'hémicycle, sans quitter la page.</p>" },
     { cible: "#s-actus", titre: "Actualités", html: "<p>Les dernières infos de Public Sénat et de LCP sur 24 heures (3 visibles, les autres en dépliant).</p>" },
     { cible: "#titre-outil", titre: "Sur votre téléphone et votre ordinateur", html: "<p>Ajoutez le dérouleur à l'écran d'accueil (iPhone : Partager → « Sur l'écran d'accueil » ; Android et ordinateur : « Installer l'application ») pour l'ouvrir comme une application, avec l'icône « V ».</p><p>La page se met à jour seule, même restée ouverte en arrière-plan.</p>" }
