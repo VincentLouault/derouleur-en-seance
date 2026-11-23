@@ -1,5 +1,5 @@
 {
-"maj": 1795455875564,
+"maj": 1795459297169,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,18 @@
 ],
 "LCP": [
 {
+"titre": "Protection animale: entre accélération législative aux cours des dernières années et persistance de certains clivages",
+"lien": "https://lcp.fr/actualites/protection-animale-entre-acceleration-legislative-aux-cours-des-dernieres-annees-et",
+"date": 1795458000000,
+"source": "LCP"
+},
+{
+"titre": "Sécurité des enseignants : l'avocat Richard Malka plaide pour l'instauration d'un \"filtre\" avec les parents d'élèves",
+"lien": "https://lcp.fr/actualites/securite-des-enseignants-l-avocat-richard-malka-plaide-pour-l-instauration-d-un-filtre",
+"date": 1795456500000,
+"source": "LCP"
+},
+{
 "titre": "Pension alimentaire: en commission, les députés approuvent une \"majoration\" en cas de non-respect du droit de visite et d'hébergement",
 "lien": "https://lcp.fr/actualites/pension-alimentaire-en-commission-les-deputes-approuvent-une-majoration-en-cas-de-non",
 "date": 1795455060000,
@@ -134,18 +146,6 @@
 "titre": "Législatives en Espagne: le pari de Pedro Sanchez peut-il ouvrir les portes du pouvoir à l’extrême droite ?",
 "lien": "https://lcp.fr/actualites/legislatives-en-espagne-le-pari-de-pedro-sanchez-peut-il-ouvrir-les-portes-du-pouvoir-a",
 "date": 1795248300000,
-"source": "LCP"
-},
-{
-"titre": "Les policiers ont-ils le droit de manifester? Les règles derrière la polémique engagée par Jean-Luc Mélenchon",
-"lien": "https://lcp.fr/actualites/les-policiers-ont-ils-le-droit-de-manifester-les-regles-derriere-la-polemique-engagee",
-"date": 1795248300000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle: pourquoi LFI n'a pas encore dévoilé le chiffrage de son programme",
-"lien": "https://lcp.fr/actualites/presidentielle-pourquoi-lfi-n-a-pas-encore-devoile-le-chiffrage-de-son-programme-445313",
-"date": 1795242900000,
 "source": "LCP"
 }
 ]
