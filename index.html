@@ -1027,7 +1027,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261124135154";</script>
+<script>window.DEROULEUR_BUILD = "20261124140225";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1719,9 +1719,22 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     }).catch(function () {});
   }
   // Retire des orateurs inscrits ceux qui sont déjà intervenus dans la rubrique correspondante du direct, marque celui qui est à la tribune.
-  function appliquerVideo(blocs, V) {
+  function appliquerVideo(blocs, V, texte) {
     if (!V || !V.seq.length) return;
     var seq = V.seq, dernierIN = -1;
+    // Début de l'examen du texte dans la séance : dernier grand titre du sommaire qui reprend l'intitulé du texte.
+    var debutTexte = -1;
+    if (texte && texte.titre) {
+      var mots = sansAccent(String(texte.titre).replace(/^[^:]*:\s*/, "")).toLowerCase().split(/[^a-z0-9]+/).filter(function (m) { return m.length > 3; });
+      seq.forEach(function (x, k) {
+        if (x.type !== "TI" || !mots.length) return;
+        var lb = sansAccent(x.label).toLowerCase(), n = mots.filter(function (m) { return lb.indexOf(m) >= 0; }).length;
+        if (n / mots.length >= 0.6) debutTexte = k;
+      });
+    }
+    // Intervenants déjà entendus sur ce texte (toutes rubriques confondues, depuis le début de son examen).
+    var dejaTexte = {};
+    if (debutTexte >= 0) for (var q = debutTexte; q < seq.length; q++) if (seq[q].type === "IN" && seq[q].nom) dejaTexte[seq[q].nom] = 1;
     for (var z = seq.length - 1; z >= 0; z--) if (seq[z].type === "IN") { dernierIN = z; break; }
     // Rubriques du sommaire (entre deux titres) avec les intervenants de chacune.
     var sections = [], cour = null;
@@ -1741,11 +1754,20 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
           if (n && n >= meilleur && (n >= 2 || sx.noms[fams[0]])) { meilleur = n; sec = sx; }
         });
       }
-      if (!sec) return;
+      if (!sec) {
+        var av0 = b.lignes.length;
+        b.lignes = b.lignes.filter(function (l) { var f = majFam(l.nom); return !(f && !l.groupe && l.role && dejaTexte[f]); });
+        if (av0 !== b.lignes.length) { b.passes = av0 - b.lignes.length; b.total = null; }
+        return;
+      }
       var passes = sec.noms, tribune = null;
       if (V.direct && dernierIN > sec.debut && dernierIN < sec.fin && sec.fin === seq.length) tribune = seq[dernierIN].nom;
       var avant = b.lignes.length;
-      b.lignes = b.lignes.filter(function (l) { var f = majFam(l.nom); if (f && f === tribune) { l.tribune = true; if (seq[dernierIN].debut) l.debutParole = seq[dernierIN].debut; return true; } return !(f && passes[f]); });
+      b.lignes = b.lignes.filter(function (l) { var f = majFam(l.nom); if (f && f === tribune) { l.tribune = true; if (seq[dernierIN].debut) l.debutParole = seq[dernierIN].debut; return true; }
+        // Rapporteur, ministre, président de commission… : ils interviennent en ouverture du texte ; s'ils ont déjà parlé
+        // sur ce texte (même sous une autre rubrique du sommaire), ils ne sont plus attendus.
+        if (f && !l.groupe && l.role && dejaTexte[f]) return false;
+        return !(f && passes[f]); });
       b.passes = avant - b.lignes.length;
       if (b.passes) b.total = null; // temps restant = somme des orateurs encore à venir
       b.direct = true;
@@ -1773,7 +1795,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       return Promise.all([pageP, majOdj(), verifierAutres(actif), majProchain(), majActus(), majVideo(), majScrutins(actif)]);
     }).then(function (r) {
       res = analyser(r[0]);
-      try { appliquerVideo(res.orateurs, VIDEO.data); } catch (e) {}
+      try { appliquerVideo(res.orateurs, VIDEO.data, actif); } catch (e) {}
       // Discussions générales : préciser le texte étudié.
       var preciser = function (lib) { return /^Discussion g[ée]n[ée]rale/i.test(lib || "") && lib.indexOf(actif.court) < 0 ? lib + " – " + actif.court : lib; };
       res.divisions.forEach(function (d) { d.libelle = preciser(d.libelle); });
