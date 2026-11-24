@@ -1,5 +1,5 @@
 {
-"maj": 1795539059016,
+"maj": 1795542739574,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,18 @@
 ],
 "LCP": [
 {
+"titre": "\"Une forfaiture\": une députée dénonce la venue de deux talibans en France",
+"lien": "https://lcp.fr/actualites/une-forfaiture-une-deputee-denonce-la-venue-de-deux-talibans-en-france-445575",
+"date": 1795542480000,
+"source": "LCP"
+},
+{
+"titre": "Logement: les députés adoptent une version du projet de loi réautorisant, à ce stade, la location des passoires thermiques",
+"lien": "https://lcp.fr/actualites/logement-les-deputes-adoptent-une-version-du-projet-de-loi-reautorisant-a-ce-stade-la",
+"date": 1795539720000,
+"source": "LCP"
+},
+{
 "titre": "Présidentielle 2027: pourquoi autant de maires refusent de donner leur parrainage à un candidat",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-pourquoi-autant-de-maires-refusent-de-donner-leur-parrainage-a-un",
 "date": 1795537800000,
@@ -134,18 +146,6 @@
 "titre": "Règle d'or: que prévoit vraiment le texte qu'Emmanuel Macron envisage de faire adopter par le Parlement?",
 "lien": "https://lcp.fr/actualites/regle-d-or-que-prevoit-vraiment-le-texte-qu-emmanuel-macron-envisage-de-faire-adopter",
 "date": 1795445460000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle: Génération.s officialise son soutien à Jean-Luc Mélenchon",
-"lien": "https://lcp.fr/actualites/presidentielle-generations-officialise-son-soutien-a-jean-luc-melenchon-445502",
-"date": 1795436820000,
-"source": "LCP"
-},
-{
-"titre": "Sommet \"Choose France\": que recouvrent les 42,5 milliards d’euros d’investissements annoncés?",
-"lien": "https://lcp.fr/actualites/sommet-choose-france-que-recouvrent-les-425-milliards-d-euros-d-investissements-annonces",
-"date": 1795433820000,
 "source": "LCP"
 }
 ]
