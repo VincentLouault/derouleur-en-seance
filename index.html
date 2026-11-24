@@ -1027,7 +1027,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261124140225";</script>
+<script>window.DEROULEUR_BUILD = "20261124145829";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1577,7 +1577,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
         var desc = texteHtml(ms[3]).replace(/^[:\s ]+/, "").replace(/\s*-\s*consulter le dossier l[ée]gislatif\.?/i, "");
         var res = (m.match(/<span class="badge[^"]*">([^<]+)<\/span>/) || [])[1] || "";
         desc = desc.replace(new RegExp("\\s*" + res.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*$"), "");
-        if (!/amendement/i.test(desc) || (titre && sansAccent(desc).replace(/\s+/g, " ").indexOf(titre) < 0)) return;
+        if (!/amend/i.test(desc) || (titre && sansAccent(desc).replace(/\s+/g, " ").indexOf(titre) < 0)) return;
         // Numéros mis aux voix (on écarte « à l'amendement n° … » qui désigne l'amendement sous-amendé)
         // Numéros mis aux voix : « n° I-1142 rectifié par …, I-1155, présenté par …, et I-1483, … » (on s'arrête avant
         // « à l'amendement n° … » qui désigne l'amendement sous-amendé, et avant l'article ou le texte visé).
@@ -3253,7 +3253,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     { cible: ".recherche .filtres", titre: "Rechercher", html: "<p>Filtrez par article, groupe, statut, n° d'amendement (« I-27 » ou « 27 ») ou nom de sénateur. La recherche s'applique aux amendements, mais aussi aux articles et aux orateurs.</p>" },
     { cible: "#s-orateurs", titre: "Prises de parole", html: "<p>Les orateurs inscrits de l'étape en cours, synchronisés avec le <b>sommaire du direct vidéo</b> :</p><ul><li>ceux qui ont parlé disparaissent ;</li><li>l'orateur <b>à la tribune</b> a une batterie qui se vide avec son temps de parole, puis affiche <b>« CONCLURE »</b>.</li></ul>" },
     { cible: "#p-articles", titre: "Articles à venir", html: "<p>Chaque article avec ses amendements et ses heures de passage estimées (sur 2 jours de séance). En italique, les autres points de l'<b>ordre du jour</b> : autres textes, questions d'actualité, réunions de commission.</p><p>Cliquez sur un article pour voir ses amendements.</p>" },
-    { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>déjà examinés</b> (les 4 plus récents en bas, les plus anciens en remontant, avec les onglets par sort et les bilans), <b>en cours</b> et <b>à venir</b> (liste qui défile) ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« Amdt de groupe » : amendement déposé au nom d'un groupe ;</li><li>bouton jaune « Scrutin public » sous le sort : résultat détaillé du vote (hémicycle, groupes) ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
+    { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>déjà examinés</b> (les 4 plus récents en bas, les plus anciens en remontant, avec les onglets par sort et les bilans), <b>en cours</b> et <b>à venir</b> (liste qui défile) ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« Amdt de groupe » : amendement déposé au nom d'un groupe ;</li><li>bouton doré « Scrutin public » sous le sort d'un amendement mis aux voix par scrutin public : un clic ouvre le résultat détaillé (hémicycle siège par siège, pour/contre, détail par groupe) ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
     { cible: "[data-audio]", titre: "Écouter la séance", html: "<p>« Activer l'audio » (ici ou en tête des amendements en cours) diffuse le son du direct de l'hémicycle, sans quitter la page.</p>" },
     { cible: "#s-actus", titre: "Actualités", html: "<p>Les dernières infos de Public Sénat et de LCP sur 24 heures (3 visibles, les autres en dépliant).</p>" },
     { cible: "#titre-outil", titre: "Sur votre téléphone et votre ordinateur", html: "<p>Ajoutez le dérouleur à l'écran d'accueil (iPhone : Partager → « Sur l'écran d'accueil » ; Android et ordinateur : « Installer l'application ») pour l'ouvrir comme une application, avec l'icône « V ».</p><p>La page se met à jour seule, même restée ouverte en arrière-plan.</p>" }
