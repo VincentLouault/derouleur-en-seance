@@ -617,6 +617,11 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 .note-sort{display:block;margin-top:3px;font-size:10.5px;color:var(--muted);font-style:italic}
 .pill.attente-sort{background:#f3f4f6;border-color:#d1d5db;color:#4b5563;font-style:italic;font-size:12px;white-space:normal;max-width:150px;line-height:1.25}
 @media (max-width:720px){td.c-passage,.t-art td{white-space:normal!important;overflow-wrap:anywhere;min-width:0}.t-art td.c-passage,.t-art td.c-passage+td{font-size:13.5px;letter-spacing:-.01em;overflow-wrap:normal}}
+.derouleur-ex{overflow-y:auto!important;overscroll-behavior:contain;position:relative}
+.derouleur-ex thead th{position:sticky;top:0;z-index:2;background:#f7f9fc}
+#p-archive .tabs{padding:10px 14px 4px}
+#arch-defile{display:block;text-align:center;font-size:12.5px;color:var(--muted);padding:8px 12px 10px}
+#arch-defile.hidden{display:none}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -722,13 +727,13 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       </div>
     </div>
 
-    <div class="panel green" id="p-derniers">
-      <div class="ph"><h3>Les 10 derniers amendements examinés</h3><span class="cnt">dans l'ordre d'examen, le plus récent en bas</span></div>
-      <div class="scroll">
-        <table class="t-amdt">
-          <thead><tr><th>Article</th><th>N°</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Sort</th></tr></thead>
-          <tbody id="derniers-body"></tbody>
-        </table>
+    <div class="panel green" id="p-archive">
+      <div class="ph"><h3>Amendements déjà examinés</h3><span class="cnt"><span id="arch-count">0</span> · dans l'ordre d'examen, le plus récent en bas</span></div>
+      <div id="arch-body">
+        <div class="tabs" id="tabs"></div>
+        <div class="scroll derouleur-ex" id="arch-content"></div>
+        <span class="defile" id="arch-defile">Remontez dans la liste pour voir les amendements plus anciens ↕</span>
+        <div class="note-sm" id="arch-note"></div>
       </div>
     </div>
 
@@ -753,16 +758,6 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       <span class="defile">Faites défiler la liste pour voir les amendements suivants ↕</span>
     </div>
 
-    <div class="panel grey" id="p-archive">
-      <div class="arch-h" id="arch-h" role="button" tabindex="0" aria-expanded="false">
-        <span class="tri">▶</span><h3>Amendements déjà examinés</h3><span class="count" id="arch-count">0</span><span class="hint" id="arch-hint">Cliquer pour déplier</span>
-      </div>
-      <div id="arch-body" class="hidden">
-        <div class="tabs" id="tabs"></div>
-        <div class="scroll tall" id="arch-content"></div>
-        <div class="note-sm" id="arch-note"></div>
-      </div>
-    </div>
   </section>
 
   <div class="fin-live"><a class="live" id="lien-live" href="#" target="_blank" rel="noopener">Dérouleur du Sénat en direct ↗</a></div>
@@ -988,7 +983,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261123210739";</script>
+<script>window.DEROULEUR_BUILD = "20261124095052";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -1405,7 +1400,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     for (var i = deb + 1; i < fin; i++) {
       var d = divisions[i];
       if (!/article|additionnel/.test(d.type)) continue;
-      if (/r[ée]serv[ée]/i.test(d.libelle)) continue; // article réservé (« réservé jusqu'à … mardi 24 novembre ») : la séance le saute
+      if (/r[ée]serv[ée]/i.test(d.libelle) && !/pr[ée]c[ée]demment r[ée]serv/i.test(d.libelle)) continue; // article réservé (« réservé jusqu'à … mardi 24 novembre ») : la séance le saute
       var ams = (divisions._am || []).filter(function (a) { return a.d === i; }), ouverts = ams.filter(function (a) { return !a.s; }).length;
       if (ouverts > 0 || (d.type === "article" && !d.sort && !ams.length)) return i;
     }
@@ -2312,10 +2307,19 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     deja = S.sortsDeja = {}; M.examines.forEach(function (a) { deja[a.k] = 1; });
     var lim = now - 3 * 86400000; Object.keys(vus).forEach(function (n) { if (vus[n] < lim) delete vus[n]; });
     lsSet("derouleur.sortsvus", JSON.stringify({ cle: cle, v: vus }));
-    var iM = M.prochain ? M.am.indexOf(M.prochain) : -1;
+    // Front de l'examen : la dernière division réglée du bloc examiné depuis le début du texte. On parcourt les divisions
+    // dans l'ordre du dérouleur ; deux divisions de suite sans aucun amendement réglé marquent la fin du bloc. Les
+    // amendements réglés au-delà (articles appelés en priorité, comme l'article 55) sont plus anciens.
+    var parDiv = {}; M.am.forEach(function (a) { var x = parDiv[a.d] = parDiv[a.d] || { n: 0, s: 0 }; x.n++; if (a.s) x.s++; });
+    var front = Infinity, dernierRegle = -1, vides = 0;
+    Object.keys(parDiv).map(Number).sort(function (x, y) { return x - y; }).some(function (d) {
+      if (parDiv[d].s) { dernierRegle = d; vides = 0; return false; }
+      if (++vides >= 2) { front = dernierRegle; return true; }
+      return false;
+    });
     return M.examines.slice().sort(function (x, y) {
       var tx = vus[x.n] || 0, ty = vus[y.n] || 0; if (tx !== ty) return tx - ty;
-      var gx = iM >= 0 && x.k > M.prochain.k ? 0 : 1, gy = iM >= 0 && y.k > M.prochain.k ? 0 : 1; if (gx !== gy) return gx - gy;
+      var gx = x.d > front ? 0 : 1, gy = y.d > front ? 0 : 1; if (gx !== gy) return gx - gy;
       return x.k - y.k;
     });
   }
@@ -2651,21 +2655,14 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     // Filtres (listes)
     remplirFiltres(M);
 
-    // 10 derniers
+    // Amendements déjà examinés
     var exF = ordreExamen(M).filter(passeFiltre);
     // Glissement « à venir » → « en cours » → « examinés » : la discussion en cours reste dans « Amendements en cours ».
     var P0d = M.prochain, dansCours = function (a) { return P0d && (a === P0d || (P0d.dc ? a.dc === P0d.dc : P0d.id && a.id === P0d.id)); };
-    var dern = exF.filter(function (a) { return !dansCours(a); }).slice(-10);
+    var exAff = exF.filter(function (a) { return !dansCours(a); }); // la discussion en cours reste dans « Amendements en cours »
     var pct = T ? Math.round(M.examines.length / T * 100) : 0;
     vide($("prog-t")).append("Avancement : ", h("b", null, nb(M.examines.length)), " amendements examinés sur ", h("b", null, nb(T)), " (", h("b", null, pct + " %"), ")");
     $("prog-bar").style.width = (T ? M.examines.length / T * 100 : 0) + "%";
-    var db = vide($("derniers-body"));
-    if (!dern.length) db.appendChild(ligneVide(7, filtreActif() ? "Aucun amendement examiné ne correspond aux filtres." : "Aucun amendement examiné pour l'instant."));
-    // Les 3 plus récents (en bas) toujours visibles ; les 7 précédents dans un dépliant.
-    var ouvD = !!S.derniersOuvert, cachesD = Math.max(0, dern.length - 3);
-    if (cachesD) db.appendChild(h("tr", { class: "plus-row" }, h("td", { colspan: 7 }, h("button", { type: "button", class: "voir-plus", onclick: function () { S.derniersOuvert = !S.derniersOuvert; rendre(); } },
-      ouvD ? "Replier : n'afficher que les 3 derniers ▾" : (cachesD > 1 ? "Voir les " + cachesD + " précédents" : "Voir le précédent") + " ▴"))));
-    (ouvD ? dern : dern.slice(-3)).forEach(function (a) { db.appendChild(ligneAmdt(a, M, "passe", now)); });
 
     // En cours : l'amendement en discussion, avec sa discussion commune (ou ses identiques)
     var P0 = M.prochain, enCours = [];
@@ -2733,7 +2730,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 
     // Archive
     $("arch-count").textContent = nb(M.examines.length);
-    rendreArchive(M, exF, now);
+    rendreArchive(M, exAff, now);
 
     // Pied de page
     var st = { explicite: 0, deduit: 0, manuel: 0, none: 0 };
@@ -2988,7 +2985,13 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     tabs.forEach(function (t) {
       tb.appendChild(h("button", { type: "button", class: "tab" + (S.onglet === t[0] ? " on" : ""), onclick: function () { S.onglet = t[0]; lsSet("derouleur.onglet", t[0]); rendre(); } }, t[1], t[2] !== null ? h("span", { class: "c" }, nb(t[2])) : null));
     });
-    var c = vide($("arch-content")), note = $("arch-note");
+    var c0 = $("arch-content");
+    // Position de lecture : distance au bas de la liste (le bas = le plus récent), conservée aux actualisations.
+    if (c0._suivi && S.ongletEx === S.onglet) S.basEx = Math.max(0, c0.scrollHeight - c0.scrollTop - c0.clientHeight); else S.basEx = 0;
+    S.ongletEx = S.onglet;
+    if (!c0._suivi) { c0._suivi = 1; c0.addEventListener("scroll", function () { S.basEx = Math.max(0, c0.scrollHeight - c0.scrollTop - c0.clientHeight); }, { passive: true }); }
+    var c = vide(c0), note = $("arch-note");
+    c.style.maxHeight = ""; c.classList.remove("derouleur-ex"); $("arch-defile").classList.add("hidden");
     if (S.onglet === "groupes") {
       note.textContent = "Taux d'adoption = adoptés ÷ (adoptés + rejetés). Cliquez sur un groupe pour filtrer les tableaux. Ce bilan ignore les filtres.";
       var rows = Object.keys(M.groupes).map(function (k) { return M.groupes[k]; });
@@ -3021,12 +3024,22 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       c.appendChild(h("table", { class: "t-bilan" }, h("thead", null, h("tr", null, ["Article", "Amendements", "Examinés", "Adoptés", "Rejetés", "Autres sorts", "Restants", "Sort de l'article"].map(function (x, i) { return h("th", { class: i && i < 7 ? "num" : null }, x); }))), tbody2));
       return;
     }
-    var liste = exF.filter(function (a) { return S.onglet === "tous" ? true : S.onglet === "autres" ? SORTS.indexOf(a.s) < 0 : a.s === S.onglet; }).slice().reverse();
-    note.textContent = "Du plus récent au plus ancien. Les filtres au-dessus s'appliquent à cette liste.";
+    var liste = exF.filter(function (a) { return S.onglet === "tous" ? true : S.onglet === "autres" ? SORTS.indexOf(a.s) < 0 : a.s === S.onglet; });
+    note.textContent = "";
     var tbody3 = h("tbody");
     if (!liste.length) tbody3.appendChild(ligneVide(7, "Aucun amendement dans cette catégorie."));
     liste.forEach(function (a) { tbody3.appendChild(ligneAmdt(a, M, "passe", now)); });
     c.appendChild(h("table", { class: "t-amdt" }, h("thead", null, h("tr", null, ["Article", "N°", "Sénateur", "Groupe", "Avis de la commission", "Avis du Gouvernement", "Sort"].map(function (x) { return h("th", null, x); }))), tbody3));
+    // Dérouleur : les 5 plus récents visibles (en bas), les plus anciens en remontant.
+    c.classList.add("derouleur-ex");
+    var lignes = Array.prototype.filter.call(tbody3.children, function (r) { return !r.classList.contains("objet-row") && r.offsetParent !== null; });
+    if (lignes.length > 5) {
+      var der5 = lignes[lignes.length - 5], th = c.querySelector("thead"), tete = th && getComputedStyle(th).display !== "none" ? th.getBoundingClientRect().height : 0;
+      var haut = tbody3.getBoundingClientRect().bottom - der5.getBoundingClientRect().top;
+      c.style.maxHeight = Math.round(tete + haut + 2) + "px";
+      c.scrollTop = c.scrollHeight - c.clientHeight - (S.basEx || 0);
+      $("arch-defile").classList.remove("hidden");
+    }
   }
 
   /* ---------- interactions ---------- */
@@ -3056,15 +3069,6 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     var t;
     ["num", "q"].forEach(function (k) { $("f-" + k).addEventListener("input", function (e) { S.f[k] = e.target.value.trim(); clearTimeout(t); t = setTimeout(rendre, 150); }); });
     $("f-reset").addEventListener("click", function () { S.f = { article: "", groupe: "", statut: "", num: "", q: "" }; $("f-num").value = ""; $("f-q").value = ""; rendre(); });
-    function bascule() {
-      S.archiveOuverte = !S.archiveOuverte;
-      $("arch-h").classList.toggle("open", S.archiveOuverte);
-      $("arch-h").setAttribute("aria-expanded", S.archiveOuverte ? "true" : "false");
-      $("arch-body").classList.toggle("hidden", !S.archiveOuverte);
-      $("arch-hint").textContent = S.archiveOuverte ? "Cliquer pour replier" : "Cliquer pour déplier";
-    }
-    $("arch-h").addEventListener("click", bascule);
-    $("arch-h").addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); bascule(); } });
   }
 
   function lierMaj() {
@@ -3174,7 +3178,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     { cible: ".recherche .filtres", titre: "Rechercher", html: "<p>Filtrez par article, groupe, statut, n° d'amendement (« I-27 » ou « 27 ») ou nom de sénateur. La recherche s'applique aux amendements, mais aussi aux articles et aux orateurs.</p>" },
     { cible: "#s-orateurs", titre: "Prises de parole", html: "<p>Les orateurs inscrits de l'étape en cours, synchronisés avec le <b>sommaire du direct vidéo</b> :</p><ul><li>ceux qui ont parlé disparaissent ;</li><li>l'orateur <b>à la tribune</b> a une batterie qui se vide avec son temps de parole, puis affiche <b>« CONCLURE »</b>.</li></ul>" },
     { cible: "#p-articles", titre: "Articles à venir", html: "<p>Chaque article avec ses amendements et ses heures de passage estimées (sur 2 jours de séance). En italique, les autres points de l'<b>ordre du jour</b> : autres textes, questions d'actualité, réunions de commission.</p><p>Cliquez sur un article pour voir ses amendements.</p>" },
-    { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>10 derniers examinés</b> (3 visibles), <b>en cours</b>, <b>à venir</b> (liste qui défile) et <b>déjà examinés</b> ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« Amdt de groupe » : amendement déposé au nom d'un groupe ;</li><li>bouton jaune « Scrutin public » sous le sort : résultat détaillé du vote (hémicycle, groupes) ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
+    { cible: "#s-amendements", titre: "Les amendements", html: "<ul><li><b>déjà examinés</b> (les 5 plus récents en bas, les plus anciens en remontant, avec les onglets par sort et les bilans), <b>en cours</b> et <b>à venir</b> (liste qui défile) ;</li><li>« Objet » : une phrase de l'exposé des motifs ;</li><li>« Amdt de groupe » : amendement déposé au nom d'un groupe ;</li><li>bouton jaune « Scrutin public » sous le sort : résultat détaillé du vote (hémicycle, groupes) ;</li><li>« +N » : les cosignataires (la liste s'efface au bout d'une minute) ;</li><li>avis de la commission et du Gouvernement, sorts en tampons.</li></ul>" },
     { cible: "[data-audio]", titre: "Écouter la séance", html: "<p>« Activer l'audio » (ici ou en tête des amendements en cours) diffuse le son du direct de l'hémicycle, sans quitter la page.</p>" },
     { cible: "#s-actus", titre: "Actualités", html: "<p>Les dernières infos de Public Sénat et de LCP sur 24 heures (3 visibles, les autres en dépliant).</p>" },
     { cible: "#titre-outil", titre: "Sur votre téléphone et votre ordinateur", html: "<p>Ajoutez le dérouleur à l'écran d'accueil (iPhone : Partager → « Sur l'écran d'accueil » ; Android et ordinateur : « Installer l'application ») pour l'ouvrir comme une application, avec l'icône « V ».</p><p>La page se met à jour seule, même restée ouverte en arrière-plan.</p>" }
