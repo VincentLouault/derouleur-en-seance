@@ -1,5 +1,5 @@
 {
-"maj": 1795546570655,
+"maj": 1795550423707,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,18 @@
 ],
 "LCP": [
 {
+"titre": "Accord électoral entre Génération.s et LFI : Sophie Taillé-Polian dénonce \"une stratégie perdante\"",
+"lien": "https://lcp.fr/actualites/accord-electoral-entre-generations-et-lfi-sophie-taille-polian-denonce-une-strategie",
+"date": 1795550400000,
+"source": "LCP"
+},
+{
+"titre": "Constitution: comment le député Pouria Amirshahi veut provoquer le débat contre les référendums promis par Marine Le Pen",
+"lien": "https://lcp.fr/actualites/constitution-comment-le-depute-pouria-amirshahi-veut-provoquer-le-debat-contre-les",
+"date": 1795547100000,
+"source": "LCP"
+},
+{
 "titre": "\"Une forfaiture\": une députée dénonce la venue de deux talibans en France",
 "lien": "https://lcp.fr/actualites/une-forfaiture-une-deputee-denonce-la-venue-de-deux-talibans-en-france-445575",
 "date": 1795542480000,
@@ -134,18 +146,6 @@
 "titre": "17 octobre: les circulaires de Gérald Darmanin n'ont entraîné \"aucune modification de la politique pénale du parquet de Paris\", selon la procureure",
 "lien": "https://lcp.fr/actualites/17-octobre-les-circulaires-de-gerald-darmanin-n-ont-entraine-aucune-modification-de-la",
 "date": 1795451880000,
-"source": "LCP"
-},
-{
-"titre": "\"C'est inacceptable\": une vidéo tournée par des jeunes dans l'hémicycle de l'Assemblée fait polémique",
-"lien": "https://lcp.fr/actualites/c-est-inacceptable-une-video-tournee-par-des-jeunes-dans-l-hemicycle-de-l-assemblee-fait",
-"date": 1795446060000,
-"source": "LCP"
-},
-{
-"titre": "Règle d'or: que prévoit vraiment le texte qu'Emmanuel Macron envisage de faire adopter par le Parlement?",
-"lien": "https://lcp.fr/actualites/regle-d-or-que-prevoit-vraiment-le-texte-qu-emmanuel-macron-envisage-de-faire-adopter",
-"date": 1795445460000,
 "source": "LCP"
 }
 ]
