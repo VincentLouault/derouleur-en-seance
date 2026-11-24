@@ -644,6 +644,11 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   .total-tete{padding:10px 12px}.total-tete h2{font-size:17px}.total-cnt{flex-basis:100%;order:3}
   .total-scroll tr.sep-total td{top:0}
 }
+.orat-tribune{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 18px;background:#fff;border-bottom:1px solid var(--line2);font-size:14.5px}
+.orat-tribune.hidden,.ph.open ~ .orat-tribune{display:none}
+.orat-tribune .ot-tag{background:var(--red-btn);color:#fff;font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:3px 10px;border-radius:99px}
+.orat-tribune .ot-role{color:var(--muted);font-size:13px}
+.orat-tribune .batt{margin-left:4px}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -740,6 +745,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   <section id="s-orateurs" class="hidden">
     <div class="panel navy" id="p-orateurs" data-pli>
       <div class="ph"><h3>Prises de parole : <span class="ph-sous">Orateurs inscrits</span></h3><span class="cnt" id="orat-cnt"></span></div>
+      <div class="orat-tribune hors-pli hidden" id="orat-tribune"></div>
       <p class="expl in">Orateurs inscrits au dérouleur du Sénat pour l'étape en cours et les étapes à venir du texte affiché, dans l'ordre de passage, avec leur temps de parole. Pendant la séance, le sommaire du direct vidéo du Sénat retire ceux qui sont déjà intervenus et signale l'orateur à la tribune.</p>
       <div id="orateurs"></div>
     </div>
@@ -1021,7 +1027,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261124133821";</script>
+<script>window.DEROULEUR_BUILD = "20261124135154";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2904,6 +2910,10 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     blocs.sort(function (x, y) { return (y.enCours ? 1 : 0) - (x.enCours ? 1 : 0); });
     sec.classList.toggle("hidden", !blocs.length);
     var nOrat = 0; blocs.forEach(function (b) { nOrat += b.lignes.length; });
+    // Encart visible quand la rubrique est repliée : l'orateur à la tribune, avec sa batterie.
+    var trib = null; blocs.some(function (b) { return b.lignes.some(function (l) { if (l.tribune) { trib = l; return true; } return false; }); });
+    var ot = vide($("orat-tribune")); ot.classList.toggle("hidden", !trib);
+    if (trib) ot.append(h("span", { class: "ot-tag" }, "🎙 À la tribune"), h("b", null, trib.nom), trib.groupe ? h("span", { class: "grp" }, trib.groupe) : (trib.role ? h("span", { class: "ot-role" }, trib.role) : null), batterie(trib));
     $("orat-cnt").textContent = blocs.length ? (blocs[0].enCours ? "en cours : " + blocs[0].titre + " · " : "") + nb(nOrat) + " orateur" + (nOrat > 1 ? "s" : "") + (blocs.length > 1 ? " sur " + nb(blocs.length) + " étapes" : "") : "";
     blocs.forEach(function (b, i) {
       var minutes = 0;
