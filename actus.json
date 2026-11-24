@@ -1,7 +1,31 @@
 {
-"maj": 1795505283559,
+"maj": 1795509860320,
 "sources": {
 "Public Sénat": [
+{
+"titre": "Sondage : au deuxième tour, seuls David Lisnard et Edouard Philippe seraient préférés à Marine Le Pen",
+"lien": "https://www.publicsenat.fr/actualites/politique/sondage-au-deuxieme-tour-seuls-david-lisnard-et-edouard-philippe-seraient-preferes-a-marine-le-pen",
+"date": 1795492800000,
+"source": "Public Sénat"
+},
+{
+"titre": "Sondage : le vainqueur de l’élection présidentielle de 2027 devrait susciter plus de rejet que d’adhésion",
+"lien": "https://www.publicsenat.fr/actualites/politique/sondage-le-vainqueur-de-lelection-presidentielle-de-2027-devrait-susciter-plus-de-rejet-que-dadhesion",
+"date": 1795492800000,
+"source": "Public Sénat"
+},
+{
+"titre": "Election présidentielle 2027 : David Lisnard confirme sa dynamique et devance Edouard Philippe",
+"lien": "https://www.publicsenat.fr/actualites/politique/election-presidentielle-2027-david-lisnard-confirme-sa-dynamique-et-devance-edouard-philippe",
+"date": 1795492800000,
+"source": "Public Sénat"
+},
+{
+"titre": "Budget 2027 : le Sénat allège la fiscalité des donations familiales",
+"lien": "https://www.publicsenat.fr/actualites/politique/budget-2027-le-senat-allege-la-fiscalite-des-donations-familiales",
+"date": 1795471360000,
+"source": "Public Sénat"
+},
 {
 "titre": "Incendie de la mairie de Limoges : le Sénat vote la défiscalisation majorée des dons des particuliers",
 "lien": "https://www.publicsenat.fr/actualites/politique/incendie-de-la-mairie-de-limoges-le-senat-vote-la-defiscalisation-majoree-des-dons-des-particuliers",
@@ -49,33 +73,15 @@
 "lien": "https://www.publicsenat.fr/emission/sens-public/sens-public-26-11-30-lu-p1-e0",
 "date": 1795449082000,
 "source": "Public Sénat"
-},
-{
-"titre": "Bonjour chez vous ! — BONJOUR CHEZ VOUS 26/12/03 Je P1",
-"lien": "https://www.publicsenat.fr/emission/bonjour-chez-vous/bonjour-chez-vous-26-12-03-je-p1-e0",
-"date": 1795449034000,
-"source": "Public Sénat"
-},
-{
-"titre": "Congrès des maires : Les candidats partent à la chasse aux parrainages même si seul un maire sur quatre compte donner sa signature, selon une enquête du CEVIPOF",
-"lien": "https://www.publicsenat.fr/actualites/politique/congres-des-maires-les-candidats-partent-a-la-chasse-aux-parrainages-meme-si-seul-un-maire-sur-quatre-compte-donner-sa-signature-selon-une-enquete-du-cevipof",
-"date": 1795447491000,
-"source": "Public Sénat"
-},
-{
-"titre": "Bonjour chez vous ! — BONJOUR CHEZ VOUS 26/12/01 Ma P1",
-"lien": "https://www.publicsenat.fr/emission/bonjour-chez-vous/bonjour-chez-vous-26-12-01-ma-p1-e0",
-"date": 1795447236000,
-"source": "Public Sénat"
-},
-{
-"titre": "Bonjour chez vous ! — BONJOUR CHEZ VOUS 26/11/30 Lu P1",
-"lien": "https://www.publicsenat.fr/emission/bonjour-chez-vous/bonjour-chez-vous-26-11-30-lu-p1-e0",
-"date": 1795447235000,
-"source": "Public Sénat"
 }
 ],
 "LCP": [
+{
+"titre": "Pouvoir d'achat, lycées, agriculture... Sébastien Lecornu présente cinq priorités pour un \"compromis\" sur le budget 2027",
+"lien": "https://lcp.fr/actualites/pouvoir-d-achat-lycees-agriculture-sebastien-lecornu-presente-cinq-priorites-pour-un",
+"date": 1795508580000,
+"source": "LCP"
+},
 {
 "titre": "Protection animale: entre accélération législative au cours des dernières années et persistance de certains clivages",
 "lien": "https://lcp.fr/actualites/protection-animale-entre-acceleration-legislative-au-cours-des-dernieres-annees-et",
@@ -140,12 +146,6 @@
 "titre": "François Ruffin se retire de la présidentielle 2027 sans soutenir aucun des candidats de gauche encore en lice",
 "lien": "https://lcp.fr/actualites/francois-ruffin-se-retire-de-la-presidentielle-2027-sans-soutenir-aucun-des-candidats-de",
 "date": 1795281960000,
-"source": "LCP"
-},
-{
-"titre": "Législatives en Espagne: le pari de Pedro Sanchez peut-il ouvrir les portes du pouvoir à l’extrême droite ?",
-"lien": "https://lcp.fr/actualites/legislatives-en-espagne-le-pari-de-pedro-sanchez-peut-il-ouvrir-les-portes-du-pouvoir-a",
-"date": 1795248300000,
 "source": "LCP"
 }
 ]
