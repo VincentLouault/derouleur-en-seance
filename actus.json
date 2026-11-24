@@ -1,5 +1,5 @@
 {
-"maj": 1795509860320,
+"maj": 1795513938334,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "\"C’était une erreur\": comment Jordan Bardella défend Laure Lavalette, accusée d’avoir cautionné des écrits antisémites",
+"lien": "https://lcp.fr/actualites/c-etait-une-erreur-comment-jordan-bardella-defend-laure-lavalette-accusee-d-avoir",
+"date": 1795511940000,
+"source": "LCP"
+},
+{
 "titre": "Pouvoir d'achat, lycées, agriculture... Sébastien Lecornu présente cinq priorités pour un \"compromis\" sur le budget 2027",
 "lien": "https://lcp.fr/actualites/pouvoir-d-achat-lycees-agriculture-sebastien-lecornu-presente-cinq-priorites-pour-un",
 "date": 1795508580000,
@@ -140,12 +146,6 @@
 "titre": "Suspension des prestations sociales, peines planchers, responsabilité pénale à 16 ans... Les députés LR à l'offensive sur la sécurité",
 "lien": "https://lcp.fr/actualites/suspension-des-prestations-sociales-peines-planchers-responsabilite-penale-a-16-ans-les",
 "date": 1795413900000,
-"source": "LCP"
-},
-{
-"titre": "François Ruffin se retire de la présidentielle 2027 sans soutenir aucun des candidats de gauche encore en lice",
-"lien": "https://lcp.fr/actualites/francois-ruffin-se-retire-de-la-presidentielle-2027-sans-soutenir-aucun-des-candidats-de",
-"date": 1795281960000,
 "source": "LCP"
 }
 ]
