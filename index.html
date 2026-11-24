@@ -1021,7 +1021,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261124114243";</script>
+<script>window.DEROULEUR_BUILD = "20261124133323";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2938,6 +2938,9 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     var debut = +el.getAttribute("data-debut"), duree = +el.getAttribute("data-duree"), ecoule = Date.now() - debut, reste = duree - ecoule;
     var f = Math.max(0, Math.min(1, reste / duree)), niv = el.querySelector(".batt-niveau");
     niv.style.width = (f * 100) + "%";
+    // Vert (plein) → orange (à mi-temps) → rouge (vide), en dégradé continu.
+    var teinte = f >= 0.5 ? 32 + (f - 0.5) / 0.5 * 98 : f / 0.5 * 32;
+    niv.style.background = "hsl(" + Math.round(teinte) + ", 85%, " + Math.round(40 + (1 - Math.abs(f - 0.5) * 2) * 8) + "%)";
     el.className = "batt" + (reste <= 0 ? " depasse" : f < 0.2 ? " faible" : f < 0.5 ? " moyen" : "");
     function mmss(ms) { var s2 = Math.round(Math.abs(ms) / 1000); return Math.floor(s2 / 60) + " min " + String(s2 % 60).padStart(2, "0"); }
     el.title = reste > 0 ? mmss(reste) + " restantes" : "dépassement de " + mmss(reste); // au survol uniquement
