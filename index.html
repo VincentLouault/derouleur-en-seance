@@ -573,7 +573,8 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 .audio-msg-haut{margin:-6px 0 10px}
 @media (max-width:720px){
   .barre-direct{gap:8px}
-  .barre-direct .btn-direct{font-size:14.5px;padding:10px 15px;flex:1 1 auto;text-align:center;white-space:nowrap}
+  .barre-direct .btn-direct{font-size:13px;padding:10px 10px;flex:1 1 auto;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .barre-direct{gap:6px}
   .barre-direct .btn-audio-haut,.barre-direct .btn-tuto{font-size:0!important;padding:0!important;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
   .barre-direct .btn-audio-haut::before{content:"🔊";font-size:17px}
   .barre-direct .btn-audio-haut.on::before{content:"⏹"}
@@ -622,6 +623,27 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 #p-archive .tabs{padding:10px 14px 4px}
 #arch-defile{display:block;text-align:center;font-size:12.5px;color:var(--muted);padding:8px 12px 10px}
 #arch-defile.hidden{display:none}
+.btn-total{all:unset;cursor:pointer;flex:0 0 auto;background:var(--navy2);color:#fff;font-weight:700;font-size:15px;padding:10px 18px;border-radius:99px;box-shadow:0 8px 20px -10px rgba(20,33,61,.9);white-space:nowrap}
+.btn-total:hover{background:var(--navy)}
+.total{position:fixed;inset:0;z-index:9500;background:rgba(10,18,35,.66);display:flex;align-items:center;justify-content:center;padding:14px}
+.total.hidden{display:none}
+.total-carte{width:min(1280px,100%);height:calc(100vh - 28px);background:#fff;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 70px -20px rgba(0,0,0,.6)}
+.total-tete{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;background:var(--navy2);color:#fff}
+.total-tete h2{margin:0;font-size:20px;color:#fff}
+.total-cnt{font-size:13px;opacity:.85}
+.total-aller{all:unset;cursor:pointer;margin-left:auto;background:var(--red-btn);color:#fff;font-weight:700;font-size:13.5px;padding:7px 14px;border-radius:99px}
+.total-fermer{all:unset;cursor:pointer;font-size:28px;line-height:1;padding:0 4px;color:#fff}
+.total-scroll{flex:1;overflow:auto;overscroll-behavior:contain;position:relative}
+.total-scroll thead th{position:sticky;top:0;z-index:2;background:#f7f9fc}
+.total-scroll tr.sep-total td{position:sticky;top:41px;z-index:1;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;color:#fff}
+.total-scroll tr.sep-total.ex td{background:#a27a3a}.total-scroll tr.sep-total.co td{background:var(--red-btn)}.total-scroll tr.sep-total.av td{background:var(--navy2)}
+@media (max-width:720px){
+  .barre-direct .btn-total{font-size:0!important;padding:0!important;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+  .barre-direct .btn-total::before{content:"☰";font-size:17px}
+  .total{padding:0}.total-carte{height:100vh;border-radius:0}
+  .total-tete{padding:10px 12px}.total-tete h2{font-size:17px}.total-cnt{flex-basis:100%;order:3}
+  .total-scroll tr.sep-total td{top:0}
+}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
@@ -632,6 +654,21 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 <meta name="theme-color" content="#14213d">
 </head>
 <body>
+<div class="total hidden" id="total" role="dialog" aria-modal="true" aria-labelledby="total-titre">
+  <div class="total-carte">
+    <div class="total-tete">
+      <h2 id="total-titre">Dérouleur total</h2><span class="total-cnt" id="total-cnt"></span>
+      <button type="button" class="total-aller" id="total-aller">➤ Amendement en cours</button>
+      <button type="button" class="total-fermer" id="total-fermer" aria-label="Fermer">×</button>
+    </div>
+    <div class="total-scroll" id="total-scroll">
+      <table class="t-amdt">
+        <thead><tr><th>Article</th><th>N°</th><th>Sénateur</th><th>Groupe</th><th>Avis de la commission</th><th>Avis du Gouvernement</th><th>Sort / statut</th></tr></thead>
+        <tbody id="total-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 <div class="porte hidden" id="porte" role="dialog" aria-modal="true" aria-labelledby="porte-titre">
   <form class="porte-carte" id="porte-form" novalidate>
     <img class="porte-logo" src="logo-vince.png" alt="" width="120" height="48">
@@ -679,6 +716,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   <div class="recherche" id="recherche">
     <div class="barre-direct">
     <a class="btn-direct" id="btn-direct-ancre" href="#p-cours" onclick="var r=document.querySelector('#cours-body tr.cur')||document.getElementById('p-cours');if(r){r.scrollIntoView({behavior:'smooth',block:'center'});r.classList.add('flash');setTimeout(function(){r.classList.remove('flash');},2200);}return false;">● Amendements en cours (direct)</a>
+    <button type="button" class="btn-total" id="btn-total" title="Ouvrir le dérouleur complet : examinés, en cours et à venir">☰ Dérouleur total</button>
     <button type="button" class="btn-audio btn-audio-haut" data-audio aria-label="Activer l'audio">🔊 Activer l'audio</button>
     <button type="button" class="btn-tuto" id="btn-tuto" title="Découvrir toutes les fonctions du dérouleur">❓ Tutoriel</button>
     </div>
@@ -983,7 +1021,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261124101417";</script>
+<script>window.DEROULEUR_BUILD = "20261124114243";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2731,6 +2769,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     // Archive
     $("arch-count").textContent = nb(M.examines.length);
     rendreArchive(M, exAff, now);
+    if (S.totalOuvert) rendreTotal(M, exAff, enCours, avF, now);
 
     // Pied de page
     var st = { explicite: 0, deduit: 0, manuel: 0, none: 0 };
@@ -3174,6 +3213,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     { cible: ".rubriques .col-g", titre: "Texte en cours et textes à venir", html: "<p>Le texte examiné en séance, avec la pastille <b>En séance</b>, puis le prochain texte de l'ordre du jour (« Voir le suivant » pour les autres jours). Un clic sur un texte à venir affiche son dérouleur.</p><p>La phrase dessous donne l'estimation de fin des débats.</p>" },
     { cible: "#kpis", titre: "Les chiffres clés", html: "<ul><li>amendements déposés et examinés (adoptés, rejetés) ;</li><li>👍 / 👎 et « Donner un avis » : dites-nous ce que vous pensez du dérouleur ;</li><li>la jauge d'avancement du texte.</li></ul><p>Les horaires sont estimés à 20-25 amendements par heure, en tenant compte des temps de parole et de l'ordre du jour.</p>" },
     { cible: "#btn-direct-ancre", titre: "Aller au direct", html: "<p>Le bouton rouge vous amène directement sur l'amendement en discussion, signalé par une <b>flèche rouge</b>, avec les amendements qui l'entourent.</p>" },
+    { cible: "#btn-total", titre: "Dérouleur total", html: "<p>Ouvre le dérouleur complet : les amendements déjà examinés, en cours et à venir dans une seule liste. Elle se recentre sur l'amendement en cours à chaque actualisation (sauf si vous êtes en train de la parcourir) ; le bouton rouge « Amendement en cours » y ramène à tout moment.</p>" },
     { cible: "#suivi-bar", titre: "Mes sénateurs", html: "<p>« Choisir » : sélectionnez des sénateurs ou des groupes. Leurs amendements sont <b>surlignés en vert avec une ★</b> partout.</p><ul><li>cochez « Premier signataire » et/ou « Cosignataires » ;</li><li>« Seulement leurs amendements » filtre les tableaux ;</li><li>une <b>alerte</b> (vibration, notification) prévient quand un de leurs amendements arrive à 10 puis 3 amendements ;</li><li>« Envoyer mes favoris vers un autre appareil » les recopie sur votre téléphone.</li></ul>" },
     { cible: ".recherche .filtres", titre: "Rechercher", html: "<p>Filtrez par article, groupe, statut, n° d'amendement (« I-27 » ou « 27 ») ou nom de sénateur. La recherche s'applique aux amendements, mais aussi aux articles et aux orateurs.</p>" },
     { cible: "#s-orateurs", titre: "Prises de parole", html: "<p>Les orateurs inscrits de l'étape en cours, synchronisés avec le <b>sommaire du direct vidéo</b> :</p><ul><li>ceux qui ont parlé disparaissent ;</li><li>l'orateur <b>à la tribune</b> a une batterie qui se vide avec son temps de parole, puis affiche <b>« CONCLURE »</b>.</li></ul>" },
@@ -3293,6 +3333,41 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
       ]).then(fini);
     });
   }
+  /* ---------- Dérouleur total : examinés, en cours et à venir dans une seule liste, recentrée sur l'amendement en cours ---------- */
+  function rendreTotal(M, ex, cours, av, now) {
+    var tb = vide($("total-body")), sc = $("total-scroll");
+    var sep = function (t, cls) { tb.appendChild(h("tr", { class: "sep-total " + cls }, h("td", { colspan: 7 }, t))); };
+    $("total-cnt").textContent = nb(ex.length) + " examinés · " + nb(cours.length) + " en cours · " + nb(av.length) + " à venir";
+    sep("Déjà examinés · " + nb(ex.length), "ex"); ex.forEach(function (a) { tb.appendChild(ligneAmdt(a, M, "passe", now)); });
+    sep("En cours", "co"); cours.forEach(function (a) { tb.appendChild(ligneAmdt(a, M, "cours", now)); });
+    sep("À venir · " + nb(av.length), "av"); av.forEach(function (a) { tb.appendChild(ligneAmdt(a, M, "venir", now)); });
+    // À chaque actualisation, retour sur l'amendement en cours, sauf si l'usager fait défiler la liste depuis moins de 20 s.
+    if (!S.totalLu || Date.now() - S.totalLu > 20000) totalAller(false);
+  }
+  function totalAller(doux) {
+    var sc = $("total-scroll"), r = sc.querySelector("tr.cur") || sc.querySelector("tr.sep-total.co");
+    if (!r) return;
+    var top = r.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - sc.clientHeight / 2 + r.offsetHeight / 2;
+    S.totalAuto = Date.now(); sc.scrollTo({ top: Math.max(0, top), behavior: doux ? "smooth" : "auto" });
+  }
+  function ouvrirTotal() {
+    S.totalOuvert = true; S.totalLu = 0;
+    $("total").classList.remove("hidden"); document.documentElement.classList.add("porte-ouverte");
+    rendre();
+  }
+  function fermerTotal() {
+    S.totalOuvert = false; $("total").classList.add("hidden"); document.documentElement.classList.remove("porte-ouverte"); vide($("total-body"));
+  }
+  function lierTotal() {
+    if (!$("btn-total")) return;
+    $("btn-total").addEventListener("click", ouvrirTotal);
+    $("total-fermer").addEventListener("click", fermerTotal);
+    $("total-aller").addEventListener("click", function () { S.totalLu = 0; totalAller(true); });
+    $("total").addEventListener("click", function (e) { if (e.target === $("total")) fermerTotal(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && S.totalOuvert) fermerTotal(); });
+    var sc = $("total-scroll");
+    ["wheel", "touchmove", "keydown", "mousedown"].forEach(function (ev) { sc.addEventListener(ev, function () { S.totalLu = Date.now(); }, { passive: true }); });
+  }
   function lierBulleTitre() {
     var t = $("titre-outil"), b = $("bulle-titre"), minuterie = null; if (!t || !b) return;
     function montrer() { b.classList.remove("hidden"); clearTimeout(minuterie); minuterie = setTimeout(cacher, 30000); }
@@ -3315,7 +3390,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     window.addEventListener("scroll", function () { if (!b.classList.contains("hidden") && window.scrollY > 200) cacher(); }, { passive: true });
   }
   function demarrer() {
-    lierPorte(); lierBulleTitre(); lierAudio(); lierAvis();
+    lierPorte(); lierBulleTitre(); lierAudio(); lierAvis(); lierTotal();
     if ($("btn-tuto")) $("btn-tuto").addEventListener("click", tutoOuvrir);
     var o = lsGet("derouleur.onglet"); if (o) S.onglet = o;
     pliables();
