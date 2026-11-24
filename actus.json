@@ -1,5 +1,5 @@
 {
-"maj": 1795517651648,
+"maj": 1795521351441,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "\"Éradiquer le cancer du col de l'utérus\": Édouard Philippe veut rendre obligatoire la vaccination contre le papillomavirus",
+"lien": "https://lcp.fr/actualites/eradiquer-le-cancer-du-col-de-l-uterus-edouard-philippe-veut-rendre-obligatoire-la",
+"date": 1795519260000,
+"source": "LCP"
+},
+{
 "titre": "\"C’était une erreur\": comment Jordan Bardella défend Laure Lavalette, accusée d’avoir cautionné des écrits antisémites",
 "lien": "https://lcp.fr/actualites/c-etait-une-erreur-comment-jordan-bardella-defend-laure-lavalette-accusee-d-avoir",
 "date": 1795511940000,
@@ -140,12 +146,6 @@
 "titre": "Finances publiques: pourquoi Emmanuel Macron rouvre le débat sur la \"règle d’or\" de 2011",
 "lien": "https://lcp.fr/actualites/finances-publiques-pourquoi-emmanuel-macron-rouvre-le-debat-sur-la-regle-d-or-de-2011",
 "date": 1795422240000,
-"source": "LCP"
-},
-{
-"titre": "Suspension des prestations sociales, peines planchers, responsabilité pénale à 16 ans... Les députés LR à l'offensive sur la sécurité",
-"lien": "https://lcp.fr/actualites/suspension-des-prestations-sociales-peines-planchers-responsabilite-penale-a-16-ans-les",
-"date": 1795413900000,
 "source": "LCP"
 }
 ]
