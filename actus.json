@@ -1,5 +1,5 @@
 {
-"maj": 1795581919206,
+"maj": 1795585442038,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,18 @@
 ],
 "LCP": [
 {
+"titre": "Présidentielle 2027: où en sont les candidats dans leur récolte des 500 parrainages?",
+"lien": "https://lcp.fr/actualites/presidentielle-2027-ou-en-sont-les-candidats-dans-leur-recolte-des-500-parrainages",
+"date": 1795584900000,
+"source": "LCP"
+},
+{
+"titre": "17 octobre: \"dans cet échec, il y a des réussites\", estime le préfet de police de Paris, évoquant \"un choc inédit\" absorbé par les forces de l'ordre",
+"lien": "https://lcp.fr/actualites/17-octobre-dans-cet-echec-il-y-a-des-reussites-estime-le-prefet-de-police-de-paris",
+"date": 1795582380000,
+"source": "LCP"
+},
+{
 "titre": "Accord électoral entre Génération.s et LFI : Sophie Taillé-Polian dénonce \"une stratégie perdante\"",
 "lien": "https://lcp.fr/actualites/accord-electoral-entre-generations-et-lfi-sophie-taille-polian-denonce-une-strategie",
 "date": 1795550400000,
@@ -134,18 +146,6 @@
 "titre": "Protection animale: entre accélération législative au cours des dernières années et persistance de certains clivages",
 "lien": "https://lcp.fr/actualites/protection-animale-entre-acceleration-legislative-au-cours-des-dernieres-annees-et",
 "date": 1795458000000,
-"source": "LCP"
-},
-{
-"titre": "Sécurité des enseignants : l'avocat Richard Malka plaide pour l'instauration d'un \"filtre\" avec les parents d'élèves",
-"lien": "https://lcp.fr/actualites/securite-des-enseignants-l-avocat-richard-malka-plaide-pour-l-instauration-d-un-filtre",
-"date": 1795456500000,
-"source": "LCP"
-},
-{
-"titre": "Pension alimentaire: en commission, les députés approuvent une \"majoration\" en cas de non-respect du droit de visite et d'hébergement",
-"lien": "https://lcp.fr/actualites/pension-alimentaire-en-commission-les-deputes-approuvent-une-majoration-en-cas-de-non",
-"date": 1795455060000,
 "source": "LCP"
 }
 ]
