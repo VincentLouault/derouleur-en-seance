@@ -1,5 +1,5 @@
 {
-"maj": 1795603427470,
+"maj": 1795607071481,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,24 @@
 ],
 "LCP": [
 {
+"titre": "Présidentielle 2027: malgré les critiques, le gouvernement maintient, à ce stade, le second tour au lendemain du 1er-Mai",
+"lien": "https://lcp.fr/actualites/presidentielle-2027-malgre-les-critiques-le-gouvernement-maintient-a-ce-stade-le-second",
+"date": 1795606320000,
+"source": "LCP"
+},
+{
+"titre": "Présidentielle 2027: après un début de campagne difficile, Teddy Riner s'explique et mise sur les maires pour se relancer",
+"lien": "https://lcp.fr/actualites/presidentielle-2027-apres-un-debut-de-campagne-difficile-teddy-riner-s-explique-et-mise",
+"date": 1795605540000,
+"source": "LCP"
+},
+{
+"titre": "Procureur présent au siège du RN lors d'une perquisition: Gérald Darmanin saisit l'inspection générale de la justice",
+"lien": "https://lcp.fr/actualites/procureur-present-au-siege-du-rn-lors-d-une-perquisition-gerald-darmanin-saisit-l",
+"date": 1795604100000,
+"source": "LCP"
+},
+{
 "titre": "Interdiction de la chasse à courre: une pétition dépasse les 100.000 signatures vérifiées sur la plateforme de l'Assemblée nationale",
 "lien": "https://lcp.fr/actualites/interdiction-de-la-chasse-a-courre-une-petition-depasse-les-100000-signatures-verifiees",
 "date": 1795602960000,
@@ -128,24 +146,6 @@
 "titre": "Logement: les députés adoptent une version du projet de loi réautorisant, à ce stade, la location des passoires thermiques",
 "lien": "https://lcp.fr/actualites/logement-les-deputes-adoptent-une-version-du-projet-de-loi-reautorisant-a-ce-stade-la",
 "date": 1795539720000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle 2027: pourquoi autant de maires refusent de donner leur parrainage à un candidat",
-"lien": "https://lcp.fr/actualites/presidentielle-2027-pourquoi-autant-de-maires-refusent-de-donner-leur-parrainage-a-un",
-"date": 1795537800000,
-"source": "LCP"
-},
-{
-"titre": "\"Éradiquer le cancer du col de l'utérus\": Édouard Philippe veut rendre obligatoire la vaccination contre le papillomavirus",
-"lien": "https://lcp.fr/actualites/eradiquer-le-cancer-du-col-de-l-uterus-edouard-philippe-veut-rendre-obligatoire-la",
-"date": 1795519260000,
-"source": "LCP"
-},
-{
-"titre": "\"C’était une erreur\": comment Jordan Bardella défend Laure Lavalette, accusée d’avoir cautionné des écrits antisémites",
-"lien": "https://lcp.fr/actualites/c-etait-une-erreur-comment-jordan-bardella-defend-laure-lavalette-accusee-d-avoir",
-"date": 1795511940000,
 "source": "LCP"
 }
 ]
