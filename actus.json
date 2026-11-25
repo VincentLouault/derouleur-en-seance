@@ -1,5 +1,5 @@
 {
-"maj": 1795599967202,
+"maj": 1795603427470,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Interdiction de la chasse à courre: une pétition dépasse les 100.000 signatures vérifiées sur la plateforme de l'Assemblée nationale",
+"lien": "https://lcp.fr/actualites/interdiction-de-la-chasse-a-courre-une-petition-depasse-les-100000-signatures-verifiees",
+"date": 1795602960000,
+"source": "LCP"
+},
+{
 "titre": "Présidentielle 2027: Edouard Philippe défie David Lisnard et lui propose un débat télévisé",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-edouard-philippe-defie-david-lisnard-et-lui-propose-un-debat",
 "date": 1795593900000,
@@ -140,12 +146,6 @@
 "titre": "\"C’était une erreur\": comment Jordan Bardella défend Laure Lavalette, accusée d’avoir cautionné des écrits antisémites",
 "lien": "https://lcp.fr/actualites/c-etait-une-erreur-comment-jordan-bardella-defend-laure-lavalette-accusee-d-avoir",
 "date": 1795511940000,
-"source": "LCP"
-},
-{
-"titre": "Pouvoir d'achat, lycées, agriculture... Sébastien Lecornu présente cinq priorités pour un \"compromis\" sur le budget 2027",
-"lien": "https://lcp.fr/actualites/pouvoir-d-achat-lycees-agriculture-sebastien-lecornu-presente-cinq-priorites-pour-un",
-"date": 1795508580000,
 "source": "LCP"
 }
 ]
