@@ -1,5 +1,5 @@
 {
-"maj": 1795638754214,
+"maj": 1795642777319,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Esclavage et traite négrière: les députés font un premier pas vers des réparations financières",
+"lien": "https://lcp.fr/actualites/esclavage-et-traite-negriere-les-deputes-font-un-premier-pas-vers-des-reparations",
+"date": 1795639920000,
+"source": "LCP"
+},
+{
 "titre": "Présidentielle 2027: l'Ukraine \"ce n'est pas notre guerre\", déclare Teddy Riner",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-l-ukraine-ce-n-est-pas-notre-guerre-declare-teddy-riner-445612",
 "date": 1795632000000,
@@ -140,12 +146,6 @@
 "titre": "Présidentielle 2027: où en sont les candidats dans leur récolte des 500 parrainages?",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-ou-en-sont-les-candidats-dans-leur-recolte-des-500-parrainages",
 "date": 1795584900000,
-"source": "LCP"
-},
-{
-"titre": "17 octobre: \"dans cet échec, il y a des réussites\", estime le préfet de police de Paris, évoquant \"un choc inédit\" absorbé par les forces de l'ordre",
-"lien": "https://lcp.fr/actualites/17-octobre-dans-cet-echec-il-y-a-des-reussites-estime-le-prefet-de-police-de-paris",
-"date": 1795582380000,
 "source": "LCP"
 }
 ]
