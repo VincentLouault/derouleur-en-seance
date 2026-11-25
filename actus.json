@@ -1,7 +1,13 @@
 {
-"maj": 1795589330834,
+"maj": 1795594986282,
 "sources": {
 "Public Sénat": [
+{
+"titre": "Budget 2027 : le Sénat exclut les chambres d’hôtes du régime fiscal des meublés touristiques",
+"lien": "https://www.publicsenat.fr/actualites/politique/budget-2027-le-senat-exclut-les-chambres-dhotes-du-regime-fiscal-des-meubles-touristiques",
+"date": 1795562027000,
+"source": "Public Sénat"
+},
 {
 "titre": "Budget 2027 : le Sénat élargit le prêt à taux zéro natalité à chaque nouvelle naissance",
 "lien": "https://www.publicsenat.fr/actualites/politique/budget-2027-le-senat-elargit-le-pret-a-taux-zero-natalite-a-chaque-nouvelle-naissance",
@@ -67,15 +73,15 @@
 "lien": "https://www.publicsenat.fr/actualites/politique/edouard-philippe-nest-pas-emmanuel-macron-defend-christophe-bechu",
 "date": 1795530583000,
 "source": "Public Sénat"
-},
-{
-"titre": "Budget 2027 : le Sénat écarte à nouveau la taxe Zucman et le rétablissement de l’ISF",
-"lien": "https://www.publicsenat.fr/actualites/economie/budget-2027-le-senat-ecarte-a-nouveau-la-taxe-zucman-et-le-retablissement-de-lisf",
-"date": 1795530346000,
-"source": "Public Sénat"
 }
 ],
 "LCP": [
+{
+"titre": "Présidentielle 2027: Edouard Philippe défie David Lisnard et lui propose un débat télévisé",
+"lien": "https://lcp.fr/actualites/presidentielle-2027-edouard-philippe-defie-david-lisnard-et-lui-propose-un-debat",
+"date": 1795593900000,
+"source": "LCP"
+},
 {
 "titre": "Présidentielle 2027: où en sont les candidats dans leur récolte des 500 parrainages?",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-ou-en-sont-les-candidats-dans-leur-recolte-des-500-parrainages",
@@ -140,12 +146,6 @@
 "titre": "Pouvoir d'achat, lycées, agriculture... Sébastien Lecornu présente cinq priorités pour un \"compromis\" sur le budget 2027",
 "lien": "https://lcp.fr/actualites/pouvoir-d-achat-lycees-agriculture-sebastien-lecornu-presente-cinq-priorites-pour-un",
 "date": 1795508580000,
-"source": "LCP"
-},
-{
-"titre": "Protection animale: entre accélération législative au cours des dernières années et persistance de certains clivages",
-"lien": "https://lcp.fr/actualites/protection-animale-entre-acceleration-legislative-au-cours-des-dernieres-annees-et",
-"date": 1795458000000,
 "source": "LCP"
 }
 ]
