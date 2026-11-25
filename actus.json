@@ -1,5 +1,5 @@
 {
-"maj": 1795620918695,
+"maj": 1795625020398,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Présidentielle 2027: Bayrou, Philippe, Barrot... Ils choisiraient le \"ni-ni\" en cas de second tour Le Pen-Mélenchon",
+"lien": "https://lcp.fr/actualites/presidentielle-2027-bayrou-philippe-barrot-ils-choisiraient-le-ni-ni-en-cas-de-second",
+"date": 1795623300000,
+"source": "LCP"
+},
+{
 "titre": "Présidentielle 2027: David Lisnard très largement réélu à la tête de l'Association des maires de France",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-david-lisnard-tres-largement-reelu-a-la-tete-de-l-association-des",
 "date": 1795611660000,
@@ -140,12 +146,6 @@
 "titre": "Accord électoral entre Génération.s et LFI : Sophie Taillé-Polian dénonce \"une stratégie perdante\"",
 "lien": "https://lcp.fr/actualites/accord-electoral-entre-generations-et-lfi-sophie-taille-polian-denonce-une-strategie",
 "date": 1795550400000,
-"source": "LCP"
-},
-{
-"titre": "Le Parlement entérine le projet de loi qui procède aux derniers ajustements budgétaires de 2026",
-"lien": "https://lcp.fr/actualites/le-parlement-enterine-le-projet-de-loi-qui-procede-aux-derniers-ajustements-budgetaires",
-"date": 1795550160000,
 "source": "LCP"
 }
 ]
