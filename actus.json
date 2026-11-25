@@ -1,5 +1,5 @@
 {
-"maj": 1795611176006,
+"maj": 1795616544463,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Présidentielle 2027: David Lisnard très largement réélu à la tête de l'Association des maires de France",
+"lien": "https://lcp.fr/actualites/presidentielle-2027-david-lisnard-tres-largement-reelu-a-la-tete-de-l-association-des",
+"date": 1795611660000,
+"source": "LCP"
+},
+{
 "titre": "\"Des idées suicidaires\": la députée insoumise Ségolène Amiot raconte la souffrance générée par les parcours de PMA",
 "lien": "https://lcp.fr/actualites/des-idees-suicidaires-la-deputee-insoumise-segolene-amiot-raconte-la-souffrance-generee",
 "date": 1795608060000,
@@ -140,12 +146,6 @@
 "titre": "Le Parlement entérine le projet de loi qui procède aux derniers ajustements budgétaires de 2026",
 "lien": "https://lcp.fr/actualites/le-parlement-enterine-le-projet-de-loi-qui-procede-aux-derniers-ajustements-budgetaires",
 "date": 1795550160000,
-"source": "LCP"
-},
-{
-"titre": "Constitution: comment le député Pouria Amirshahi veut provoquer le débat contre les référendums promis par Marine Le Pen",
-"lien": "https://lcp.fr/actualites/constitution-comment-le-depute-pouria-amirshahi-veut-provoquer-le-debat-contre-les",
-"date": 1795547100000,
 "source": "LCP"
 }
 ]
