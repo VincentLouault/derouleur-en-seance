@@ -1,5 +1,5 @@
 {
-"maj": 1795716630654,
+"maj": 1795721200223,
 "sources": {
 "Public Sénat": [
 {
@@ -77,9 +77,21 @@
 ],
 "LCP": [
 {
-"titre": "Violences du 17 octobre: à Marseille, des casseurs interpellés et aussitôt relâchés, selon le maire Benoît Payan",
-"lien": "https://lcp.fr/actualites/violences-du-17-octobre-a-marseille-des-casseurs-interpelles-et-aussitot-relaches-selon",
-"date": 1795729500000,
+"titre": "Présidentielle 2027: David Lisnard, candidat de l'automne ou ascension durable?",
+"lien": "https://lcp.fr/actualites/presidentielle-2027-david-lisnard-candidat-de-l-automne-ou-ascension-durable-445996",
+"date": 1795720620000,
+"source": "LCP"
+},
+{
+"titre": "Pharmacies: les députés adoptent un texte pour assouplir les règles d'installation en milieu rural",
+"lien": "https://lcp.fr/actualites/pharmacies-les-deputes-adoptent-un-texte-pour-assouplir-les-regles-d-installation-en",
+"date": 1795718220000,
+"source": "LCP"
+},
+{
+"titre": "Vers la fin de la notion de \"devoir conjugal\" dans le mariage: pourquoi le code civil sera bientôt modifié",
+"lien": "https://lcp.fr/actualites/vers-la-fin-de-la-notion-de-devoir-conjugal-dans-le-mariage-pourquoi-le-code-civil-sera",
+"date": 1795716780000,
 "source": "LCP"
 },
 {
@@ -101,8 +113,14 @@
 "source": "LCP"
 },
 {
-"titre": "Esclavage et traite négrière: les députés font un premier pas vers des réparations financières",
-"lien": "https://lcp.fr/actualites/esclavage-et-traite-negriere-les-deputes-font-un-premier-pas-vers-des-reparations",
+"titre": "Violences du 17 octobre: à Marseille, des casseurs interpellés et aussitôt relâchés, selon le maire Benoît Payan",
+"lien": "https://lcp.fr/actualites/violences-du-17-octobre-a-marseille-des-casseurs-interpelles-et-aussitot-relaches-selon",
+"date": 1795643100000,
+"source": "LCP"
+},
+{
+"titre": "Esclavage et traite négrière: les députés font un premier pas vers une réparation",
+"lien": "https://lcp.fr/actualites/esclavage-et-traite-negriere-les-deputes-font-un-premier-pas-vers-une-reparation-445608",
 "date": 1795639920000,
 "source": "LCP"
 },
@@ -128,24 +146,6 @@
 "titre": "\"Des idées suicidaires\": la députée insoumise Ségolène Amiot raconte la souffrance générée par les parcours de PMA",
 "lien": "https://lcp.fr/actualites/des-idees-suicidaires-la-deputee-insoumise-segolene-amiot-raconte-la-souffrance-generee",
 "date": 1795608060000,
-"source": "LCP"
-},
-{
-"titre": "Soupçons de fuites vers le RN: Hugues Moutouh officiellement débarqué de son poste de préfet du Loiret",
-"lien": "https://lcp.fr/actualites/soupcons-de-fuites-vers-le-rn-hugues-moutouh-officiellement-debarque-de-son-poste-de",
-"date": 1795607280000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle 2027: malgré les critiques, le gouvernement maintient, à ce stade, le second tour au lendemain du 1er-Mai",
-"lien": "https://lcp.fr/actualites/presidentielle-2027-malgre-les-critiques-le-gouvernement-maintient-a-ce-stade-le-second",
-"date": 1795606320000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle 2027: après un début de campagne difficile, Teddy Riner s'explique et mise sur les maires pour se relancer",
-"lien": "https://lcp.fr/actualites/presidentielle-2027-apres-un-debut-de-campagne-difficile-teddy-riner-s-explique-et-mise",
-"date": 1795605540000,
 "source": "LCP"
 }
 ]
