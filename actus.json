@@ -1,5 +1,5 @@
 {
-"maj": 1795728368572,
+"maj": 1795732134327,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "\"Pas créer de doute et de trouble\": Emmanuel Macron recadre Teddy Riner sur l'aide à l'Ukraine",
+"lien": "https://lcp.fr/actualites/pas-creer-de-doute-et-de-trouble-emmanuel-macron-recadre-teddy-riner-sur-l-aide-a-l",
+"date": 1795729500000,
+"source": "LCP"
+},
+{
 "titre": "Présidentielle 2027: David Lisnard, candidat de l'automne ou ascension durable?",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-david-lisnard-candidat-de-l-automne-ou-ascension-durable-445996",
 "date": 1795720620000,
@@ -140,12 +146,6 @@
 "titre": "Présidentielle 2027: David Lisnard très largement réélu à la tête de l'Association des maires de France",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-david-lisnard-tres-largement-reelu-a-la-tete-de-l-association-des",
 "date": 1795611660000,
-"source": "LCP"
-},
-{
-"titre": "\"Des idées suicidaires\": la députée insoumise Ségolène Amiot raconte la souffrance générée par les parcours de PMA",
-"lien": "https://lcp.fr/actualites/des-idees-suicidaires-la-deputee-insoumise-segolene-amiot-raconte-la-souffrance-generee",
-"date": 1795608060000,
 "source": "LCP"
 }
 ]
