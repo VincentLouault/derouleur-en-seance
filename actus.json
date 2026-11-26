@@ -1,7 +1,19 @@
 {
-"maj": 1795679508085,
+"maj": 1795683568423,
 "sources": {
 "Public Sénat": [
+{
+"titre": "Budget : le Sénat reconduit la surtaxe sur les grandes entreprises, allégée de 2 milliards d’euros",
+"lien": "https://www.publicsenat.fr/actualites/politique/budget-le-senat-reconduit-la-surtaxe-sur-les-grandes-entreprises-allegee-de-2-milliards-deuros",
+"date": 1795653223000,
+"source": "Public Sénat"
+},
+{
+"titre": "Taxation totale des indemnités pour affections de longue durée : les sénateurs LR font machine arrière et vont demander un nouveau vote",
+"lien": "https://www.publicsenat.fr/actualites/politique/taxation-totale-des-indemnites-pour-affections-de-longue-duree-les-senateurs-lr-font-machine-arriere-et-vont-demander-un-nouveau-vote",
+"date": 1795645093000,
+"source": "Public Sénat"
+},
 {
 "titre": "Éducation : « À la rentrée prochaine, le nombre d’élèves par classe baissera à la maternelle, à l’école élémentaire, au collège et au lycée », annonce Édouard Geffray",
 "lien": "https://www.publicsenat.fr/actualites/politique/education-a-la-rentree-prochaine-le-nombre-deleves-par-classe-baissera-a-la-maternelle-a-lecole-elementaire-au-college-et-au-lycee-annonce-edouard-geffray",
@@ -61,18 +73,6 @@
 "lien": "https://www.publicsenat.fr/actualites/politique/budget-2027-le-senat-exclut-les-chambres-dhotes-du-regime-fiscal-des-meubles-touristiques",
 "date": 1795562027000,
 "source": "Public Sénat"
-},
-{
-"titre": "Budget 2027 : le Sénat élargit le prêt à taux zéro natalité à chaque nouvelle naissance",
-"lien": "https://www.publicsenat.fr/actualites/politique/budget-2027-le-senat-elargit-le-pret-a-taux-zero-natalite-a-chaque-nouvelle-naissance",
-"date": 1795548104000,
-"source": "Public Sénat"
-},
-{
-"titre": "Budget 2027 : la gauche du Sénat échoue à supprimer la flat tax",
-"lien": "https://www.publicsenat.fr/actualites/politique/budget-2027-la-gauche-du-senat-echoue-a-supprimer-la-flat-tax",
-"date": 1795545702000,
-"source": "Public Sénat"
 }
 ],
 "LCP": [
@@ -80,6 +80,12 @@
 "titre": "Violences du 17 octobre: à Marseille, des casseurs interpellés et aussitôt relâchés, selon le maire Benoît Payan",
 "lien": "https://lcp.fr/actualites/violences-du-17-octobre-a-marseille-des-casseurs-interpelles-et-aussitot-relaches-selon",
 "date": 1795729500000,
+"source": "LCP"
+},
+{
+"titre": "INFO LCP- Budget de la Sécu: échec de la réunion de conciliation entre députés et sénateurs, le texte bientôt de retour à l'Assemblée",
+"lien": "https://lcp.fr/actualites/info-lcp-budget-de-la-secu-echec-de-la-reunion-de-conciliation-entre-deputes-et",
+"date": 1795681980000,
 "source": "LCP"
 },
 {
@@ -140,12 +146,6 @@
 "titre": "Présidentielle 2027: après un début de campagne difficile, Teddy Riner s'explique et mise sur les maires pour se relancer",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-apres-un-debut-de-campagne-difficile-teddy-riner-s-explique-et-mise",
 "date": 1795605540000,
-"source": "LCP"
-},
-{
-"titre": "Procureur présent au siège du RN lors d'une perquisition: Gérald Darmanin saisit l'inspection générale de la justice",
-"lien": "https://lcp.fr/actualites/procureur-present-au-siege-du-rn-lors-d-une-perquisition-gerald-darmanin-saisit-l",
-"date": 1795604100000,
 "source": "LCP"
 }
 ]
