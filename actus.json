@@ -1,5 +1,5 @@
 {
-"maj": 1795665547873,
+"maj": 1795669908683,
 "sources": {
 "Public Sénat": [
 {
@@ -83,6 +83,12 @@
 "source": "LCP"
 },
 {
+"titre": "Budget de la Sécu: députés et sénateurs vont tenter de se mettre d'accord ce jeudi, compromis envisageable ou mission impossible?",
+"lien": "https://lcp.fr/actualites/budget-de-la-secu-deputes-et-senateurs-vont-tenter-de-se-mettre-d-accord-ce-jeudi",
+"date": 1795668900000,
+"source": "LCP"
+},
+{
 "titre": "Esclavage et traite négrière: les députés font un premier pas vers des réparations financières",
 "lien": "https://lcp.fr/actualites/esclavage-et-traite-negriere-les-deputes-font-un-premier-pas-vers-des-reparations",
 "date": 1795639920000,
@@ -140,12 +146,6 @@
 "titre": "Interdiction de la chasse à courre: une pétition dépasse les 100.000 signatures vérifiées sur la plateforme de l'Assemblée nationale",
 "lien": "https://lcp.fr/actualites/interdiction-de-la-chasse-a-courre-une-petition-depasse-les-100000-signatures-verifiees",
 "date": 1795602960000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle 2027: Edouard Philippe défie David Lisnard et lui propose un débat télévisé",
-"lien": "https://lcp.fr/actualites/presidentielle-2027-edouard-philippe-defie-david-lisnard-et-lui-propose-un-debat",
-"date": 1795593900000,
 "source": "LCP"
 }
 ]
