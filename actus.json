@@ -1,5 +1,5 @@
 {
-"maj": 1795658401578,
+"maj": 1795661836649,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Violences du 17 octobre: à Marseille, des casseurs interpellés et aussitôt relâchés, selon le maire Benoît Payan",
+"lien": "https://lcp.fr/actualites/violences-du-17-octobre-a-marseille-des-casseurs-interpelles-et-aussitot-relaches-selon",
+"date": 1795729500000,
+"source": "LCP"
+},
+{
 "titre": "Esclavage et traite négrière: les députés font un premier pas vers des réparations financières",
 "lien": "https://lcp.fr/actualites/esclavage-et-traite-negriere-les-deputes-font-un-premier-pas-vers-des-reparations",
 "date": 1795639920000,
@@ -140,12 +146,6 @@
 "titre": "Présidentielle 2027: Edouard Philippe défie David Lisnard et lui propose un débat télévisé",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-edouard-philippe-defie-david-lisnard-et-lui-propose-un-debat",
 "date": 1795593900000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle 2027: où en sont les candidats dans leur récolte des 500 parrainages?",
-"lien": "https://lcp.fr/actualites/presidentielle-2027-ou-en-sont-les-candidats-dans-leur-recolte-des-500-parrainages",
-"date": 1795584900000,
 "source": "LCP"
 }
 ]
