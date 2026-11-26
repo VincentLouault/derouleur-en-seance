@@ -1027,7 +1027,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261124145829";</script>
+<script>window.DEROULEUR_BUILD = "20261126094255";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -3061,9 +3061,15 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     });
     var c0 = $("arch-content");
     // Position de lecture : distance au bas de la liste (le bas = le plus récent), conservée aux actualisations.
-    if (c0._suivi && S.ongletEx === S.onglet) S.basEx = Math.max(0, c0.scrollHeight - c0.scrollTop - c0.clientHeight); else S.basEx = 0;
+    // Seul un défilement fait par l'usager (doigt, molette, clavier) déplace la position retenue ; sinon la liste reste
+    // calée sur le plus récent, en bas.
+    if (S.ongletEx !== S.onglet) S.basEx = 0;
     S.ongletEx = S.onglet;
-    if (!c0._suivi) { c0._suivi = 1; c0.addEventListener("scroll", function () { S.basEx = Math.max(0, c0.scrollHeight - c0.scrollTop - c0.clientHeight); }, { passive: true }); }
+    if (!c0._suivi) {
+      c0._suivi = 1;
+      ["wheel", "touchstart", "touchmove", "keydown", "mousedown"].forEach(function (ev) { c0.addEventListener(ev, function () { S.exUser = Date.now(); }, { passive: true }); });
+      c0.addEventListener("scroll", function () { if (Date.now() - (S.exUser || 0) < 1500) { var d = c0.scrollHeight - c0.scrollTop - c0.clientHeight; S.basEx = d < 30 ? 0 : d; } }, { passive: true });
+    }
     var c = vide(c0), note = $("arch-note");
     c.style.maxHeight = ""; c.classList.remove("derouleur-ex"); $("arch-defile").classList.add("hidden");
     if (S.onglet === "groupes") {
@@ -3110,8 +3116,11 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     if (lignes.length > 4) {
       var der5 = lignes[lignes.length - 4], th = c.querySelector("thead"), tete = th && getComputedStyle(th).display !== "none" ? th.getBoundingClientRect().height : 0;
       var haut = tbody3.getBoundingClientRect().bottom - der5.getBoundingClientRect().top;
-      c.style.maxHeight = Math.round(tete + haut + 2) + "px";
-      c.scrollTop = c.scrollHeight - c.clientHeight - (S.basEx || 0);
+      var hMax = Math.round(tete + haut + 2);
+      if (window.matchMedia && matchMedia("(max-width:720px)").matches) hMax = Math.min(hMax, Math.round(innerHeight * 0.62)); // téléphone : le cadre tient dans l'écran
+      c.style.maxHeight = hMax + "px";
+      var caler = function () { c.scrollTop = c.scrollHeight - c.clientHeight - (S.basEx || 0); };
+      caler(); requestAnimationFrame(caler); setTimeout(caler, 300); setTimeout(caler, 1200); // après la mise en page définitive (polices, cartes)
       $("arch-defile").classList.remove("hidden");
     }
   }
