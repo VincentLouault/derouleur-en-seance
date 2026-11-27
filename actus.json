@@ -1,5 +1,5 @@
 {
-"maj": 1795791170859,
+"maj": 1795795041826,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Pouvoir d'achat, sécurité, aller-retour dans l'Hexagone: Ce que promet Marine Le Pen aux outre-mer pour 2027",
+"lien": "https://lcp.fr/actualites/pouvoir-d-achat-securite-aller-retour-dans-l-hexagone-ce-que-promet-marine-le-pen-aux",
+"date": 1795794120000,
+"source": "LCP"
+},
+{
 "titre": "\"Poursuivre l’esprit des purges\": Danielle Simonnet dénonce le refus de LFI de rencontrer ses anciens députés",
 "lien": "https://lcp.fr/actualites/poursuivre-l-esprit-des-purges-danielle-simonnet-denonce-le-refus-de-lfi-de-rencontrer",
 "date": 1795783800000,
@@ -140,12 +146,6 @@
 "titre": "Budget de la Sécu: députés et sénateurs vont tenter de se mettre d'accord ce jeudi, compromis envisageable ou mission impossible?",
 "lien": "https://lcp.fr/actualites/budget-de-la-secu-deputes-et-senateurs-vont-tenter-de-se-mettre-d-accord-ce-jeudi",
 "date": 1795668900000,
-"source": "LCP"
-},
-{
-"titre": "Violences du 17 octobre: à Marseille, des casseurs interpellés et aussitôt relâchés, selon le maire Benoît Payan",
-"lien": "https://lcp.fr/actualites/violences-du-17-octobre-a-marseille-des-casseurs-interpelles-et-aussitot-relaches-selon",
-"date": 1795643100000,
 "source": "LCP"
 }
 ]
