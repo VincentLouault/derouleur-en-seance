@@ -1,5 +1,5 @@
 {
-"maj": 1795761204076,
+"maj": 1795766650662,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Présidentielle 2027: huit députés LR soutiennent David Lisnard",
+"lien": "https://lcp.fr/actualites/presidentielle-2027-huit-deputes-lr-soutiennent-david-lisnard-446012",
+"date": 1795765560000,
+"source": "LCP"
+},
+{
 "titre": "\"Pas créer de doute et de trouble\": Emmanuel Macron recadre Teddy Riner sur l'aide à l'Ukraine",
 "lien": "https://lcp.fr/actualites/pas-creer-de-doute-et-de-trouble-emmanuel-macron-recadre-teddy-riner-sur-l-aide-a-l",
 "date": 1795729500000,
@@ -140,12 +146,6 @@
 "titre": "Présidentielle 2027: Bayrou, Philippe, Barrot... Ils choisiraient le \"ni-ni\" en cas de second tour Le Pen-Mélenchon",
 "lien": "https://lcp.fr/actualites/presidentielle-2027-bayrou-philippe-barrot-ils-choisiraient-le-ni-ni-en-cas-de-second",
 "date": 1795623300000,
-"source": "LCP"
-},
-{
-"titre": "Présidentielle 2027: David Lisnard très largement réélu à la tête de l'Association des maires de France",
-"lien": "https://lcp.fr/actualites/presidentielle-2027-david-lisnard-tres-largement-reelu-a-la-tete-de-l-association-des",
-"date": 1795611660000,
 "source": "LCP"
 }
 ]
