@@ -1027,7 +1027,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
 })(typeof window !== "undefined" ? window : this);
 
 </script>
-<script>window.DEROULEUR_BUILD = "20261126094255";</script>
+<script>window.DEROULEUR_BUILD = "20261127133144";</script>
 <script>
 /* Version « suit En séance » : lit chaque jour l'accueil de l'application « En séance »
    (senat.fr/enseance/textes/AAAAMMJJ.html), repère les textes du jour et affiche
@@ -2512,7 +2512,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     var cls = [estProchain && (mode === "venir" || mode === "cours") ? "cur" : (a.ndc > 1 ? "dcrow" : ""), estSuivi(a) ? "suivi" : ""].join(" ").trim();
     var ligneObjet = a.o ? h("tr", { class: "objet-row" + (S.objets && S.objets[a.n] ? "" : " hidden") }, h("td", { colspan: 7 }, h("span", { class: "objet-box" }, h("span", { class: "objet-lab" }, "Objet du n° " + a.n + " : "), a.o))) : null;
     var bObj = objet(a, ligneObjet); if (bObj) numCell.appendChild(h("span", { class: "obj-sous" }, bObj));
-    var tr = h("tr", { class: cls || null },
+    var tr = h("tr", { class: cls || null, "data-ancre": mode + ":" + a.n },
       h("td", null, estProchain && mode === "cours" ? h("span", { class: "fleche", "aria-label": "Amendement en discussion" }, "➤") : null, dv ? dv.libelle : "", alinea(a.al) ? h("span", { class: "sub2" }, alinea(a.al)) : null),
       numCell,
       h("td", null, estSuivi(a) ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, a.a, cosig(a)),
@@ -2554,7 +2554,45 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
   function ligneVide(cols, txt) { return h("tr", { class: "empty-row" }, h("td", { colspan: cols }, txt)); }
 
   /* ---------- rendu ---------- */
+  // Actualisation sans déplacer la lecture : on repère l'élément en haut de l'écran (amendement, article ou rubrique)
+  // avant de redessiner, puis on remet la page de sorte qu'il reste exactement au même endroit.
+  function visibleDansSonCadre(e) {
+    var r = e.getBoundingClientRect(); if (!r.height) return false;
+    var cadre = e.closest(".derouleur-av, .derouleur-ex, #total-scroll");
+    if (!cadre) return true;
+    var q = cadre.getBoundingClientRect(); return r.bottom > q.top + 2 && r.top < q.bottom - 2;
+  }
+  function reperePage() {
+    if (S.totalOuvert || document.documentElement.classList.contains("porte-ouverte") || scrollY < 40) return null;
+    var cands = document.querySelectorAll("[data-ancre], section[id], .panel[id]"), best = null;
+    for (var i = 0; i < cands.length; i++) {
+      var e = cands[i], r = e.getBoundingClientRect();
+      if (r.bottom <= 56 || r.top >= innerHeight || !visibleDansSonCadre(e)) continue;
+      if (e.hasAttribute("data-ancre") || !best) { best = e; if (e.hasAttribute("data-ancre")) break; }
+    }
+    if (!best) return null;
+    var sec = best.closest(".panel[id], section[id]");
+    return { cle: best.getAttribute("data-ancre"), id: best.id, top: best.getBoundingClientRect().top,
+      sec: sec ? sec.id : null, secTop: sec ? sec.getBoundingClientRect().top : 0 };
+  }
+  ["touchstart", "touchmove", "wheel", "keydown"].forEach(function (ev) { window.addEventListener(ev, function () { S.pageUser = Date.now(); }, { passive: true }); });
+  function remettrePage(rp, tardif) {
+    if (!rp || (tardif && Date.now() - (S.pageUser || 0) < 1500)) return; // l'usager fait défiler : on ne le contrarie pas
+    var e = null;
+    if (rp.cle) { e = document.querySelector('[data-ancre="' + rp.cle.replace(/"/g, '\\"') + '"]'); if (e && !visibleDansSonCadre(e)) e = null; }
+    var top0 = rp.top;
+    if (!e && rp.id) e = document.getElementById(rp.id);
+    if (!e && rp.sec) { e = document.getElementById(rp.sec); top0 = rp.secTop; }
+    if (!e) return;
+    var d = e.getBoundingClientRect().top - top0;
+    if (Math.abs(d) > 1) window.scrollBy(0, d);
+  }
   function rendre() {
+    var rp = reperePage();
+    rendreBase();
+    if (rp) { remettrePage(rp); requestAnimationFrame(function () { remettrePage(rp, 1); }); setTimeout(function () { remettrePage(rp, 1); }, 350); setTimeout(function () { remettrePage(rp, 1); }, 1300); }
+  }
+  function rendreBase() {
     var M = modele(); if (!M) return;
     var cfg = M.cfg, D = M.D, now = Date.now(), cur = M.cur;
     S.M = M;
@@ -2708,7 +2746,7 @@ td.c-passage .plus-tard{color:var(--navy2);font-weight:600;opacity:.75}
     av.forEach(function (d) {
       if (d.debut) viderOdj(d.debut);
       var estCours = M.etape ? M.etape.idx === d.i : (M.prochain && M.prochain.d === d.i);
-      tb.appendChild(h("tr", { class: "click" + (estCours ? " cur" : "") + (d.suivi ? " suivi" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); S.avenirOuvert = true; rendre(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
+      tb.appendChild(h("tr", { "data-ancre": "art:" + d.i, class: "click" + (estCours ? " cur" : "") + (d.suivi ? " suivi" : ""), title: d.sansAmdt ? "Étape sans amendement" : "Afficher les amendements de cet article", onclick: function () { S.f.article = String(d.i); syncFiltres(); rendre(); S.avenirOuvert = true; rendre(); $("p-avenir").scrollIntoView({ behavior: "smooth", block: "start" }); } },
         h("td", null, d.suivi ? h("span", { class: "etoile", title: "Sénateur ou groupe suivi" }, "★ ") : null, h("span", { class: "art-bulle" }, d.libelle), estCours ? h("span", { class: "badge" }, "En cours") : null, tagOdj(d),
           filtreP ? h("span", { class: "tag-odj", style: "color:var(--navy2)" }, [d.fAm ? nb(d.fAm) + " amendement" + (d.fAm > 1 ? "s" : "") + " correspondant" + (d.fAm > 1 ? "s" : "") : "", d.fOr ? nb(d.fOr) + " orateur" + (d.fOr > 1 ? "s" : "") + " correspondant" + (d.fOr > 1 ? "s" : "") : ""].filter(Boolean).join(" · ")) : null),
         h("td", { class: "num" }, nb(d.total)), h("td", { class: "num" }, nb(d.restants)),
