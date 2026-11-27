@@ -1,7 +1,13 @@
 {
-"maj": 1795766650662,
+"maj": 1795770962575,
 "sources": {
 "Public Sénat": [
+{
+"titre": "Incendies : le Sénat allège la fiscalité des PME frappées cet été, et augmente de 200 millions le budget des SDIS",
+"lien": "https://www.publicsenat.fr/actualites/economie/incendies-le-senat-allege-la-fiscalite-des-pme-frappees-cet-ete-et-augmente-de-200-millions-le-budget-des-sdis",
+"date": 1795732106000,
+"source": "Public Sénat"
+},
 {
 "titre": "HEC Débats – Public Sénat : suivez en direct la rencontre avec Jean-Noël Barrot",
 "lien": "https://www.publicsenat.fr/actualites/international/hec-debats-public-senat-suivez-en-direct-la-rencontre-avec-jean-noel-barrot",
@@ -66,12 +72,6 @@
 "titre": "Sens Public — Sens Public",
 "lien": "https://www.publicsenat.fr/emission/sens-public/sens-public-e79",
 "date": 1795690931000,
-"source": "Public Sénat"
-},
-{
-"titre": "Budget : « J’ai fait mon job pour faire baisser la dette », estime Bruno Le Maire",
-"lien": "https://www.publicsenat.fr/actualites/politique/budget-jai-fait-mon-job-pour-faire-baisser-la-dette-estime-bruno-le-maire",
-"date": 1795683862000,
 "source": "Public Sénat"
 }
 ],
