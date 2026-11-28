@@ -1,5 +1,5 @@
 {
-"maj": 1795844259834,
+"maj": 1795848033745,
 "sources": {
 "Public Sénat": [
 {
@@ -77,6 +77,12 @@
 ],
 "LCP": [
 {
+"titre": "Budget 2027: que sont les ordonnances et dans quels cas le gouvernement peut-il les utiliser?",
+"lien": "https://lcp.fr/actualites/budget-2027-que-sont-les-ordonnances-et-dans-quels-cas-le-gouvernement-peut-il-les",
+"date": 1795847760000,
+"source": "LCP"
+},
+{
 "titre": "Pouvoir d'achat, sécurité, aller-retour dans l'Hexagone: Ce que promet Marine Le Pen aux outre-mer pour 2027",
 "lien": "https://lcp.fr/actualites/pouvoir-d-achat-securite-aller-retour-dans-l-hexagone-ce-que-promet-marine-le-pen-aux",
 "date": 1795794120000,
@@ -140,12 +146,6 @@
 "titre": "\"On ne devrait pas avoir besoin de frapper deux fois pour aller en prison\": les députés LR veulent rétablir et renforcer les peines planchers",
 "lien": "https://lcp.fr/actualites/on-ne-devrait-pas-avoir-besoin-de-frapper-deux-fois-pour-aller-en-prison-les-deputes-lr",
 "date": 1795673100000,
-"source": "LCP"
-},
-{
-"titre": "Budget de la Sécu: députés et sénateurs vont tenter de se mettre d'accord ce jeudi, compromis envisageable ou mission impossible?",
-"lien": "https://lcp.fr/actualites/budget-de-la-secu-deputes-et-senateurs-vont-tenter-de-se-mettre-d-accord-ce-jeudi",
-"date": 1795668900000,
 "source": "LCP"
 }
 ]
